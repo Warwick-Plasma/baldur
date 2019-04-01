@@ -295,6 +295,7 @@ def mass(*args, **kwargs):
 	plt.show()
 
 
+
 def lineout(start, *args, **kwargs):
 	"""
 	"""
@@ -303,9 +304,10 @@ def lineout(start, *args, **kwargs):
 	pathname = os.path.abspath(os.getcwd())
 	SDFName=pathname+'/'+str(start).zfill(4)+'.sdf'
 	dat = sh.getdata(SDFName,verbose=False)
+	nmat = dat.Integer_flags.nmat # assume nmat doesn't change
 	runs = glob.glob1(pathname,"*.sdf")
 	RunCounter = len(runs)-1
-	RunCounter = kwargs.get('end', RunCounter)+1
+	RunCounter = kwargs.get('end', RunCounter) + 1
 	minrun = start
 	
 	len_x = np.shape(dat.Fluid_Rho.data)[0]
@@ -313,48 +315,58 @@ def lineout(start, *args, **kwargs):
 	half = round(len_y / 2)
 	cs = kwargs.get('cross_section', half)
 	
-	all_time = all_sdf(RunCounter, len_x)
+	all_time = all_sdf(RunCounter, nmat, len_x)
 	all_time = get_data_all(minrun, RunCounter, pathname, cs, all_time)
 
 	plt.ion()
 	plt.close('all')
 	
-	fig, (ax,ax2)=plt.subplots(2, 1, num=1, facecolor='white')
-	plt.subplots_adjust(left=0.1, bottom=0.2)
+	fig, (ax,ax2)=plt.subplots(2, 1, num=1, figsize=(12,10), facecolor='white')
+	plt.subplots_adjust(left  = 0.3,  # the left side of the subplots of the figure
+											right = 0.9,    # the right side of the subplots of the figure
+											bottom = 0.15,   # the bottom of the subplots of the figure
+											top = 0.9,      # the top of the subplots of the figure
+											wspace = 0.25,   # the amount of width reserved for space between subplots
+											hspace = 0.3)
+	fs = 12
 	
 	ax1 = ax.twinx()
 	
-	ax.set_ylabel('Density (g/cm$^3$)')	
-	ax.set_xlabel('Radius (m)')
-	l1, = ax.plot(1, lw=2, color='black')
-	ax.tick_params(axis='y', labelcolor='black')
+	ax.set_xlabel('Radius (m)', fontsize = fs)
+	ax.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
 	
-	ax1.set_ylabel('Temperature (keV)', color='tab:red')
-	l2, = ax1.plot(0, color='tab:blue')
-	l3, = ax1.plot(0, color='tab:red')
-	ax1.tick_params(axis='y', labelcolor='tab:red')
+	ax.set_ylabel('Density (g/cm$^3$)', fontsize = fs)	
+	l1, = ax.plot(1, lw = 2.5, color='black')
+	ax.tick_params(axis='y', labelcolor='black', labelsize = fs)
+	
+	ax1.set_ylabel('Temperature (keV)', color='tab:red', fontsize = fs)
+	l2, = ax1.plot(0, lw = 2, color = 'tab:blue')
+	l3, = ax1.plot(0, lw = 2, color = 'tab:red')
+	ax1.tick_params(axis='y', labelcolor = 'tab:red', labelsize = fs)
 
 	xmin = 0 #np.min(all_time.radius[0,:])
 	xmax = np.max(all_time.radius[0,:])
 	ax.set_xlim([xmin, xmax])
 	
-	x_data = all_time.time * 1.0e9
-	
 	ax3 = ax2.twinx()
 	
-	ax2.set_xlabel('Time (ns)')
+	ax2.set_xlabel('Time (ns)', fontsize = fs)
+	ax2.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
+	x_data = all_time.time * 1.0e9
+	
 	# Plot laser power deposited
-	ax2.set_ylabel('Laser power deposited (W)')
+	ax2.set_ylabel('Laser power deposited (W)', fontsize = fs)
 	dt = all_time.time[1:] - all_time.time[:-1]
 	y_data = (all_time.tot_laser_dep[1:] - all_time.tot_laser_dep[:-1]) / dt
 	y_data = np.insert(y_data, 0, 0)
-	la = ax2.plot(x_data, y_data, color='black')
-	ax2.tick_params(axis='y', labelcolor='black')
+	la = ax2.plot(x_data, y_data, lw = 2, color='black')
+	ax2.tick_params(axis='y', labelcolor='black', labelsize = fs)
+	
 	# Plot maximum density
-	ax3.set_ylabel('Maximum density', color='tab:red')
+	ax3.set_ylabel('Maximum density', color='tab:red', fontsize = fs)
 	y_data = all_time.max_rho / 1000
-	lb = ax3.plot(x_data, y_data, lw=2, color='tab:red')
-	ax3.tick_params(axis='y', labelcolor='tab:red')
+	lb = ax3.plot(x_data, y_data, lw = 2.5, color='tab:red')
+	ax3.tick_params(axis='y', labelcolor='tab:red', labelsize = fs)
 
 	xmin = 0 #np.min(x_data)
 	xmax = np.max(x_data)
@@ -365,11 +377,12 @@ def lineout(start, *args, **kwargs):
 	
 	# Setting up slider
 	axcolor='lightgoldenrodyellow'
-	axtime=plt.axes([0.1, 0.125, 0.8, 0.03], facecolor=axcolor)
-	stime=Slider(axtime, 'time', minrun, RunCounter-1, valinit=minrun, valfmt='%1.0f')
+	axtime=plt.axes([0.3, 0.05, 0.6, 0.03], facecolor=axcolor)
+	stime=Slider(axtime, 'SDF selector', minrun, RunCounter-1, valinit = minrun, valfmt = '%1.0f')
+	stime.label.set_size(fs)
 	
 	axcolor = 'lightgoldenrodyellow'
-	rax = plt.axes([0.0, 0.0, 0.15, 0.1], facecolor=axcolor)
+	rax = plt.axes([0.02, 0.65, 0.18, 0.18], facecolor=axcolor)
 	radio = RadioButtons(rax, ("Fluid_Temperature", "Fluid_Pressure",
 	    "Fluid_Energy", var_name))
 	
@@ -434,7 +447,7 @@ def lineout(start, *args, **kwargs):
 			plt.draw()
 			filename1 = 'test.pdf'
 			extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-			fig.savefig(filename1, bbox_inches=extent.expanded(1.5, 1.25))
+			fig.savefig(filename1, bbox_inches=extent.expanded(1.3, 1.3))
 	
 	def update(val):
 		'''update(val)
@@ -563,12 +576,14 @@ class axis_data:
 class all_sdf:
 	""" This class will collect all the data from the sdf files
 	"""
-	def __init__(self, RunCounter, len_x):
+	def __init__(self, RunCounter, nmat, len_x):
 		self.com = np.zeros(RunCounter)
 		self.time = np.zeros(RunCounter)
 		self.max_rho = np.zeros(RunCounter)
 		self.tot_laser_dep = np.zeros(RunCounter)
-		self.nmat = 0
+		
+		self.nmat = nmat
+		self.material_names = [None] * nmat
 		
 		self.radius = np.zeros((RunCounter,len_x))
 		self.Fluid_Rho = np.zeros((RunCounter,len_x))
