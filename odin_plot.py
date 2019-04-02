@@ -643,7 +643,6 @@ def get_data_all(minrun, RunCounter, nmat, pathname, cs, all_time):
 		all_time.Fluid_Pressure_electron[n,:] = dat.Fluid_Pressure_electron.data[:,cs]
 		all_time.Fluid_Energy_ion[n,:] = dat.Fluid_Energy_ion.data[:,cs]
 		all_time.Fluid_Energy_electron[n,:] = dat.Fluid_Energy_electron.data[:,cs]
-	print(all_time.material_Volume_fraction)
 	return all_time
 
 
