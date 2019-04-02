@@ -316,7 +316,7 @@ def lineout(start, *args, **kwargs):
 	cs = kwargs.get('cross_section', half)
 	
 	all_time = all_sdf(RunCounter, nmat, len_x)
-	all_time = get_data_all(minrun, RunCounter, pathname, cs, all_time)
+	all_time = get_data_all(minrun, RunCounter, nmat, pathname, cs, all_time)
 
 	plt.ion()
 	plt.close('all')
@@ -584,6 +584,7 @@ class all_sdf:
 		
 		self.nmat = nmat
 		self.material_names = [None] * nmat
+		self.material_Volume_fraction = np.zeros((RunCounter, len_x, nmat))
 		
 		self.radius = np.zeros((RunCounter,len_x))
 		self.Fluid_Rho = np.zeros((RunCounter,len_x))
@@ -607,7 +608,7 @@ class all_sdf:
 
 
 
-def get_data_all(minrun, RunCounter, pathname, cs, all_time):
+def get_data_all(minrun, RunCounter, nmat, pathname, cs, all_time):
 	"""
 	"""
 	for n in range(minrun,RunCounter):
@@ -627,8 +628,13 @@ def get_data_all(minrun, RunCounter, pathname, cs, all_time):
 		all_time.time[n] = t
 		all_time.max_rho[n] = np.max(np.max(rho))
 		all_time.tot_laser_dep[n] = np.sum(np.sum(mass * laser_dep))
-		all_time.nmat = dat.Integer_flags.nmat
 		
+		all_time.nmat = dat.Integer_flags.nmat
+		for nm in range(1, nmat+1):
+			all_time.material_names[nm-1] = getattr(getattr(dat, 'material_string_flags_'
+			    + str(nm).zfill(3)),'name_')
+			all_time.material_Volume_fraction[n,:,nm-1] = getattr(getattr(dat, 'Fluid_Volume_fraction_'
+			    + all_time.material_names[nm-1]),'data')[:,cs]
 		all_time.radius[n,:] = rad[:,cs]
 		all_time.Fluid_Rho[n,:] = rho[:,cs]
 		all_time.Fluid_Temperature_ion[n,:] = dat.Fluid_Temperature_ion.data[:,cs]
@@ -637,6 +643,7 @@ def get_data_all(minrun, RunCounter, pathname, cs, all_time):
 		all_time.Fluid_Pressure_electron[n,:] = dat.Fluid_Pressure_electron.data[:,cs]
 		all_time.Fluid_Energy_ion[n,:] = dat.Fluid_Energy_ion.data[:,cs]
 		all_time.Fluid_Energy_electron[n,:] = dat.Fluid_Energy_electron.data[:,cs]
+	print(all_time.material_Volume_fraction)
 	return all_time
 
 
