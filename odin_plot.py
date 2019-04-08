@@ -99,37 +99,38 @@ def snapshot(start, *args, **kwargs):
 	var_name = kwargs.get('var_name', "Fluid_Rho")
 
 	pathname = os.path.abspath(os.getcwd())
-	SDFName=pathname+'/'+str(start).zfill(4)+'.sdf'
-	dat = sh.getdata(SDFName,verbose=False)
 	runs = glob.glob1(pathname,"*.sdf")
 	RunCounter = len(runs)
 	minrun = start
 	
-	var=getattr(dat, var_name)
-	X=var.grid.data[0][:,:]
-	Y=var.grid.data[1][:,:]
-
+	sdf_dat = one_sdf()
+	sdf_dat = get_data_one(sdf_dat, minrun, pathname, var_name)
+	
 	plt.ion()
 	plt.close('all')
 
-	fig=plt.figure(num=1,figsize=(6,6),facecolor='white')
-	ax1=plt.axes([0.1, 0.1, 0.8, 0.8])
-	cmesh = ax1.pcolormesh(X,Y,var.data[:,:], linewidth=0.1)
+	fig=plt.figure(num=1,figsize=(8,6),facecolor='white')
+	ax1=plt.axes([0.1, 0.1, 0.70, 0.65])
+
+	x_data = sdf_dat.X * sdf_dat.X_conversion
+	y_data = sdf_dat.Y * sdf_dat.Y_conversion
+	c_data = sdf_dat.var
+	cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
 	#plt.gca().set_aspect('equal', adjustable='box')
-	ax1.set_xlim([np.min(X[:-1,:]),np.max(X[:-1,:])])
-	ax1.set_ylim([np.min(Y[:-1,:]),np.max(Y[:-1,:])])
-	plt.xlabel(var.grid.labels[0] + ' $(' + var.grid.units[1] + ')$')
-	plt.ylabel(var.grid.labels[1] + ' $(' + var.grid.units[1] + ')$')
-	plt.title('Time '+str(t*10**9)+'ns')
+	ax1.set_xlim([np.min(x_data[:-1,:]),np.max(x_data[:-1,:])])
+	ax1.set_ylim([np.min(y_data[:-1,:]),np.max(y_data[:-1,:])])
+	plt.xlabel(sdf_dat.X_units)
+	plt.ylabel(sdf_dat.Y_units)
+	plt.title('Time {0:5.3f}'.format(sdf_dat.time*sdf_dat.time_conversion)+'ns')
 	cbar = plt.colorbar(cmesh)
-	cbar.set_label(var.name + ' $(' + var.units + ')$')
+	cbar.set_label(sdf_dat.var_units)
 
 	axcolor='lightgoldenrodyellow' # slider background colour
-	axtime=plt.axes([0.02, 0.02, 0.90, 0.03], facecolor=axcolor) # slider size
+	axtime=plt.axes([0.1, 0.85, 0.56, 0.03], facecolor=axcolor) # slider size
 	stime=Slider(axtime, ' ', minrun, RunCounter-1, valinit=minrun, valfmt='%1.0f')
 	
 	axcolor = 'lightgoldenrodyellow'
-	rax = plt.axes([0.15, 0.735, 0.15, 0.15], facecolor=axcolor)
+	rax = plt.axes([0.7, 0.82, 0.15, 0.15], facecolor=axcolor)
 	radio = RadioButtons(rax, (var_name, "Fluid_Pressure_ion",
 		 "Fluid_Pressure_electron", "Fluid_Energy_ion",
 		 "Fluid_Energy_electron", "Fluid_Rho", "Fluid_Temperature_ion",
@@ -160,26 +161,41 @@ def snapshot(start, *args, **kwargs):
 	def update(val):
 		"""
 		"""
+		
 		x=ax1.get_xlim()
 		y=ax1.get_ylim()
 		zoomed_axis1=np.array([x[0],x[1],y[0],y[1]])
 
 		sdf_num=int(round(stime.val))
-		SDFName=pathname+'/'+str(sdf_num).zfill(4)+'.sdf'
-		dat = sh.getdata(SDFName,verbose=False)
-
 		var_name = radio.value_selected
-		var = getattr(dat, var_name)
-		X=var.grid.data[0][:,:]
-		Y=var.grid.data[1][:,:]
+		
+		sdf_dat = one_sdf()
+		sdf_dat = get_data_one(sdf_dat, sdf_num, pathname, var_name)
+
+		var = getattr(sdf_dat, var_name)
+
+		var_base = var_name.split('_')
+		if var_base[-1] == 'ion' or  var_base[-1] == 'electron':
+			var_base = '_'.join(var_base[:-1])
+		else:
+			var_base = '_'.join(var_base)
+
+		var_units = var_base + '_units'
+		var_conversion = var_base + '_conversion'
+		units = getattr(sdf_dat, var_units)
+		unit_conv = getattr(sdf_dat, var_conversion)
+		
+		x_data = sdf_dat.X * sdf_dat.X_conversion
+		y_data = sdf_dat.Y * sdf_dat.Y_conversion
+		c_data = sdf_dat.var * unit_conv
 		
 		ax1.clear()
-		cmesh = ax1.pcolormesh(X,Y,var.data[:,:], linewidth=0.01)
+		cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.01)
 		grid_colour = getattr(fig, "grid_colour")
 		cmesh.set_edgecolor(grid_colour)
-		ax1.set_title('Time {0:5.3f}'.format(t*10**9)+'ns')
-		cbar.set_clim(np.min(var.data[:,:]), np.max(var.data[:,:]))
-		cbar.set_label(var.name + ' $(' + var.units + ')$')
+		ax1.set_title('Time {0:5.3f}'.format(sdf_dat.time*sdf_dat.time_conversion)+'ns')
+		cbar.set_clim(np.min(c_data), np.max(c_data))
+		cbar.set_label(units)
 		cbar.draw_all()
 		#cmesh.set_array(var.data[:,:].ravel())
 		
@@ -193,6 +209,108 @@ def snapshot(start, *args, **kwargs):
 	radio.on_clicked(change_variable)
 	plt.show()
 
+
+
+class one_sdf:
+	""" This class will collect all the data from the sdf files
+	"""
+	def __init__(self):
+		self.com = []
+		self.time = []
+		self.time_units = 'Time (ns)'
+		self.time_conversion = 1e9
+		self.max_rho = []
+		self.tot_laser_dep = []
+		
+		self.nmat = []
+		self.material_names = []
+		self.material_Volume_fraction = []
+		
+		self.X = []
+		self.X_units = 'x ($\mu$m)'
+		self.X_conversion = 1e6
+		self.Y = []
+		self.Y_units = 'y ($\mu$m)'
+		self.Y_conversion = 1e6
+		
+		self.Fluid_Rho = []
+		self.Fluid_Rho_units = 'Density (g/cm$^3$)'
+		self.Fluid_Rho_conversion = 1.0 / 1000.0
+		
+		self.Fluid_Temperature_ion = []
+		self.Fluid_Temperature_electron = []
+		self.Fluid_Temperature_units = 'Temperature (keV)'
+		self.Fluid_Temperature_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
+		
+		
+		self.Fluid_Pressure_ion = []
+		self.Fluid_Pressure_electron = []
+		self.Fluid_Pressure_units = 'Pressure (Mbar)'
+		self.Fluid_Pressure_conversion = 1.0e-11 # from Pascal
+		
+		self.Fluid_Energy_ion = []
+		self.Fluid_Energy_electron = []
+		self.Fluid_Energy_units = 'Energy (J/kg)'
+		self.Fluid_Energy_conversion = 1.0
+		
+		self.Laser_Energy_deposited = []
+		self.Fluid_Energy_units = 'Energy (J/kg)'
+		self.Fluid_Energy_conversion = 1.0
+		
+		self.var = []
+		self.var_units = [] # this is taken from the sdf
+		self.var_conversion = 1.0
+
+
+def get_data_one(one_sdf, n, pathname, var_name):
+	"""
+	"""	
+	SDFName=pathname+'/'+str(n).zfill(4)+'.sdf'
+	dat = sh.getdata(SDFName,verbose=False)
+	fac = 1.0
+	if dat.Logical_flags.use_rz:
+		fac = 2*np.pi
+	len_x = np.shape(dat.Fluid_Rho.data)[0]
+	len_y = np.shape(dat.Fluid_Rho.data)[1]
+
+	rho = dat.Fluid_Rho.data
+	one_sdf.X = x
+	one_sdf.Y = y
+
+	try:
+		vol=dat.Fluid_Volume.data * fac
+		mass = rho[:,:] * vol[:,:]
+		laser_dep = dat.Fluid_Energy_deposited_laser.data
+		one_sdf.com = np.sum(np.sum(mass * rad)) / np.sum(np.sum(mass))
+		one_sdf.tot_laser_dep = np.sum(np.sum(mass * laser_dep))
+	except:
+		vol = []
+
+	one_sdf.time = t
+	one_sdf.max_rho = np.max(np.max(rho))
+
+	one_sdf.nmat = dat.Integer_flags.nmat
+	one_sdf.material_names = [None] * one_sdf.nmat
+	one_sdf.material_Volume_fraction = np.zeros((one_sdf.nmat, len_x, len_y))
+	if one_sdf.nmat != 1:
+		for nm in range(1, one_sdf.nmat+1):
+			one_sdf.material_names[nm-1] = getattr(getattr(dat, 'material_string_flags_'
+			    + str(nm).zfill(3)),'name_')
+			one_sdf.material_Volume_fraction[nm-1,:,:] = getattr(getattr(dat, 'Fluid_Volume_fraction_'
+			    + all_time.material_names[nm-1]),'data')[:,:]
+
+	one_sdf.Fluid_Rho = rho[:,:]
+	one_sdf.Fluid_Temperature_ion = dat.Fluid_Temperature_ion.data
+	one_sdf.Fluid_Temperature_electron = dat.Fluid_Temperature_electron.data
+	one_sdf.Fluid_Pressure_ion = dat.Fluid_Pressure_ion.data
+	one_sdf.Fluid_Pressure_electron = dat.Fluid_Pressure_electron.data
+	one_sdf.Fluid_Energy_ion = dat.Fluid_Energy_ion.data
+	one_sdf.Fluid_Energy_electron = dat.Fluid_Energy_electron.data
+	 
+	var = getattr(dat, var_name)
+	one_sdf.var = var.data
+	one_sdf.var_units = var.name + ' $(' + var.units + ')$'
+	return one_sdf
 
 
 def total_energy(output_number):
@@ -592,12 +710,12 @@ class all_sdf:
 		self.Fluid_Temperature_ion = np.zeros((RunCounter,len_x))
 		self.Fluid_Temperature_electron = np.zeros((RunCounter,len_x))
 		self.Fluid_Temperature_units = 'Temperature (keV)'
-		self.Fluid_Temperature_conversion = 1.0 / 11604.5 / 1000.0
+		self.Fluid_Temperature_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
 		
 		self.Fluid_Pressure_ion = np.zeros((RunCounter,len_x))
 		self.Fluid_Pressure_electron = np.zeros((RunCounter,len_x))
 		self.Fluid_Pressure_units = 'Pressure (Mbar)'
-		self.Fluid_Pressure_conversion = 1.0e-11
+		self.Fluid_Pressure_conversion = 1.0e-11 # from Pascals
 		
 		self.Fluid_Energy_ion = np.zeros((RunCounter,len_x))
 		self.Fluid_Energy_electron = np.zeros((RunCounter,len_x))
