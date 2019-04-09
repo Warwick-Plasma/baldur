@@ -116,14 +116,9 @@ def snapshot(start, *args, **kwargs):
 	y_data = sdf_dat.Y * sdf_dat.Y_conversion
 	c_data = sdf_dat.var
 	cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
-	#plt.gca().set_aspect('equal', adjustable='box')
+	cbar = plt.colorbar(cmesh)
 	ax1.set_xlim([np.min(x_data[:-1,:]),np.max(x_data[:-1,:])])
 	ax1.set_ylim([np.min(y_data[:-1,:]),np.max(y_data[:-1,:])])
-	plt.xlabel(sdf_dat.X_units)
-	plt.ylabel(sdf_dat.Y_units)
-	plt.title('Time {0:5.3f}'.format(sdf_dat.time*sdf_dat.time_conversion)+'ns')
-	cbar = plt.colorbar(cmesh)
-	cbar.set_label(sdf_dat.var_units)
 
 	axcolor='lightgoldenrodyellow' # slider background colour
 	axtime=plt.axes([0.1, 0.85, 0.56, 0.03], facecolor=axcolor) # slider size
@@ -205,7 +200,6 @@ def snapshot(start, *args, **kwargs):
 		cbar.set_clim(np.min(c_data), np.max(c_data))
 		cbar.set_label(units)
 		cbar.draw_all()
-		#cmesh.set_array(var.data[:,:].ravel())
 		
 		ax1.set_xlim(zoomed_axis1[:2])
 		ax1.set_ylim(zoomed_axis1[2:])
@@ -215,6 +209,7 @@ def snapshot(start, *args, **kwargs):
 	fig.canvas.mpl_connect('key_press_event', press) # this makes the keyboard function work (key press)
 	stime.on_changed(update) # this makes the slider work
 	radio.on_clicked(change_variable)
+	update(minrun)
 	plt.show()
 
 
