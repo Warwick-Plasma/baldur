@@ -130,7 +130,7 @@ def snapshot(start, *args, **kwargs):
 	stime=Slider(axtime, ' ', minrun, RunCounter-1, valinit=minrun, valfmt='%1.0f')
 	
 	axcolor = 'lightgoldenrodyellow'
-	rax = plt.axes([0.7, 0.82, 0.15, 0.15], facecolor=axcolor)
+	rax = plt.axes([0.7, 0.85, 0.15, 0.15], facecolor=axcolor)
 	radio = RadioButtons(rax, (var_name, "Fluid_Pressure_ion",
 		 "Fluid_Pressure_electron", "Fluid_Energy_ion",
 		 "Fluid_Energy_electron", "Fluid_Rho", "Fluid_Temperature_ion",
@@ -157,6 +157,12 @@ def snapshot(start, *args, **kwargs):
 				grid_colour = "none"
 			setattr(fig, "grid_colour", grid_colour)
 			stime.set_val(max_x)
+		# publish the current view of the top figure
+		elif event.key == 't':
+			plt.draw()
+			filename1 = 'test.pdf'
+			extent = ax1.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+			fig.savefig(filename1, bbox_inches=extent.expanded(1.5, 1.2))
 
 	def update(val):
 		"""
@@ -191,6 +197,8 @@ def snapshot(start, *args, **kwargs):
 		
 		ax1.clear()
 		cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.01)
+		ax1.set_xlabel(sdf_dat.X_units)
+		ax1.set_ylabel(sdf_dat.Y_units)
 		grid_colour = getattr(fig, "grid_colour")
 		cmesh.set_edgecolor(grid_colour)
 		ax1.set_title('Time {0:5.3f}'.format(sdf_dat.time*sdf_dat.time_conversion)+'ns')
@@ -297,7 +305,7 @@ def get_data_one(one_sdf, n, pathname, var_name):
 			one_sdf.material_names[nm-1] = getattr(getattr(dat, 'material_string_flags_'
 			    + str(nm).zfill(3)),'name_')
 			one_sdf.material_Volume_fraction[nm-1,:,:] = getattr(getattr(dat, 'Fluid_Volume_fraction_'
-			    + all_time.material_names[nm-1]),'data')[:,:]
+			    + one_sdf.material_names[nm-1]),'data')[:,:]
 
 	one_sdf.Fluid_Rho = rho[:,:]
 	one_sdf.Fluid_Temperature_ion = dat.Fluid_Temperature_ion.data
