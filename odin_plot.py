@@ -190,15 +190,19 @@ def snapshot(start, *args, **kwargs):
 		y_data = sdf_dat.Y * sdf_dat.Y_conversion
 		c_data = sdf_dat.var * unit_conv
 		
+		fs = 12
 		ax1.clear()
 		cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.01)
-		ax1.set_xlabel(sdf_dat.X_units)
-		ax1.set_ylabel(sdf_dat.Y_units)
+		ax1.tick_params(axis='x', labelsize = fs)
+		ax1.tick_params(axis='y', labelsize = fs)
+		ax1.set_xlabel(sdf_dat.X_units, fontsize = fs)
+		ax1.set_ylabel(sdf_dat.Y_units, fontsize = fs)
 		grid_colour = getattr(fig, "grid_colour")
 		cmesh.set_edgecolor(grid_colour)
-		ax1.set_title('Time {0:5.3f}'.format(sdf_dat.time*sdf_dat.time_conversion)+'ns')
+		#ax1.set_title('Time {0:5.3f}'.format(sdf_dat.time*sdf_dat.time_conversion)+'ns')
 		cbar.set_clim(np.min(c_data), np.max(c_data))
-		cbar.set_label(units)
+		cbar.set_label(units, fontsize = fs)
+		cbar.ax.tick_params(labelsize=fs) 
 		cbar.draw_all()
 		
 		ax1.set_xlim(zoomed_axis1[:2])
