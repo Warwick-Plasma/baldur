@@ -158,7 +158,7 @@ def snapshot(start, *args, **kwargs):
 			plt.draw()
 			filename1 = 'test.pdf'
 			extent = ax1.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-			fig.savefig(filename1, bbox_inches=extent.expanded(1.5, 1.2))
+			fig.savefig(filename1, bbox_inches=extent.expanded(1.5, 1.27))
 
 	def update(val):
 		"""
