@@ -356,25 +356,25 @@ def lineout(start, *args, **kwargs):
 	
 	ax1 = ax.twinx()
 	
-	ax.set_xlabel('Radius (m)', fontsize = fs)
+	ax.set_xlabel(all_time.X_units, fontsize = fs)
 	ax.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
 	
-	ax.set_ylabel('Density (g/cm$^3$)', fontsize = fs)	
+	ax.set_ylabel(all_time.Fluid_Rho_units, fontsize = fs)	
 	l1, = ax.plot(1, lw = 2.5, color='black')
 	ax.tick_params(axis='y', labelcolor='black', labelsize = fs)
 	
-	ax1.set_ylabel('Temperature (keV)', color='tab:red', fontsize = fs)
+	ax1.set_ylabel('Place holder', color='tab:red', fontsize = fs)
 	l2, = ax1.plot(0, lw = 2, color = 'tab:blue')
 	l3, = ax1.plot(0, lw = 2, color = 'tab:red')
 	ax1.tick_params(axis='y', labelcolor = 'tab:red', labelsize = fs)
 
 	xmin = 0 #np.min(all_time.radius[0,:])
-	xmax = np.max(all_time.radius[0,:])
+	xmax = np.max(all_time.X[0,:])
 	ax.set_xlim([xmin, xmax])
 	
 	ax3 = ax2.twinx()
 	
-	ax2.set_xlabel('Time (ns)', fontsize = fs)
+	ax2.set_xlabel('Place holder', fontsize = fs)
 	ax2.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
 	x_data = all_time.time * 1.0e9
 	
