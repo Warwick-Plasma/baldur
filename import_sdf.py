@@ -5,6 +5,7 @@ import numpy as np
 import glob
 import sys, os
 from matplotlib.widgets import Slider, RadioButtons
+import analysis_functions as afunc
 
 
 
@@ -69,9 +70,7 @@ def get_data_one(one_sdf, n, pathname, var_name, analysis):
 	"""	
 	SDFName=pathname+'/'+str(n).zfill(4)+'.sdf'
 	dat = sh.getdata(SDFName,verbose=False)
-	fac = 1.0
-	if dat.Logical_flags.use_rz:
-		fac = 2*np.pi
+
 	len_x = np.shape(dat.Fluid_Rho.data)[0]
 	len_y = np.shape(dat.Fluid_Rho.data)[1]
 
@@ -81,11 +80,10 @@ def get_data_one(one_sdf, n, pathname, var_name, analysis):
 	one_sdf.radius = np.sqrt(xc**2 + yc**2)
 	
 	if analysis:
-		vol = dat.Fluid_Volume.data * fac
-		mass = rho[:,:] * vol[:,:]
-		laser_dep = dat.Fluid_Energy_deposited_laser.data
-		one_sdf.com = np.sum(np.sum(mass * one_sdf.radius)) / np.sum(np.sum(mass))
-		one_sdf.tot_laser_dep = np.sum(np.sum(mass * laser_dep))
+		one_sdf = afunc.basic(dat, one_sdf)
+		#one_sdf = afunc.energy(dat, one_sdf)
+		one_sdf = afunc.laser(dat, one_sdf)
+		#afunc.adiabat
 	else:
 		one_sdf.com = 0
 		one_sdf.tot_laser_dep = 0
