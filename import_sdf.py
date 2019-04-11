@@ -58,8 +58,10 @@ class read_sdf:
 		self.Fluid_Energy_units = 'Energy (J/kg)'
 		self.Fluid_Energy_conversion = 1.0
 		
-		self.var = np.zeros((RunCounter,len_x))
-
+		# These values are overwritten (ie do not change here)
+		self.User_defined = np.zeros((RunCounter,len_x))
+		self.User_defined_units = 'Place holder'
+		self.User_defined_conversion =  1.0
 
 
 def get_data_one(one_sdf, n, pathname, var_name):
@@ -109,19 +111,19 @@ def get_data_one(one_sdf, n, pathname, var_name):
 	one_sdf.Fluid_Energy_ion = dat.Fluid_Energy_ion.data
 	one_sdf.Fluid_Energy_electron = dat.Fluid_Energy_electron.data
 	
+	# If nessacery change units and conversion here
 	var = getattr(dat, var_name)
-	setattr(one_sdf, var_name, var.data)
-	setattr(one_sdf, var_name+'_units', var.name + ' $(' + var.units + ')$')
-	setattr(one_sdf, var_name+'_conversion', 1.0)
+	one_sdf.User_defined = var.data
+	one_sdf.User_defined_units = var.name + ' $(' + var.units + ')$'
+	one_sdf.User_defined_conversion = 1.0
 	return one_sdf
 
 
 
 
-def get_data_all(minrun, RunCounter, nmat, pathname, cs, all_time):
+def get_data_all(all_time, minrun, pathname, var_name, RunCounter, cs, nmat):
 	"""
 	"""
-	var_name = "Fluid_Rho"
 	for n in range(minrun,RunCounter):
 		
 		one_sdf = read_sdf()
@@ -143,6 +145,10 @@ def get_data_all(minrun, RunCounter, nmat, pathname, cs, all_time):
 		all_time.Fluid_Pressure_electron[n,:] = one_sdf.Fluid_Pressure_electron[:,cs]
 		all_time.Fluid_Energy_ion[n,:] = one_sdf.Fluid_Energy_ion[:,cs]
 		all_time.Fluid_Energy_electron[n,:] = one_sdf.Fluid_Energy_electron[:,cs]
+		
+		all_time.User_defined = one_sdf.User_defined[:,cs]
+		all_time.User_defined_units = one_sdf.User_defined_units
+		all_time.User_defined_conversion = one_sdf.User_defined_conversion
 	return all_time
 
 
