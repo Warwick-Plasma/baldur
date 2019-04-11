@@ -545,7 +545,8 @@ def lineout(start, *args, **kwargs):
 		ax1.set_xlim([xlimL,xlimH])
 		ax1_data.new_axis=np.array([xlimL,xlimH,ylimL,ylimH])
 		
-		ax.set_title('Time {0:5.3f}'.format(all_time.time[t0]*1e9) + ' $ns$')
+		ax.set_title(all_time.time_units 
+				+ ' = {0:5.3f}'.format(all_time.time[t0]*all_time.time_conversion))
 		
 		if ii!=0:
 			

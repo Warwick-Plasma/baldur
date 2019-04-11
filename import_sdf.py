@@ -78,15 +78,15 @@ def get_data_one(one_sdf, n, pathname, var_name):
 	one_sdf.Y = y
 	one_sdf.radius = np.sqrt(xc**2 + yc**2)
 	
-	try:
-		vol = dat.Fluid_Volume.data * fac
-		mass = rho[:,:] * vol[:,:]
-		laser_dep = dat.Fluid_Energy_deposited_laser.data
-		one_sdf.com = np.sum(np.sum(mass * rad)) / np.sum(np.sum(mass))
-		one_sdf.tot_laser_dep = np.sum(np.sum(mass * laser_dep))
-	except:
-		one_sdf.com = 0
-		one_sdf.tot_laser_dep = 0
+	#try:
+	vol = dat.Fluid_Volume.data * fac
+	mass = rho[:,:] * vol[:,:]
+	laser_dep = dat.Fluid_Energy_deposited_laser.data
+	one_sdf.com = np.sum(np.sum(mass * one_sdf.radius)) / np.sum(np.sum(mass))
+	one_sdf.tot_laser_dep = np.sum(np.sum(mass * laser_dep))
+	#except:
+	#	one_sdf.com = 0
+	#	one_sdf.tot_laser_dep = 0
 
 	one_sdf.time = t
 	one_sdf.max_rho = np.max(np.max(rho))
