@@ -369,7 +369,7 @@ def lineout(start, *args, **kwargs):
 	ax1.tick_params(axis='y', labelcolor = 'tab:red', labelsize = fs)
 
 	xmin = 0 #np.min(all_time.radius[0,:])
-	xmax = np.max(all_time.X[0,:])
+	xmax = np.max(all_time.radius[0,:])
 	ax.set_xlim([xmin, xmax])
 	
 	ax3 = ax2.twinx()
