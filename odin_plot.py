@@ -94,10 +94,24 @@ def adiabat(*args, **kwargs):
 
 
 
+def check_analysis(analysis):
+	if analysis == True:
+		print("starting analysis")
+	elif analysis == False:
+		print("set: <analysis = True>, for analysis")
+	else:
+		print("set: <analysis = True> or <False>")
+		print("it requires certain dump_masks")
+		sys.exit()
+
+
+
 def snapshot(start, *args, **kwargs):
 	"""
 	"""
 	var_name = kwargs.get('var_name', "Fluid_Rho")
+	analysis = kwargs.get('analysis', False)
+	check_analysis(analysis)
 
 	pathname = os.path.abspath(os.getcwd())
 	runs = glob.glob1(pathname,"*.sdf")
@@ -105,7 +119,7 @@ def snapshot(start, *args, **kwargs):
 	minrun = start
 	
 	sdf_dat = isdf.read_sdf()
-	sdf_dat = isdf.get_data_one(sdf_dat, minrun, pathname, var_name)
+	sdf_dat = isdf.get_data_one(sdf_dat, minrun, pathname, var_name, analysis)
 	
 	plt.ion()
 	plt.close('all')
@@ -178,7 +192,7 @@ def snapshot(start, *args, **kwargs):
 		user_option = user_option.split('=')[-1]
 		
 		sdf_dat = isdf.read_sdf()
-		sdf_dat = isdf.get_data_one(sdf_dat, sdf_num, pathname, user_option)
+		sdf_dat = isdf.get_data_one(sdf_dat, sdf_num, pathname, user_option, analysis)
 
 		var = getattr(sdf_dat, var_name)
 
@@ -331,6 +345,8 @@ def lineout(start, *args, **kwargs):
 	"""
 	"""
 	var_name = kwargs.get('var_name', "Fluid_Rho")
+	analysis = kwargs.get('analysis', False)
+	check_analysis(analysis)
 	
 	pathname = os.path.abspath(os.getcwd())
 	SDFName=pathname+'/'+str(start).zfill(4)+'.sdf'
@@ -347,7 +363,7 @@ def lineout(start, *args, **kwargs):
 	cs = kwargs.get('cross_section', half)
 	
 	all_time = isdf.read_sdf(RunCounter = RunCounter, nmat = nmat, len_x = len_x)
-	all_time = isdf.get_data_all(all_time, minrun, pathname, var_name, RunCounter, cs, nmat)
+	all_time = isdf.get_data_all(all_time, minrun, pathname, var_name, analysis, RunCounter, cs, nmat)
 	
 	plt.ion()
 	plt.close('all')
@@ -394,8 +410,8 @@ def lineout(start, *args, **kwargs):
 	ax2.tick_params(axis='y', labelcolor='black', labelsize = fs)
 	
 	# Plot maximum density
-	ax3.set_ylabel('Maximum density', color='tab:red', fontsize = fs)
-	y_data = all_time.max_rho / 1000
+	ax3.set_ylabel('Maximum '+all_time.Fluid_Rho_units, color='tab:red', fontsize = fs)
+	y_data = all_time.max_rho * all_time.Fluid_Rho_conversion
 	lb = ax3.plot(x_data, y_data, lw = 2.5, color='tab:red')
 	ax3.tick_params(axis='y', labelcolor='tab:red', labelsize = fs)
 

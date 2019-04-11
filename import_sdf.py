@@ -64,7 +64,7 @@ class read_sdf:
 		self.User_defined_conversion =  1.0
 
 
-def get_data_one(one_sdf, n, pathname, var_name):
+def get_data_one(one_sdf, n, pathname, var_name, analysis):
 	"""
 	"""	
 	SDFName=pathname+'/'+str(n).zfill(4)+'.sdf'
@@ -80,15 +80,15 @@ def get_data_one(one_sdf, n, pathname, var_name):
 	one_sdf.Y = y
 	one_sdf.radius = np.sqrt(xc**2 + yc**2)
 	
-	#try:
-	vol = dat.Fluid_Volume.data * fac
-	mass = rho[:,:] * vol[:,:]
-	laser_dep = dat.Fluid_Energy_deposited_laser.data
-	one_sdf.com = np.sum(np.sum(mass * one_sdf.radius)) / np.sum(np.sum(mass))
-	one_sdf.tot_laser_dep = np.sum(np.sum(mass * laser_dep))
-	#except:
-	#	one_sdf.com = 0
-	#	one_sdf.tot_laser_dep = 0
+	if analysis:
+		vol = dat.Fluid_Volume.data * fac
+		mass = rho[:,:] * vol[:,:]
+		laser_dep = dat.Fluid_Energy_deposited_laser.data
+		one_sdf.com = np.sum(np.sum(mass * one_sdf.radius)) / np.sum(np.sum(mass))
+		one_sdf.tot_laser_dep = np.sum(np.sum(mass * laser_dep))
+	else:
+		one_sdf.com = 0
+		one_sdf.tot_laser_dep = 0
 
 	one_sdf.time = t
 	one_sdf.max_rho = np.max(np.max(rho))
@@ -121,13 +121,13 @@ def get_data_one(one_sdf, n, pathname, var_name):
 
 
 
-def get_data_all(all_time, minrun, pathname, var_name, RunCounter, cs, nmat):
+def get_data_all(all_time, minrun, pathname, var_name, analysis, RunCounter, cs, nmat):
 	"""
 	"""
 	for n in range(minrun,RunCounter):
 		
 		one_sdf = read_sdf()
-		one_sdf = get_data_one(one_sdf, n, pathname, var_name)
+		one_sdf = get_data_one(one_sdf, n, pathname, var_name, analysis)
 		
 		all_time.nmat = nmat
 		
