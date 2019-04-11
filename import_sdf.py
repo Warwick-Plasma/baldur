@@ -5,6 +5,7 @@ import numpy as np
 import glob
 import sys, os
 from matplotlib.widgets import Slider, RadioButtons
+import analysis_functions as afunc
 
 
 
@@ -58,18 +59,18 @@ class read_sdf:
 		self.Fluid_Energy_units = 'Energy (J/kg)'
 		self.Fluid_Energy_conversion = 1.0
 		
-		self.var = np.zeros((RunCounter,len_x))
+		# These values are overwritten (ie do not change here)
+		self.User_defined = np.zeros((RunCounter,len_x))
+		self.User_defined_units = 'Place holder'
+		self.User_defined_conversion =  1.0
 
 
-
-def get_data_one(one_sdf, n, pathname, var_name):
+def get_data_one(one_sdf, n, pathname, var_name, analysis):
 	"""
 	"""	
 	SDFName=pathname+'/'+str(n).zfill(4)+'.sdf'
 	dat = sh.getdata(SDFName,verbose=False)
-	fac = 1.0
-	if dat.Logical_flags.use_rz:
-		fac = 2*np.pi
+
 	len_x = np.shape(dat.Fluid_Rho.data)[0]
 	len_y = np.shape(dat.Fluid_Rho.data)[1]
 
@@ -78,15 +79,14 @@ def get_data_one(one_sdf, n, pathname, var_name):
 	one_sdf.Y = y
 	one_sdf.radius = np.sqrt(xc**2 + yc**2)
 	
-	#try:
-	vol = dat.Fluid_Volume.data * fac
-	mass = rho[:,:] * vol[:,:]
-	laser_dep = dat.Fluid_Energy_deposited_laser.data
-	one_sdf.com = np.sum(np.sum(mass * one_sdf.radius)) / np.sum(np.sum(mass))
-	one_sdf.tot_laser_dep = np.sum(np.sum(mass * laser_dep))
-	#except:
-	#	one_sdf.com = 0
-	#	one_sdf.tot_laser_dep = 0
+	if analysis:
+		one_sdf = afunc.basic(dat, one_sdf)
+		#one_sdf = afunc.energy(dat, one_sdf)
+		one_sdf = afunc.laser(dat, one_sdf)
+		#afunc.adiabat
+	else:
+		one_sdf.com = 0
+		one_sdf.tot_laser_dep = 0
 
 	one_sdf.time = t
 	one_sdf.max_rho = np.max(np.max(rho))
@@ -109,23 +109,23 @@ def get_data_one(one_sdf, n, pathname, var_name):
 	one_sdf.Fluid_Energy_ion = dat.Fluid_Energy_ion.data
 	one_sdf.Fluid_Energy_electron = dat.Fluid_Energy_electron.data
 	
+	# If nessacery change units and conversion here
 	var = getattr(dat, var_name)
-	setattr(one_sdf, var_name, var.data)
-	setattr(one_sdf, var_name+'_units', var.name + ' $(' + var.units + ')$')
-	setattr(one_sdf, var_name+'_conversion', 1.0)
+	one_sdf.User_defined = var.data
+	one_sdf.User_defined_units = var.name + ' $(' + var.units + ')$'
+	one_sdf.User_defined_conversion = 1.0
 	return one_sdf
 
 
 
 
-def get_data_all(minrun, RunCounter, nmat, pathname, cs, all_time):
+def get_data_all(all_time, minrun, pathname, var_name, analysis, RunCounter, cs, nmat):
 	"""
 	"""
-	var_name = "Fluid_Rho"
 	for n in range(minrun,RunCounter):
 		
 		one_sdf = read_sdf()
-		one_sdf = get_data_one(one_sdf, n, pathname, var_name)
+		one_sdf = get_data_one(one_sdf, n, pathname, var_name, analysis)
 		
 		all_time.nmat = nmat
 		
@@ -143,6 +143,10 @@ def get_data_all(minrun, RunCounter, nmat, pathname, cs, all_time):
 		all_time.Fluid_Pressure_electron[n,:] = one_sdf.Fluid_Pressure_electron[:,cs]
 		all_time.Fluid_Energy_ion[n,:] = one_sdf.Fluid_Energy_ion[:,cs]
 		all_time.Fluid_Energy_electron[n,:] = one_sdf.Fluid_Energy_electron[:,cs]
+		
+		all_time.User_defined = one_sdf.User_defined[:,cs]
+		all_time.User_defined_units = one_sdf.User_defined_units
+		all_time.User_defined_conversion = one_sdf.User_defined_conversion
 	return all_time
 
 

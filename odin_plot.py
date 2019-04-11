@@ -94,10 +94,24 @@ def adiabat(*args, **kwargs):
 
 
 
+def check_analysis(analysis):
+	if analysis == True:
+		print("starting analysis")
+	elif analysis == False:
+		print("set: <analysis = True>, for analysis")
+	else:
+		print("set: <analysis = True> or <False>")
+		print("it requires certain dump_masks")
+		sys.exit()
+
+
+
 def snapshot(start, *args, **kwargs):
 	"""
 	"""
 	var_name = kwargs.get('var_name', "Fluid_Rho")
+	analysis = kwargs.get('analysis', False)
+	check_analysis(analysis)
 
 	pathname = os.path.abspath(os.getcwd())
 	runs = glob.glob1(pathname,"*.sdf")
@@ -105,7 +119,7 @@ def snapshot(start, *args, **kwargs):
 	minrun = start
 	
 	sdf_dat = isdf.read_sdf()
-	sdf_dat = isdf.get_data_one(sdf_dat, minrun, pathname, var_name)
+	sdf_dat = isdf.get_data_one(sdf_dat, minrun, pathname, var_name, analysis)
 	
 	plt.ion()
 	plt.close('all')
@@ -115,7 +129,7 @@ def snapshot(start, *args, **kwargs):
 
 	x_data = sdf_dat.X * sdf_dat.X_conversion
 	y_data = sdf_dat.Y * sdf_dat.Y_conversion
-	c_data = getattr(sdf_dat, var_name)
+	c_data = getattr(sdf_dat, "Fluid_Rho")
 	cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
 	cbar = plt.colorbar(cmesh)
 	ax1.set_xlim([np.min(x_data[:-1,:]),np.max(x_data[:-1,:])])
@@ -127,14 +141,14 @@ def snapshot(start, *args, **kwargs):
 	
 	axcolor = 'lightgoldenrodyellow'
 	rax = plt.axes([0.7, 0.85, 0.15, 0.15], facecolor=axcolor)
-	radio = RadioButtons(rax, (var_name, "Fluid_Pressure_ion",
+	radio = RadioButtons(rax, ("Fluid_Rho", "Fluid_Pressure_ion",
 		 "Fluid_Pressure_electron", "Fluid_Energy_ion",
-		 "Fluid_Energy_electron", "Fluid_Rho", "Fluid_Temperature_ion",
-		 "Fluid_Temperature_electron"))
+		 "Fluid_Energy_electron", "Fluid_Temperature_ion",
+		 "Fluid_Temperature_electron", 'User='+var_name))
 
 	grid_colour = "none"
 	setattr(fig, "grid_colour", grid_colour)
-	setattr(radio, "user_option", var_name)
+	setattr(radio, "user_option", 'User='+var_name)
 
 	def change_variable(label):
 		max_x=stime.val
@@ -169,12 +183,16 @@ def snapshot(start, *args, **kwargs):
 		y=ax1.get_ylim()
 		zoomed_axis1=np.array([x[0],x[1],y[0],y[1]])
 
-		sdf_num=int(round(stime.val))
+		sdf_num = int(round(stime.val))
+		
 		var_name = radio.value_selected
 		user_option = getattr(radio, "user_option")
+		if var_name == user_option:
+			var_name = "User_defined"
+		user_option = user_option.split('=')[-1]
 		
 		sdf_dat = isdf.read_sdf()
-		sdf_dat = isdf.get_data_one(sdf_dat, sdf_num, pathname, user_option)
+		sdf_dat = isdf.get_data_one(sdf_dat, sdf_num, pathname, user_option, analysis)
 
 		var = getattr(sdf_dat, var_name)
 
@@ -326,7 +344,9 @@ def mass(*args, **kwargs):
 def lineout(start, *args, **kwargs):
 	"""
 	"""
-	var_name = kwargs.get('var_name', "Fluid_Temperature")
+	var_name = kwargs.get('var_name', "Fluid_Rho")
+	analysis = kwargs.get('analysis', False)
+	check_analysis(analysis)
 	
 	pathname = os.path.abspath(os.getcwd())
 	SDFName=pathname+'/'+str(start).zfill(4)+'.sdf'
@@ -343,8 +363,8 @@ def lineout(start, *args, **kwargs):
 	cs = kwargs.get('cross_section', half)
 	
 	all_time = isdf.read_sdf(RunCounter = RunCounter, nmat = nmat, len_x = len_x)
-	all_time = isdf.get_data_all(minrun, RunCounter, nmat, pathname, cs, all_time)
-
+	all_time = isdf.get_data_all(all_time, minrun, pathname, var_name, analysis, RunCounter, cs, nmat)
+	
 	plt.ion()
 	plt.close('all')
 	
@@ -390,8 +410,8 @@ def lineout(start, *args, **kwargs):
 	ax2.tick_params(axis='y', labelcolor='black', labelsize = fs)
 	
 	# Plot maximum density
-	ax3.set_ylabel('Maximum density', color='tab:red', fontsize = fs)
-	y_data = all_time.max_rho / 1000
+	ax3.set_ylabel('Maximum '+all_time.Fluid_Rho_units, color='tab:red', fontsize = fs)
+	y_data = all_time.max_rho * all_time.Fluid_Rho_conversion
 	lb = ax3.plot(x_data, y_data, lw = 2.5, color='tab:red')
 	ax3.tick_params(axis='y', labelcolor='tab:red', labelsize = fs)
 
