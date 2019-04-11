@@ -8,21 +8,29 @@ from matplotlib.widgets import Slider, RadioButtons
 
 
 
-class one_sdf:
+class read_sdf:
 	""" This class will collect all the data from the sdf files
 	"""
-	def __init__(self):
-		self.com = []
-		self.time = []
+	def __init__(self, *args, **kwargs):
+		RunCounter = kwargs.get('RunCounter', 0)
+		nmat =  kwargs.get('nmat', 0)
+		len_x =  kwargs.get('len_x', 0)
+		
+		self.com = np.zeros(RunCounter)
+		self.time = np.zeros(RunCounter)
 		self.time_units = 'Time (ns)'
 		self.time_conversion = 1e9
-		self.max_rho = []
-		self.tot_laser_dep = []
+		self.max_rho = np.zeros(RunCounter)
+		self.tot_laser_dep = np.zeros(RunCounter)
 		
-		self.nmat = []
-		self.material_names = []
-		self.material_Volume_fraction = []
+		self.nmat = nmat
+		self.material_names = [None] * nmat
+		self.material_Volume_fraction = np.zeros((RunCounter, len_x, nmat))
+				
+		# 1D
+		self.radius = np.zeros((RunCounter,len_x))
 		
+		# 2D
 		self.X = []
 		self.X_units = 'x ($\mu$m)'
 		self.X_conversion = 1e6
@@ -30,48 +38,9 @@ class one_sdf:
 		self.Y_units = 'y ($\mu$m)'
 		self.Y_conversion = 1e6
 		
-		self.radius = []
-		
-		self.Fluid_Rho = []
+		self.Fluid_Rho = np.zeros((RunCounter,len_x))
 		self.Fluid_Rho_units = 'Density (g/cm$^3$)'
 		self.Fluid_Rho_conversion = 1.0 / 1000.0
-		
-		self.Fluid_Temperature_ion = []
-		self.Fluid_Temperature_electron = []
-		self.Fluid_Temperature_units = 'Temperature (keV)'
-		self.Fluid_Temperature_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
-		
-		self.Fluid_Pressure_ion = []
-		self.Fluid_Pressure_electron = []
-		self.Fluid_Pressure_units = 'Pressure (Mbar)'
-		self.Fluid_Pressure_conversion = 1.0e-11 # from Pascal
-		
-		self.Fluid_Energy_ion = []
-		self.Fluid_Energy_electron = []
-		self.Fluid_Energy_units = 'Energy (J/kg)'
-		self.Fluid_Energy_conversion = 1.0
-		
-		self.Laser_Energy_deposited = []
-		self.Fluid_Energy_units = 'Energy (J/kg)'
-		self.Fluid_Energy_conversion = 1.0
-
-
-
-class all_sdf:
-	""" This class will collect all the data from the sdf files
-	"""
-	def __init__(self, RunCounter, nmat, len_x):
-		self.com = np.zeros(RunCounter)
-		self.time = np.zeros(RunCounter)
-		self.max_rho = np.zeros(RunCounter)
-		self.tot_laser_dep = np.zeros(RunCounter)
-		
-		self.nmat = nmat
-		self.material_names = [None] * nmat
-		self.material_Volume_fraction = np.zeros((RunCounter, len_x, nmat))
-		
-		self.radius = np.zeros((RunCounter,len_x))
-		self.Fluid_Rho = np.zeros((RunCounter,len_x))
 		
 		self.Fluid_Temperature_ion = np.zeros((RunCounter,len_x))
 		self.Fluid_Temperature_electron = np.zeros((RunCounter,len_x))
@@ -81,7 +50,7 @@ class all_sdf:
 		self.Fluid_Pressure_ion = np.zeros((RunCounter,len_x))
 		self.Fluid_Pressure_electron = np.zeros((RunCounter,len_x))
 		self.Fluid_Pressure_units = 'Pressure (Mbar)'
-		self.Fluid_Pressure_conversion = 1.0e-11 # from Pascals
+		self.Fluid_Pressure_conversion = 1.0e-11 # from Pascal
 		
 		self.Fluid_Energy_ion = np.zeros((RunCounter,len_x))
 		self.Fluid_Energy_electron = np.zeros((RunCounter,len_x))
@@ -89,6 +58,7 @@ class all_sdf:
 		self.Fluid_Energy_conversion = 1.0
 		
 		self.var = np.zeros((RunCounter,len_x))
+
 
 
 def get_data_one(one_sdf, n, pathname, var_name):

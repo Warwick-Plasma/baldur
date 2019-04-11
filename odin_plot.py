@@ -104,7 +104,7 @@ def snapshot(start, *args, **kwargs):
 	RunCounter = len(runs)
 	minrun = start
 	
-	sdf_dat = isdf.one_sdf()
+	sdf_dat = isdf.read_sdf()
 	sdf_dat = isdf.get_data_one(sdf_dat, minrun, pathname, var_name)
 	
 	plt.ion()
@@ -171,7 +171,7 @@ def snapshot(start, *args, **kwargs):
 		sdf_num=int(round(stime.val))
 		var_name = radio.value_selected
 		
-		sdf_dat = isdf.one_sdf()
+		sdf_dat = isdf.read_sdf()
 		sdf_dat = isdf.get_data_one(sdf_dat, sdf_num, pathname, var_name)
 
 		var = getattr(sdf_dat, var_name)
@@ -339,7 +339,7 @@ def lineout(start, *args, **kwargs):
 	half = round(len_y / 2)
 	cs = kwargs.get('cross_section', half)
 	
-	all_time = isdf.all_sdf(RunCounter, nmat, len_x)
+	all_time = isdf.read_sdf(RunCounter = RunCounter, nmat = nmat, len_x = len_x)
 	all_time = isdf.get_data_all(minrun, RunCounter, nmat, pathname, cs, all_time)
 
 	plt.ion()
