@@ -134,6 +134,7 @@ def snapshot(start, *args, **kwargs):
 
 	grid_colour = "none"
 	setattr(fig, "grid_colour", grid_colour)
+	setattr(radio, "user_option", var_name)
 
 	def change_variable(label):
 		max_x=stime.val
@@ -158,7 +159,7 @@ def snapshot(start, *args, **kwargs):
 			plt.draw()
 			filename1 = 'test.pdf'
 			extent = ax1.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-			fig.savefig(filename1, bbox_inches=extent.expanded(1.5, 1.27))
+			fig.savefig(filename1, bbox_inches=extent.expanded(1.7, 1.25))
 
 	def update(val):
 		"""
@@ -170,9 +171,10 @@ def snapshot(start, *args, **kwargs):
 
 		sdf_num=int(round(stime.val))
 		var_name = radio.value_selected
+		user_option = getattr(radio, "user_option")
 		
 		sdf_dat = isdf.read_sdf()
-		sdf_dat = isdf.get_data_one(sdf_dat, sdf_num, pathname, var_name)
+		sdf_dat = isdf.get_data_one(sdf_dat, sdf_num, pathname, user_option)
 
 		var = getattr(sdf_dat, var_name)
 
@@ -200,7 +202,8 @@ def snapshot(start, *args, **kwargs):
 		ax1.set_ylabel(sdf_dat.Y_units, fontsize = fs)
 		grid_colour = getattr(fig, "grid_colour")
 		cmesh.set_edgecolor(grid_colour)
-		ax1.set_title('Time {0:5.3f}'.format(sdf_dat.time*sdf_dat.time_conversion)+'ns')
+		ax1.set_title(sdf_dat.time_units 
+				+ ' = {0:5.3f}'.format(sdf_dat.time*sdf_dat.time_conversion))
 		cbar.set_clim(np.min(c_data), np.max(c_data))
 		cbar.set_label(units, fontsize = fs)
 		cbar.ax.tick_params(labelsize=fs) 

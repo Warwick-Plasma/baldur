@@ -9,7 +9,8 @@ from matplotlib.widgets import Slider, RadioButtons
 
 
 class read_sdf:
-	""" This class will collect all the data from the sdf files
+	""" This class will collect all the data from an sdf file. The units and
+	their conversions from SI are set here
 	"""
 	def __init__(self, *args, **kwargs):
 		RunCounter = kwargs.get('RunCounter', 0)
