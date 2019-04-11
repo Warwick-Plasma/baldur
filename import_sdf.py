@@ -54,10 +54,6 @@ class one_sdf:
 		self.Laser_Energy_deposited = []
 		self.Fluid_Energy_units = 'Energy (J/kg)'
 		self.Fluid_Energy_conversion = 1.0
-		
-		self.var = []
-		self.var_units = [] # this is taken from the sdf
-		self.var_conversion = 1.0
 
 
 
@@ -139,10 +135,11 @@ def get_data_one(one_sdf, n, pathname, var_name):
 	one_sdf.Fluid_Pressure_electron = dat.Fluid_Pressure_electron.data
 	one_sdf.Fluid_Energy_ion = dat.Fluid_Energy_ion.data
 	one_sdf.Fluid_Energy_electron = dat.Fluid_Energy_electron.data
-	 
+	
 	var = getattr(dat, var_name)
-	one_sdf.var = var.data
-	one_sdf.var_units = var.name + ' $(' + var.units + ')$'
+	setattr(one_sdf, var_name, var.data)
+	setattr(one_sdf, var_name+'_units', var.name + ' $(' + var.units + ')$')
+	setattr(one_sdf, var_name+'_conversion', 1.0)
 	return one_sdf
 
 

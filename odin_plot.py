@@ -115,7 +115,7 @@ def snapshot(start, *args, **kwargs):
 
 	x_data = sdf_dat.X * sdf_dat.X_conversion
 	y_data = sdf_dat.Y * sdf_dat.Y_conversion
-	c_data = sdf_dat.var
+	c_data = getattr(sdf_dat, var_name)
 	cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
 	cbar = plt.colorbar(cmesh)
 	ax1.set_xlim([np.min(x_data[:-1,:]),np.max(x_data[:-1,:])])
@@ -189,7 +189,7 @@ def snapshot(start, *args, **kwargs):
 		
 		x_data = sdf_dat.X * sdf_dat.X_conversion
 		y_data = sdf_dat.Y * sdf_dat.Y_conversion
-		c_data = sdf_dat.var * unit_conv
+		c_data = var * unit_conv
 		
 		fs = 12
 		ax1.clear()
