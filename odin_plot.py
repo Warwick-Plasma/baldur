@@ -104,7 +104,7 @@ def snapshot(start, *args, **kwargs):
 	RunCounter = len(runs)
 	minrun = start
 	
-	sdf_dat = isdf.one_sdf()
+	sdf_dat = isdf.read_sdf()
 	sdf_dat = isdf.get_data_one(sdf_dat, minrun, pathname, var_name)
 	
 	plt.ion()
@@ -171,7 +171,7 @@ def snapshot(start, *args, **kwargs):
 		sdf_num=int(round(stime.val))
 		var_name = radio.value_selected
 		
-		sdf_dat = isdf.one_sdf()
+		sdf_dat = isdf.read_sdf()
 		sdf_dat = isdf.get_data_one(sdf_dat, sdf_num, pathname, var_name)
 
 		var = getattr(sdf_dat, var_name)
@@ -339,7 +339,7 @@ def lineout(start, *args, **kwargs):
 	half = round(len_y / 2)
 	cs = kwargs.get('cross_section', half)
 	
-	all_time = isdf.all_sdf(RunCounter, nmat, len_x)
+	all_time = isdf.read_sdf(RunCounter = RunCounter, nmat = nmat, len_x = len_x)
 	all_time = isdf.get_data_all(minrun, RunCounter, nmat, pathname, cs, all_time)
 
 	plt.ion()
@@ -356,14 +356,14 @@ def lineout(start, *args, **kwargs):
 	
 	ax1 = ax.twinx()
 	
-	ax.set_xlabel('Radius (m)', fontsize = fs)
+	ax.set_xlabel(all_time.X_units, fontsize = fs)
 	ax.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
 	
-	ax.set_ylabel('Density (g/cm$^3$)', fontsize = fs)	
+	ax.set_ylabel(all_time.Fluid_Rho_units, fontsize = fs)	
 	l1, = ax.plot(1, lw = 2.5, color='black')
 	ax.tick_params(axis='y', labelcolor='black', labelsize = fs)
 	
-	ax1.set_ylabel('Temperature (keV)', color='tab:red', fontsize = fs)
+	ax1.set_ylabel('Place holder', color='tab:red', fontsize = fs)
 	l2, = ax1.plot(0, lw = 2, color = 'tab:blue')
 	l3, = ax1.plot(0, lw = 2, color = 'tab:red')
 	ax1.tick_params(axis='y', labelcolor = 'tab:red', labelsize = fs)
@@ -374,7 +374,7 @@ def lineout(start, *args, **kwargs):
 	
 	ax3 = ax2.twinx()
 	
-	ax2.set_xlabel('Time (ns)', fontsize = fs)
+	ax2.set_xlabel('Place holder', fontsize = fs)
 	ax2.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
 	x_data = all_time.time * 1.0e9
 	
