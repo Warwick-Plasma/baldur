@@ -356,11 +356,11 @@ def lineout(start, *args, **kwargs):
         
         fig, (ax,ax2)=plt.subplots(2, 1, num=1, figsize=(12,10), facecolor='white')
         plt.subplots_adjust(left  = 0.3,  # the left side of the subplots of the figure
-                                                                                        right = 0.9,    # the right side of the subplots of the figure
-                                                                                        bottom = 0.15,   # the bottom of the subplots of the figure
-                                                                                        top = 0.9,      # the top of the subplots of the figure
-                                                                                        wspace = 0.25,   # the amount of width reserved for space between subplots
-                                                                                        hspace = 0.3)
+                            right = 0.9,    # the right side of the subplots of the figure
+                            bottom = 0.15,   # the bottom of the subplots of the figure
+                            top = 0.9,      # the top of the subplots of the figure
+                            wspace = 0.25,   # the amount of width reserved for space between subplots
+                            hspace = 0.3)
         fs = 12
         
         ax1 = ax.twinx()
