@@ -35,6 +35,15 @@ def add_label(dat):
     label = name + " (" + units + ")"
     setattr(var, "label", label)
     setattr(var, "unit_conversion", 1)
+    
+  # User defined
+  var = getattr(dat, "Fluid_Temperature_electron")
+  label = 'Electron Temperature (keV)'
+  setattr(var, "label", label)
+  unit_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
+  setattr(var, "unit_conversion", unit_conversion)
+  
+  return dat
 
 
 
@@ -134,13 +143,13 @@ def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
       array = getattr(getattr(dat1, var_name), "all_time_data")
       data = getattr(getattr(dat, var_name), "data")
       array[n,:] = data[:,cs]
-      setattr(getattr(dat1, var_name), "all_time_data")
+      setattr(getattr(dat1, var_name), "all_time_data", array)
     
     for var_name in dat.variables_time:
       array = getattr(getattr(dat1, var_name), "all_time_data")
       data = getattr(getattr(dat, var_name), "data")
       array[n] = data
-      setattr(getattr(dat1, var_name), "all_time_data")
+      setattr(getattr(dat1, var_name), "all_time_data", array)
   return all_time
 
 

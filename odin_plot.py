@@ -131,7 +131,7 @@ def snapshot(start, *args, **kwargs):
         
   x_data = getattr(var_grid, 'data')[0]
   y_data = getattr(var_grid, 'data')[1]
-  c_data = getattr(var, 'data')
+  c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
   
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
   cbar = plt.colorbar(cmesh)
@@ -192,11 +192,11 @@ def snapshot(start, *args, **kwargs):
         
         X_data = getattr(var_grid, 'data')[0]
         Y_data = getattr(var_grid, 'data')[1]
-        C_data = getattr(var, 'data')
+        C_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
         
         X_label = 'X (' + getattr(var_grid, 'units')[0] + ')'
         Y_label = 'Y (' + getattr(var_grid, 'units')[1] + ')'
-        C_label = getattr(var, 'name') + ' ' + getattr(var, 'units')
+        C_label = getattr(var, 'label')
         
         fs = 12
         ax1.clear()

@@ -29,7 +29,7 @@ def basic(dat):
 	yc = grid_mid[1]
 	
 	var_name = "Radius_mid"
-	setattr(dat, var_name, dat.Grid_Grid_mid)
+	setattr(dat, var_name, new_variable())
 	radius = np.sqrt(xc**2 + yc**2)
 	dat.Radius_mid.data = radius
 	
