@@ -12,9 +12,12 @@ class new_variable:
   """
   """
   def __init__(self, *args, **kwargs):
-    self.data = 1 #np.zeros(RunCounter)
-    self.label = 'None'
-    self.grid = 1
+    self.data = kwargs.get('data', 1)
+    self.grid =  kwargs.get('grid', 1)
+    self.units = kwargs.get('units', 'Not set')
+    self.name = kwargs.get('name', 'Not set')
+    self.unit_conversion = kwargs.get('unit_conversion', 1)
+    self.units_new = kwargs.get('units_new', 'Not set')
 
 
 
@@ -28,54 +31,80 @@ def basic(dat):
 	xc = grid_mid[0]
 	yc = grid_mid[1]
 	
-	var_name = "Radius_mid"
-	setattr(dat, var_name, new_variable())
-	radius = np.sqrt(xc**2 + yc**2)
-	dat.Radius_mid.data = radius
+	# Grids
+	var_list = dat.grids
 	
-	var_list = ["None"]
+	var_name = "Radius_mid"
+	var_list.append(var_name)
+	radius = np.sqrt(xc**2 + yc**2)
+	setattr(dat, var_name, new_variable(data = radius,
+	                                    units = dat.Grid_Grid_mid.units_new,
+	                                    unit_conversion = dat.Grid_Grid_mid.unit_conversion,
+	                                    name = "Radius"))
+	
+	setattr(dat, "grids", var_list)
+	
+	# Variables that change in time and space
+	var_list = dat.variables
 	
 	var_name = "Fluid_Volume_rz"
 	var_list.append(var_name)
-	setattr(dat, var_name, new_variable())
 	vol = dat.Fluid_Volume.data * fac
-	dat.Fluid_Volume_rz.data = vol
-	dat.Fluid_Volume_rz.grid = grid_mid
+	setattr(dat, var_name, new_variable(data = vol,
+	                                    grid = dat.Grid_Grid,
+	                                    units_new = "m$^3$",
+	                                    unit_conversion = 1,
+	                                    name = "Volume"))
 	
-	var_name = "Fluid_Mass"
+	var_name = "Cell_Mass"
 	var_list.append(var_name)
-	setattr(dat, var_name, new_variable())
 	mass = dat.Fluid_Rho.data[:,:] * vol[:,:]
-	dat.Fluid_Mass.data = mass
-	dat.Fluid_Mass.grid = grid_mid
+	setattr(dat, var_name, new_variable(data = mass,
+	                                    grid = dat.Grid_Grid,
+	                                    units_new = "kg/m$^3$",
+	                                    unit_conversion = 1,
+	                                    name = "Mass"))
+  
+	setattr(dat, "variables", var_list)
+	
+	# variables that only change in time
+	var_list = dat.variables_time
 	
 	var_name = "Centre_Of_Mass"
 	var_list.append(var_name)
-	setattr(dat, var_name, new_variable())
-	dat.Centre_Of_Mass.data = np.sum(np.sum(mass * radius)) / np.sum(np.sum(mass))
+	com = np.sum(np.sum(mass * radius)) / np.sum(np.sum(mass))
+	setattr(dat, var_name, new_variable(data = com,
+	                                    units = dat.Grid_Grid_mid.units_new,
+	                                    unit_conversion = dat.Grid_Grid_mid.unit_conversion,
+	                                    name = "Centre of Mass"))
 	
-	var_list = var_list[1:]
 	setattr(dat, "variables_time", var_list)
 	
 	return dat
 
 
 
-def laser(dat):
-	
-	dat = basic(dat)
-	
-	var_list = dat.variables_time
-	
-	var_name = "Total_Energy_Laser"
-	var_list.append(var_name)
-	setattr(dat, var_name, new_variable())
-	laser_dep = dat.Fluid_Energy_deposited_laser.data
-	tot_laser_dep = np.sum(np.sum(dat.Fluid_Mass.data * laser_dep))
-	dat.Total_Energy_Laser.data = tot_laser_dep
-	
-	
-	return dat
+def laser(dat, *args, **kwargs):
+  call_basic = kwargs.get('call_basic', True)
+  
+  if call_basic:
+    dat = basic(dat)
+  
+  # variables that only change in time
+  var_list = dat.variables_time
+  
+  var_name = "Total_Energy_Laser_deposited"
+  var_list.append(var_name)
+  laser_dep = dat.Fluid_Energy_deposited_laser.data
+  tot_laser_dep = np.sum(np.sum(dat.Cell_Mass.data * laser_dep))
+  setattr(dat, var_name, new_variable(data = tot_laser_dep,
+                                      units_new = 'J',
+                                      unit_conversion = 1,
+                                      name = "Total laser energy deposited"))
+  
+  setattr(dat, "variables_time", var_list)
+  
+  return dat
 
 
 

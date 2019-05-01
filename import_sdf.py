@@ -29,19 +29,27 @@ def add_label(dat):
   # default labels
   for var_name in dat.variables:
     var = getattr(dat, var_name)
-    name = getattr(var, "name")
-    units = getattr(var, "units")
-    
-    label = name + " (" + units + ")"
-    setattr(var, "label", label)
     setattr(var, "unit_conversion", 1)
-    
+    units = getattr(var, "units")
+    setattr(var, "units_new", units)
+  
+  for var_name in dat.grids:
+    var = getattr(dat, var_name)
+    setattr(var, "unit_conversion", 1)
+    units = getattr(var, "units")
+    setattr(var, "units_new", units)
+  
+  #print("Warning: User defined units will overwrite original")
+  #print("and the conversion might only be true from SI.")
+  
   # User defined
   var = getattr(dat, "Fluid_Temperature_electron")
-  label = 'Electron Temperature (keV)'
-  setattr(var, "label", label)
+  name = 'Electron Temperature'
+  setattr(var, "name", name)
   unit_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
   setattr(var, "unit_conversion", unit_conversion)
+  units_new = "KeV"
+  setattr(var, "units_new", units_new)
   
   return dat
 
@@ -111,21 +119,30 @@ def use_sdf(n, pathname, use_analysis):
   
   dat_names = list(dat.__dict__.keys())
   variable_type = type(dat.Fluid_Rho)
-  dat_variables_names = []
+  grid_type = type(dat.Grid_Grid)
   
+  dat_variable_names = []
+  dat_grid_names = []
+  dat_variable_time_names = []
   for n in range(0, len(dat_names)):
     var = getattr(dat, dat_names[n])
     if type(var) == variable_type:
-      dat_variables_names.append(dat_names[n])
-  setattr(dat, "variables", dat_variables_names)
+      dat_variable_names.append(dat_names[n])
+    elif type(var) == grid_type:
+      dat_grid_names.append(dat_names[n])
+  
+  setattr(dat, "grids", dat_grid_names)
+  setattr(dat, "variables", dat_variable_names)
+  setattr(dat, "variables_time", dat_variable_time_names)
+  
+  dat = add_label(dat)
   
   if use_analysis:
     dat = afunc.basic(dat)
-    dat = afunc.laser(dat)
+    dat = afunc.laser(dat, call_basic = False)
     # energy
     # adiabat
-  
-  dat = add_label(dat)
+    # IFAR
   
   return dat
 
