@@ -8,20 +8,32 @@ from matplotlib.widgets import Slider, RadioButtons
 import analysis_functions as afunc
 
 
-def preallocate_dat(dat, iend):
-  setattr(dat, "Times", np.zeros(RunCounter))
+def preallocate_dat(dat, iend, cs):
+  
+  for var_name in dat.grids:
+    var = getattr(dat, var_name)
+    data = getattr(var, "data")
+    len_x = np.shape(data[0])[0]
+    array = np.zeros((iend, len_x))
+    array[0,:] = data[1][:,cs]
+    setattr(var, "all_time_data", array)
   
   for var_name in dat.variables:
     var = getattr(dat, var_name)
     data = getattr(var, "data")
     len_x = np.shape(data)[0]
-    setattr(var, "all_time_data" , np.zeros((RunCounter, len_x)))
-  
-  setattr(dat.Radius_mid, "all_time", np.zeros((RunCounter, len_x)))
+    array = np.zeros((iend, len_x))
+    array[0,:] = data[:,cs]
+    setattr(var, "all_time_data", array)
   
   for var_name in dat.variables_time:
     var = getattr(dat, var_name)
-    setattr(var, "all_time_data" , np.zeros(RunCounter))
+    data = getattr(var, "data")
+    array = np.zeros(iend)
+    array[0] = data
+    setattr(var, "all_time_data", array)
+  
+  return dat
 
 
 def add_label(dat):
@@ -37,7 +49,7 @@ def add_label(dat):
     var = getattr(dat, var_name)
     setattr(var, "unit_conversion", 1)
     units = getattr(var, "units")
-    setattr(var, "units_new", units)
+    setattr(var, "units_new", units[0])
   
   #print("Warning: User defined units will overwrite original")
   #print("and the conversion might only be true from SI.")
@@ -151,11 +163,18 @@ def use_sdf(n, pathname, use_analysis):
 def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
   """
   """
-  dat1 = use_sdf(dat1)
-  dat1 = preallocate_dat(dat1, iend)
-  for n in range(istart, iend):     
+  dat1 = preallocate_dat(dat1, iend, cs)
+  
+  for n in range(istart+1, iend):     
     dat = use_sdf(n, pathname, use_analysis)
+    
     # grid for this data is either radius or X depending on rz t/f
+    for var_name in dat.grids:
+    	array = getattr(getattr(dat1, var_name), "all_time_data")
+    	data = getattr(getattr(dat, var_name), "data")
+    	array[n,:] = data[1][:,cs]
+    	setattr(getattr(dat1, var_name), "all_time_data", array)
+    
     for var_name in dat.variables:
       array = getattr(getattr(dat1, var_name), "all_time_data")
       data = getattr(getattr(dat, var_name), "data")
@@ -167,7 +186,7 @@ def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
       data = getattr(getattr(dat, var_name), "data")
       array[n] = data
       setattr(getattr(dat1, var_name), "all_time_data", array)
-  return all_time
+  return dat1
 
 
 

@@ -327,28 +327,26 @@ def mass(*args, **kwargs):
 
 
 
-def lineout(start, *args, **kwargs):
+def lineout(istart, *args, **kwargs):
   """
   """
-  var_name = kwargs.get('var_name', "Fluid_Rho")
-  analysis = kwargs.get('analysis', False)
-  check_analysis(analysis)
+  use_analysis = kwargs.get('analysis', False)
+  check_analysis(use_analysis)
   
   pathname = os.path.abspath(os.getcwd())
-  SDFName=pathname+'/'+str(start).zfill(4)+'.sdf'
-  dat = sh.getdata(SDFName,verbose=False)
+  dat = isdf.use_sdf(istart, pathname, use_analysis)
+  
   nmat = dat.Integer_flags.nmat # assume nmat doesn't change
   runs = glob.glob1(pathname,"*.sdf")
   RunCounter = len(runs)-1
   RunCounter = kwargs.get('end', RunCounter) + 1
-  minrun = start
   
   len_x = np.shape(dat.Fluid_Rho.data)[0]
   len_y = np.shape(dat.Fluid_Rho.data)[1]
   half = round(len_y / 2)
   cs = kwargs.get('cross_section', half)
   
-  dat = isdf.get_data_all(dat, minrun, RunCounter, pathname, analysis, cs)
+  dat = isdf.get_data_all(dat, istart, RunCounter, pathname, use_analysis, cs)
   
   plt.ion()
   plt.close('all')
@@ -364,10 +362,15 @@ def lineout(start, *args, **kwargs):
   
   ax1 = ax.twinx()
   
-  ax.set_xlabel(all_time.X_units, fontsize = fs)
+  x_var = dat.Radius_mid
+  x_data = x_var.data * x_var.unit_conversion
+  label = x_var.name + " (" + x_var.units_new + ")"
+  ax.set_xlabel(label, fontsize = fs)
   ax.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
   
-  ax.set_ylabel(all_time.Fluid_Rho_units, fontsize = fs)  
+  y_var = dat.Fluid_Rho
+  label = y_var.name + " (" + y_var.units + ")"
+  ax.set_ylabel(label, fontsize = fs)  
   l1, = ax.plot(1, lw = 2.5, color='black')
   ax.tick_params(axis='y', labelcolor='black', labelsize = fs)
   
@@ -377,26 +380,28 @@ def lineout(start, *args, **kwargs):
   ax1.tick_params(axis='y', labelcolor = 'tab:red', labelsize = fs)
 
   xmin = 0 #np.min(all_time.radius[0,:])
-  xmax = np.max(all_time.radius[0,:])
+  xmax = np.max(x_data)
   ax.set_xlim([xmin, xmax])
   
   ax3 = ax2.twinx()
   
   ax2.set_xlabel('Place holder', fontsize = fs)
   ax2.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
-  x_data = all_time.time * 1.0e9
+  x_data = dat.Times.all_time_data * dat.Times.unit_conversion
   
   # Plot laser power deposited
   ax2.set_ylabel('Laser power deposited (W)', fontsize = fs)
-  dt = all_time.time[1:] - all_time.time[:-1]
-  y_data = (all_time.tot_laser_dep[1:] - all_time.tot_laser_dep[:-1]) / dt
+  dt = dat.Times.all_time_data[1:] - dat.Times.all_time_data[:-1]
+  var = dat.Total_Energy_Laser_deposited.all_time_data
+  y_data = (var[1:] - var[:-1]) / dt
   y_data = np.insert(y_data, 0, 0)
   la = ax2.plot(x_data, y_data, lw = 2, color='black')
   ax2.tick_params(axis='y', labelcolor='black', labelsize = fs)
   
   # Plot maximum density
-  ax3.set_ylabel('Maximum '+all_time.Fluid_Rho_units, color='tab:red', fontsize = fs)
-  y_data = all_time.max_rho * all_time.Fluid_Rho_conversion
+  var = dat.Fluid_Rho
+  y_data = np.max(var.all_time_data, axis=1) * var.unit_conversion
+  ax3.set_ylabel('Maximum Density' + var.units_new, color='tab:red', fontsize = fs)
   lb = ax3.plot(x_data, y_data, lw = 2.5, color='tab:red')
   ax3.tick_params(axis='y', labelcolor='tab:red', labelsize = fs)
 
@@ -410,13 +415,12 @@ def lineout(start, *args, **kwargs):
   # Setting up slider
   axcolor='lightgoldenrodyellow'
   axtime=plt.axes([0.3, 0.05, 0.6, 0.03], facecolor=axcolor)
-  stime=Slider(axtime, 'SDF selector', minrun, RunCounter-1, valinit = minrun, valfmt = '%1.0f')
+  stime=Slider(axtime, 'SDF selector', istart, RunCounter-1, valinit = istart, valfmt = '%1.0f')
   stime.label.set_size(fs)
   
   axcolor = 'lightgoldenrodyellow'
-  rax = plt.axes([0.02, 0.65, 0.18, 0.18], facecolor=axcolor)
-  radio = RadioButtons(rax, ("Fluid_Temperature", "Fluid_Pressure",
-      "Fluid_Energy", var_name))
+  rax = plt.axes([0.0, 0.05, 0.18, 0.90], facecolor=axcolor)
+  radio = RadioButtons(rax, (dat.variables))
   
   ax_data = axis_data()
   ax1_data = axis_data()
@@ -438,7 +442,7 @@ def lineout(start, *args, **kwargs):
   def press(event): #keyboard movement of slider, currently set to 'o' and 'p'
     t0 = stime.val
     # return one time step
-    if event.key == 'o' and t0 > minrun + 0.5:
+    if event.key == 'o' and t0 > istart + 0.5:
       stime.set_val(t0-1)
     # advance one time step
     elif event.key == 'p' and t0 < RunCounter - 1.5:
@@ -466,11 +470,9 @@ def lineout(start, *args, **kwargs):
     elif event.key == 'y':
       log_on = getattr(fig,'log_on')
       if log_on == 0:
-        setattr(fig,'log_on',1)
-        ax.set_ylabel('Log(Density (g/cm$^3$))')        
+        setattr(fig,'log_on',1)     
       else:
-        setattr(fig,'log_on',0)
-        ax.set_ylabel('Density (g/cm$^3$)')     
+        setattr(fig,'log_on',0)  
       setattr(fig,'reset_axis',0)
       setattr(fig,'reset_axis2',0)
       stime.set_val(t0)
@@ -496,62 +498,65 @@ def lineout(start, *args, **kwargs):
     iv = getattr(fig,'reset_axis2')
     t0 = int(np.around(stime.val))
     
-    l1.set_xdata(all_time.radius[t0,:])
-    l2.set_xdata(all_time.radius[t0,:])
-    l3.set_xdata(all_time.radius[t0,:])
-    
     log_on = getattr(fig,'log_on')
+    var = dat.Fluid_Rho
+    y_data = var.all_time_data[t0,:] * var.unit_conversion
+    name = var.name
+    units = var.units_new
+    
     if log_on == 0:
-      y_data = all_time.Fluid_Rho[t0,:] / 1000 # convert to g/cm^-3
       l1.set_ydata(y_data)
     
       ylimL = 0.0
       ylimH = 1.5 * np.max(y_data)
+      ax.set_ylabel(name + ' (' + units + ')')  
     else:
-      y_data = all_time.Fluid_Rho[t0,:] / 1000 # convert to g/cm^-3
       l1.set_ydata(np.log10(y_data))
+      ax.set_ylabel('Log[' + name + ' (' + units + ')]')   
     
       ylimL = np.log10(0.0001)#0.0
       ylimH = np.log10(10000)#1.5 * np.max(y_data)
     
-    ax.set_ylim([ylimL,ylimH])
-    xlimH = np.max(all_time.radius[t0,:])
+    x_data = dat.Radius_mid.all_time_data[t0,:] * dat.Radius_mid.unit_conversion
+    l1.set_xdata(x_data)
+    l2.set_xdata(x_data)
+    l3.set_xdata(x_data)
+    
+    xlimH = np.max(x_data)
     xlimL = 0.0
     ax.set_xlim([xlimL,xlimH])
+    ax.set_ylim([ylimL,ylimH])
     ax_data.new_axis=np.array([xlimL,xlimH,ylimL,ylimH])
     
     var_name = radio.value_selected
-    var_conv = var_name + '_conversion'
-    unit_conv = getattr(all_time, var_conv)
-    var_units = var_name + '_units'
-    units = getattr(all_time, var_units)
-    try:
-      var_ion = var_name + '_ion'
-      var_ele = var_name + '_electron'
-      ti = getattr(all_time, var_ion)
-      te = getattr(all_time, var_ele)
-    except:
-      var = getattr(all_time, var_name)
+    var = getattr(dat, var_name)
+    unit_conv = getattr(var, "unit_conversion")
+    units = getattr(var, "units_new")
+    name = getattr(var, "name")
     
-    ax1.set_ylabel(units)
-    y_data = ti[t0,:] * unit_conv
+    ax1.set_ylabel(name + " (" + units + ")")
+    y_data = getattr(var, "all_time_data")[t0,:] * unit_conv
     l2.set_ydata(y_data)
-    l2.set_label('Ion')
+    l2.set_label("Not Fixed")
     
-    y_data = te[t0,:] * unit_conv
-    l3.set_ydata(y_data)
-    l3.set_label('Electron')
+    #y_data = te[t0,:] * unit_conv
+    #l3.set_ydata(y_data)
+    #l3.set_label('Electron')
     
     ylimL = 0.0 # np.min(y_data)
-    ylimH = 1.5 * np.max(y_data)
+    if np.max(y_data) != 0.0:
+      ylimH = 1.5 * np.max(y_data)
+    else:
+      ylimH = 1.0
     ax1.set_ylim([ylimL,ylimH])
-    xlimH = np.max(all_time.radius[t0,:])
     xlimL = 0.0
+    xlimH = np.max(x_data)
     ax1.set_xlim([xlimL,xlimH])
     ax1_data.new_axis=np.array([xlimL,xlimH,ylimL,ylimH])
     
-    ax.set_title(all_time.time_units 
-                    + ' = {0:5.3f}'.format(all_time.time[t0]*all_time.time_conversion))
+    ax.set_title(dat.Times.name
+        + ' = {0:5.3f}'.format(dat.Times.all_time_data[t0]
+        * dat.Times.unit_conversion))
     
     if ii!=0:
       ax_data.zoomed_axis2 = ax_data.zoomed_axis1[0:2]
@@ -587,7 +592,7 @@ def lineout(start, *args, **kwargs):
   fig.canvas.mpl_connect('key_press_event', press)
   stime.on_changed(update)
   radio.on_clicked(change_variable)
-  update(minrun)
+  update(istart)
 
   plt.show()
 

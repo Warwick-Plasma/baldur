@@ -31,14 +31,14 @@ def basic(dat):
 	xc = grid_mid[0]
 	yc = grid_mid[1]
 	
-	# Grids
+	# Grids, all grids need to be 3D arrays so we stack radius
 	var_list = dat.grids
 	
 	var_name = "Radius_mid"
 	var_list.append(var_name)
 	radius = np.sqrt(xc**2 + yc**2)
-	setattr(dat, var_name, new_variable(data = radius,
-	                                    units = dat.Grid_Grid_mid.units_new,
+	setattr(dat, var_name, new_variable(data = np.array([radius, radius]),
+	                                    units_new = dat.Grid_Grid_mid.units_new,
 	                                    unit_conversion = dat.Grid_Grid_mid.unit_conversion,
 	                                    name = "Radius"))
 	
@@ -70,11 +70,18 @@ def basic(dat):
 	# variables that only change in time
 	var_list = dat.variables_time
 	
+	var_name = "Times"
+	var_list.append(var_name)
+	setattr(dat, var_name, new_variable(data = dat.Header["time"],
+	                                    units_new = "ns",
+	                                    unit_conversion = 1.0e9,
+	                                    name = "Time"))
+	
 	var_name = "Centre_Of_Mass"
 	var_list.append(var_name)
 	com = np.sum(np.sum(mass * radius)) / np.sum(np.sum(mass))
 	setattr(dat, var_name, new_variable(data = com,
-	                                    units = dat.Grid_Grid_mid.units_new,
+	                                    units_new = dat.Grid_Grid_mid.units_new,
 	                                    unit_conversion = dat.Grid_Grid_mid.unit_conversion,
 	                                    name = "Centre of Mass"))
 	
