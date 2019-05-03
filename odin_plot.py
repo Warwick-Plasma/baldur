@@ -385,7 +385,8 @@ def lineout(istart, *args, **kwargs):
   
   ax3 = ax2.twinx()
   
-  ax2.set_xlabel('Place holder', fontsize = fs)
+  label = dat.Times.name + ' (' + dat.Times.units_new + ')' 
+  ax2.set_xlabel(label, fontsize = fs)
   ax2.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
   x_data = dat.Times.all_time_data * dat.Times.unit_conversion
   
@@ -517,7 +518,30 @@ def lineout(istart, *args, **kwargs):
       ylimL = np.log10(0.0001)#0.0
       ylimH = np.log10(10000)#1.5 * np.max(y_data)
     
-    x_data = dat.Radius_mid.all_time_data[t0,:] * dat.Radius_mid.unit_conversion
+    var_name = radio.value_selected
+    var = getattr(dat, var_name)
+    unit_conv = getattr(var, "unit_conversion")
+    units = getattr(var, "units_new")
+    name = getattr(var, "name")
+    grid_name = getattr(var, "grid")
+    grid = getattr(grid_name, "all_time_data")
+    grid_conv = getattr(grid_name, "unit_conversion")
+    
+    x_data = dat.Radius_mid.all_time_data[0,t0,:] * dat.Radius_mid.unit_conversion
+    y_data = getattr(var, "all_time_data")[t0,:] * unit_conv
+    edge = np.sqrt(grid[0,t0,:]**2 + grid[1,t0,:]**2) * grid_conv
+    XP = (edge[:-1] + edge[1:]) * 0.5
+    
+    if np.shape(y_data) != np.shape(x_data):
+      if np.shape(y_data) == np.shape(edge):
+        XP = edge
+      elif np.shape(y_data) == np.shape(XP):
+        XP = XP
+      else:
+        print("Unknown geometry variable")
+      print("Waring: Linear Interpolation!")
+      y_data = np.interp(x_data, XP, y_data)
+    
     l1.set_xdata(x_data)
     l2.set_xdata(x_data)
     l3.set_xdata(x_data)
@@ -528,20 +552,13 @@ def lineout(istart, *args, **kwargs):
     ax.set_ylim([ylimL,ylimH])
     ax_data.new_axis=np.array([xlimL,xlimH,ylimL,ylimH])
     
-    var_name = radio.value_selected
-    var = getattr(dat, var_name)
-    unit_conv = getattr(var, "unit_conversion")
-    units = getattr(var, "units_new")
-    name = getattr(var, "name")
-    
     ax1.set_ylabel(name + " (" + units + ")")
-    y_data = getattr(var, "all_time_data")[t0,:] * unit_conv
-    l2.set_ydata(y_data)
-    l2.set_label("Not Fixed")
+    #y_data = getattr(var, "all_time_data")[t0,:] * unit_conv
+    #l2.set_ydata(y_data)
+    #l2.set_label("Not Fixed")
     
-    #y_data = te[t0,:] * unit_conv
-    #l3.set_ydata(y_data)
-    #l3.set_label('Electron')
+    l3.set_ydata(y_data)
+    l3.set_label("Not Fixed")
     
     ylimL = 0.0 # np.min(y_data)
     if np.max(y_data) != 0.0:

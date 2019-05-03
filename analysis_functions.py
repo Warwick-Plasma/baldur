@@ -37,7 +37,8 @@ def basic(dat):
 	var_name = "Radius_mid"
 	var_list.append(var_name)
 	radius = np.sqrt(xc**2 + yc**2)
-	setattr(dat, var_name, new_variable(data = np.array([radius, radius]),
+	theta = np.arctan2(yc, xc)
+	setattr(dat, var_name, new_variable(data = np.array([radius, theta]),
 	                                    units_new = dat.Grid_Grid_mid.units_new,
 	                                    unit_conversion = dat.Grid_Grid_mid.unit_conversion,
 	                                    name = "Radius"))

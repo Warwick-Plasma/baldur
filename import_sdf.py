@@ -14,8 +14,9 @@ def preallocate_dat(dat, iend, cs):
     var = getattr(dat, var_name)
     data = getattr(var, "data")
     len_x = np.shape(data[0])[0]
-    array = np.zeros((iend, len_x))
-    array[0,:] = data[1][:,cs]
+    array = np.zeros((2, iend, len_x))
+    array[0,0,:] = data[0][:,cs]
+    array[1,0,:] = data[1][:,cs]
     setattr(var, "all_time_data", array)
   
   for var_name in dat.variables:
@@ -172,7 +173,8 @@ def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
     for var_name in dat.grids:
     	array = getattr(getattr(dat1, var_name), "all_time_data")
     	data = getattr(getattr(dat, var_name), "data")
-    	array[n,:] = data[1][:,cs]
+    	array[0,n,:] = data[0][:,cs]
+    	array[1,n,:] = data[1][:,cs]
     	setattr(getattr(dat1, var_name), "all_time_data", array)
     
     for var_name in dat.variables:
