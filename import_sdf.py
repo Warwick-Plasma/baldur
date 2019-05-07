@@ -126,8 +126,10 @@ class read_sdf:
 
 
 
-def use_sdf(n, pathname, use_analysis):
-  SDFName=pathname+'/'+str(n).zfill(4)+'.sdf'
+def use_sdf(sdf_num, pathname, use_analysis, *args, **kwargs):
+  istart = kwargs.get('istart', 0)
+
+  SDFName=pathname+'/'+str(sdf_num).zfill(4)+'.sdf'
   dat = sh.getdata(SDFName,verbose=False)
   
   dat_names = list(dat.__dict__.keys())
@@ -152,7 +154,8 @@ def use_sdf(n, pathname, use_analysis):
   
   if use_analysis:
     dat = afunc.basic(dat)
-    dat = afunc.laser(dat, call_basic = False)
+    dat = afunc.laser(dat, call_basic = False, laser_change = True,
+        sdf_num = sdf_num, istart = istart, pathname = pathname)
     # energy
     # adiabat
     # IFAR

@@ -94,16 +94,44 @@ def basic(dat):
 
 def laser(dat, *args, **kwargs):
   call_basic = kwargs.get('call_basic', True)
+  laser_change = kwargs.get('laser_change', False)
+  sdf_num = kwargs.get('sdf_num', 0)
+  istart = kwargs.get('istart', 0)
+  pathname = kwargs.get('pathname', os.path.abspath(os.getcwd()))
   
   if call_basic:
     dat = basic(dat)
+  
+  laser_dep = dat.Fluid_Energy_deposited_laser.data
+  
+  if laser_change:
+    # Variables that change in time and space
+    var_list = dat.variables
+	  
+    var_name = "Laser_Energy_per_step"
+    var_list.append(var_name)
+    if sdf_num == istart:
+      lap_dep_step = laser_dep
+    elif sdf_num >= istart:
+      SDFName=pathname+'/'+str(sdf_num-1).zfill(4)+'.sdf'
+      dat2 = sh.getdata(SDFName,verbose=False)
+      lap_dep_step = laser_dep - dat2.Fluid_Energy_deposited_laser.data
+    else:
+      print('Error with laser change calculation')
+      print('sdf_num = ', sdf_num, ' and the minimum = ', istart)
+    setattr(dat, var_name, new_variable(data = lap_dep_step,
+                                        grid = dat.Grid_Grid,
+                                        units_new = "J/kg",
+                                        unit_conversion = 1,
+                                        name = "Laser Energy Deposited"))
+  
+    setattr(dat, "variables", var_list)
   
   # variables that only change in time
   var_list = dat.variables_time
   
   var_name = "Total_Energy_Laser_deposited"
   var_list.append(var_name)
-  laser_dep = dat.Fluid_Energy_deposited_laser.data
   tot_laser_dep = np.sum(np.sum(dat.Cell_Mass.data * laser_dep))
   setattr(dat, var_name, new_variable(data = tot_laser_dep,
                                       units_new = 'J',

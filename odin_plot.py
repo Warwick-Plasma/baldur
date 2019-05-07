@@ -106,7 +106,7 @@ def check_analysis(analysis):
 
 
 
-def snapshot(start, *args, **kwargs):
+def snapshot(istart, *args, **kwargs):
   """
   """
   var_name = kwargs.get('var_name', "Fluid_Rho")
@@ -116,9 +116,8 @@ def snapshot(start, *args, **kwargs):
   pathname = os.path.abspath(os.getcwd())
   runs = glob.glob1(pathname,"*.sdf")
   RunCounter = len(runs)
-  minrun = start
   
-  dat1 = isdf.use_sdf(minrun, pathname, analysis)
+  dat1 = isdf.use_sdf(istart, pathname, analysis, istart = istart)
   
   plt.ion()
   plt.close('all')
@@ -140,7 +139,7 @@ def snapshot(start, *args, **kwargs):
   
   axcolor='lightgoldenrodyellow' # slider background colour
   axtime=plt.axes([0.1, 0.85, 0.4, 0.03], facecolor=axcolor) # slider size
-  stime=Slider(axtime, ' ', minrun, RunCounter-1, valinit=minrun, valfmt='%1.0f')
+  stime=Slider(axtime, ' ', istart, RunCounter-1, valinit = istart, valfmt = '%1.0f')
   
   axcolor = 'lightgoldenrodyellow'
   rax = plt.axes([0.65, 0.05, 0.35, 0.9], facecolor=axcolor)
@@ -155,9 +154,9 @@ def snapshot(start, *args, **kwargs):
   
   def press(event): # Defining a function for keyboard inputs for o and p
         max_x=stime.val
-        if event.key == 'o' and max_x > minrun+0.5:
+        if event.key == 'o' and max_x > istart + 0.5:
                 stime.set_val(max_x-1) # define the increment
-        elif event.key == 'p' and max_x < RunCounter-1.5:
+        elif event.key == 'p' and max_x < RunCounter - 1.5:
                 stime.set_val(max_x+1)
         elif event.key == 'i':
                 grid_colour = getattr(fig, "grid_colour")
@@ -185,7 +184,7 @@ def snapshot(start, *args, **kwargs):
     sdf_num = int(round(stime.val))
     
     var_name = radio.value_selected
-    dat = isdf.use_sdf(sdf_num, pathname, analysis)
+    dat = isdf.use_sdf(sdf_num, pathname, analysis, istart = istart)
 
     var = getattr(dat, var_name)
     var_grid = getattr(var, 'grid')
@@ -221,7 +220,7 @@ def snapshot(start, *args, **kwargs):
   fig.canvas.mpl_connect('key_press_event', press) # this makes the keyboard function work (key press)
   stime.on_changed(update) # this makes the slider work
   radio.on_clicked(change_variable)
-  update(minrun)
+  update(istart)
   plt.show()
 
 
