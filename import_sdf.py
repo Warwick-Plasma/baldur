@@ -59,9 +59,9 @@ def add_label(dat):
   var = getattr(dat, "Fluid_Temperature_electron")
   name = 'Electron Temperature'
   setattr(var, "name", name)
-  unit_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
+  unit_conversion = 1.0 #/ 11604.5 / 1000.0 # from Kelvin
   setattr(var, "unit_conversion", unit_conversion)
-  units_new = "KeV"
+  units_new = "K"#"KeV"
   setattr(var, "units_new", units_new)
   
   return dat
