@@ -126,8 +126,9 @@ class read_sdf:
 
 
 
-def use_sdf(sdf_num, pathname, use_analysis, *args, **kwargs):
+def use_sdf(sdf_num, pathname, *args, **kwargs):
   istart = kwargs.get('istart', 0)
+  use_analysis = kwargs.get('use_analysis', False)
 
   SDFName=pathname+'/'+str(sdf_num).zfill(4)+'.sdf'
   dat = sh.getdata(SDFName,verbose=False)
@@ -170,7 +171,7 @@ def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
   dat1 = preallocate_dat(dat1, iend, cs)
   
   for n in range(istart+1, iend):     
-    dat = use_sdf(n, pathname, use_analysis)
+    dat = use_sdf(n, pathname, use_analysis = use_analysis)
     
     # grid for this data is either radius or X depending on rz t/f
     for var_name in dat.grids:

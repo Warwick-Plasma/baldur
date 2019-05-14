@@ -117,7 +117,7 @@ def snapshot(istart, *args, **kwargs):
   runs = glob.glob1(pathname,"*.sdf")
   RunCounter = len(runs)
   
-  dat1 = isdf.use_sdf(istart, pathname, analysis, istart = istart)
+  dat1 = isdf.use_sdf(istart, pathname, use_analysis = analysis, istart = istart)
   
   plt.ion()
   plt.close('all')
@@ -184,7 +184,7 @@ def snapshot(istart, *args, **kwargs):
     sdf_num = int(round(stime.val))
     
     var_name = radio.value_selected
-    dat = isdf.use_sdf(sdf_num, pathname, analysis, istart = istart)
+    dat = isdf.use_sdf(sdf_num, pathname, use_analysis = analysis, istart = istart)
 
     var = getattr(dat, var_name)
     var_grid = getattr(var, 'grid')
@@ -333,7 +333,7 @@ def lineout(istart, *args, **kwargs):
   check_analysis(use_analysis)
   
   pathname = os.path.abspath(os.getcwd())
-  dat = isdf.use_sdf(istart, pathname, use_analysis)
+  dat = isdf.use_sdf(istart, pathname, use_analysis = use_analysis)
   
   nmat = dat.Integer_flags.nmat # assume nmat doesn't change
   runs = glob.glob1(pathname,"*.sdf")
@@ -361,17 +361,17 @@ def lineout(istart, *args, **kwargs):
   
   ax1 = ax.twinx()
   
-  x_var = dat.Radius_mid
-  x_data = x_var.data * x_var.unit_conversion
-  label = x_var.name + " (" + x_var.units_new + ")"
-  ax.set_xlabel(label, fontsize = fs)
-  ax.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
-  
   y_var = dat.Fluid_Rho
   label = y_var.name + " (" + y_var.units + ")"
   ax.set_ylabel(label, fontsize = fs)  
   l1, = ax.plot(1, lw = 2.5, color='black')
   ax.tick_params(axis='y', labelcolor='black', labelsize = fs)
+  
+  x_var = dat.Grid_Grid_mid
+  x_data = x_var.data[0] * x_var.unit_conversion
+  label = x_var.name + " (" + x_var.units_new + ")"
+  ax.set_xlabel(label, fontsize = fs)
+  ax.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
   
   ax1.set_ylabel('Place holder', color='tab:red', fontsize = fs)
   l2, = ax1.plot(0, lw = 2, color = 'tab:blue')
@@ -526,20 +526,10 @@ def lineout(istart, *args, **kwargs):
     grid = getattr(grid_name, "all_time_data")
     grid_conv = getattr(grid_name, "unit_conversion")
     
-    x_data = dat.Radius_mid.all_time_data[0,t0,:] * dat.Radius_mid.unit_conversion
+    x_data = dat.Grid_Grid_mid.all_time_data[0,t0,:] * dat.Grid_Grid_mid.unit_conversion
     y_data = getattr(var, "all_time_data")[t0,:] * unit_conv
-    edge = np.sqrt(grid[0,t0,:]**2 + grid[1,t0,:]**2) * grid_conv
-    XP = (edge[:-1] + edge[1:]) * 0.5
     
-    if np.shape(y_data) != np.shape(x_data):
-      if np.shape(y_data) == np.shape(edge):
-        XP = edge
-      elif np.shape(y_data) == np.shape(XP):
-        XP = XP
-      else:
-        print("Unknown geometry variable")
-      print("Waring: Linear Interpolation!")
-      y_data = np.interp(x_data, XP, y_data)
+    y_data = one_dim_grid(grid[:,t0,:], grid_conv, x_data, y_data)
     
     l1.set_xdata(x_data)
     l2.set_xdata(x_data)
@@ -613,6 +603,23 @@ def lineout(istart, *args, **kwargs):
   plt.show()
 
 
+def one_dim_grid(grid, grid_conv, x_data, y_data):
+  
+  edge = np.sqrt(grid[0,:]**2 + grid[1,:]**2) * grid_conv
+  XP = (edge[:-1] + edge[1:]) * 0.5
+  
+  if np.shape(y_data) != np.shape(x_data):
+    if np.shape(y_data) == np.shape(edge):
+      XP = edge
+    elif np.shape(y_data) == np.shape(XP):
+      XP = XP
+    else:
+      print("Unknown geometry variable")
+    print("Waring: Linear Interpolation!")
+    y_data = np.interp(x_data, XP, y_data)
+  
+  return y_data
+    
 
 class axis_data:
   def __init__(self):
