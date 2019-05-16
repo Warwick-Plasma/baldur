@@ -55,19 +55,19 @@ def adiabat(*args, **kwargs):
 
                 mass = density * volume
                 # The conversion to electron degeneracy pressure is only true for DT
-                deg_pressure = 2.17e12 * (density / 1000)**(5.0/3.0) / 10
+                deg_pressure = 2.17e12 * (density / 1000)**(5.0 / 3.0) / 10
                 
                 # As used by Craxton et al 2015 the inverse pressure scale length
                 # makes the discontinous shock clear. Requires similar spatial and
                 # temporal resolution
                 dx = xc[1:,cross_section] - xc[:-1,cross_section]
                 dlnp = np.abs(np.log(pressure[1:]) - np.log(pressure[:-1]))
-                pressure_ls = dlnp / dx
+                pressure_ls = idlnp / dx
                 
                 # Save the cross sections, isentrope's maximum is set as 3
                 all_time[n,:] =  t
                 all_mass[n,:] =  np.cumsum(mass)
-                all_isentrope[n,:] = pressure / deg_pressure# np.minimum(pressure / deg_pressure, 3)
+                all_isentrope[n,:] = pressure / deg_pressure#np.minimum(pressure/deg_pressure,3)
                 all_pressure[n,:] = pressure
                 all_pressure_ls[n,:] = pressure_ls
 
@@ -382,35 +382,37 @@ def lineout(istart, *args, **kwargs):
   xmax = np.max(x_data)
   ax.set_xlim([xmin, xmax])
   
-  ax3 = ax2.twinx()
+  if use_analysis:
+    
+    ax3 = ax2.twinx()
+    
+    label = dat.Times.name + ' (' + dat.Times.units_new + ')' 
+    ax2.set_xlabel(label, fontsize = fs)
+    ax2.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
+    x_data = dat.Times.all_time_data * dat.Times.unit_conversion
+      
+    # Plot laser power deposited
+    ax2.set_ylabel('Laser power deposited (W)', fontsize = fs)
+    dt = dat.Times.all_time_data[1:] - dat.Times.all_time_data[:-1]
+    var = dat.Total_Energy_Laser_deposited.all_time_data
+    y_data = (var[1:] - var[:-1]) / dt
+    y_data = np.insert(y_data, 0, 0)
+    la = ax2.plot(x_data, y_data, lw = 2, color='black')
+    ax2.tick_params(axis='y', labelcolor='black', labelsize = fs)
   
-  label = dat.Times.name + ' (' + dat.Times.units_new + ')' 
-  ax2.set_xlabel(label, fontsize = fs)
-  ax2.tick_params(axis='x', labelcolor = 'black', labelsize = fs)
-  x_data = dat.Times.all_time_data * dat.Times.unit_conversion
-  
-  # Plot laser power deposited
-  ax2.set_ylabel('Laser power deposited (W)', fontsize = fs)
-  dt = dat.Times.all_time_data[1:] - dat.Times.all_time_data[:-1]
-  var = dat.Total_Energy_Laser_deposited.all_time_data
-  y_data = (var[1:] - var[:-1]) / dt
-  y_data = np.insert(y_data, 0, 0)
-  la = ax2.plot(x_data, y_data, lw = 2, color='black')
-  ax2.tick_params(axis='y', labelcolor='black', labelsize = fs)
-  
-  # Plot maximum density
-  var = dat.Fluid_Rho
-  y_data = np.max(var.all_time_data, axis=1) * var.unit_conversion
-  ax3.set_ylabel('Maximum Density' + var.units_new, color='tab:red', fontsize = fs)
-  lb = ax3.plot(x_data, y_data, lw = 2.5, color='tab:red')
-  ax3.tick_params(axis='y', labelcolor='tab:red', labelsize = fs)
+    # Plot maximum density
+    var = dat.Fluid_Rho
+    y_data = np.max(var.all_time_data, axis=1) * var.unit_conversion
+    ax3.set_ylabel('Maximum Density' + var.units_new, color='tab:red', fontsize = fs)
+    lb = ax3.plot(x_data, y_data, lw = 2.5, color='tab:red')
+    ax3.tick_params(axis='y', labelcolor='tab:red', labelsize = fs)
 
-  xmin = 0 #np.min(x_data)
-  xmax = np.max(x_data)
-  #ymin = 0
-  #ymax = 1
-  ax2.set_xlim([xmin, xmax])
-  #ax2.set_ylim([ymin, ymax])
+    xmin = 0 #np.min(x_data)
+    xmax = np.max(x_data)
+    #ymin = 0
+    #ymax = 1
+    ax2.set_xlim([xmin, xmax])
+    #ax2.set_ylim([ymin, ymax])
   
   # Setting up slider
   axcolor='lightgoldenrodyellow'

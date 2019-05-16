@@ -18,6 +18,7 @@ def preallocate_dat(dat, iend, cs):
     array[0,0,:] = data[0][:,cs]
     array[1,0,:] = data[1][:,cs]
     setattr(var, "all_time_data", array)
+    setattr(var, "all_time_data_polar", array)
   
   for var_name in dat.variables:
     var = getattr(dat, var_name)
@@ -59,9 +60,17 @@ def add_label(dat):
   var = getattr(dat, "Fluid_Temperature_electron")
   name = 'Electron Temperature'
   setattr(var, "name", name)
-  unit_conversion = 1.0 #/ 11604.5 / 1000.0 # from Kelvin
+  unit_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
   setattr(var, "unit_conversion", unit_conversion)
-  units_new = "K"#"KeV"
+  units_new = "KeV"
+  setattr(var, "units_new", units_new)
+  
+  var = getattr(dat, "Grid_Grid_mid")
+  name = 'X distance, cell centres'
+  setattr(var, "name", name)
+  unit_conversion = 1.0e6 # from m
+  setattr(var, "unit_conversion", unit_conversion)
+  units_new = "$\mu m$"
   setattr(var, "units_new", units_new)
   
   return dat
@@ -150,6 +159,16 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   setattr(dat, "grids", dat_grid_names)
   setattr(dat, "variables", dat_variable_names)
   setattr(dat, "variables_time", dat_variable_time_names)
+		
+  # Save time variable
+  var_list = dat.variables_time
+  var_name = "Times"
+  var_list.append(var_name)
+  setattr(dat, var_name, afunc.new_variable(data = dat.Header["time"],
+                                            units_new = "ns",
+                                            unit_conversion = 1.0e9,
+                                            name = "Time"))
+  setattr(dat, "variables_time", var_list)
   
   dat = add_label(dat)
   
@@ -157,6 +176,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
     dat = afunc.basic(dat)
     dat = afunc.laser(dat, call_basic = False, laser_change = True,
         sdf_num = sdf_num, istart = istart, pathname = pathname)
+    dat = afunc.adiabat(dat, call_basic = False)
     # energy
     # adiabat
     # IFAR

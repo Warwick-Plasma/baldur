@@ -71,13 +71,6 @@ def basic(dat):
 	# variables that only change in time
 	var_list = dat.variables_time
 	
-	var_name = "Times"
-	var_list.append(var_name)
-	setattr(dat, var_name, new_variable(data = dat.Header["time"],
-	                                    units_new = "ns",
-	                                    unit_conversion = 1.0e9,
-	                                    name = "Time"))
-	
 	var_name = "Centre_Of_Mass"
 	var_list.append(var_name)
 	com = np.sum(np.sum(mass * radius)) / np.sum(np.sum(mass))
@@ -140,6 +133,53 @@ def laser(dat, *args, **kwargs):
   
   setattr(dat, "variables_time", var_list)
   
+  return dat
+
+def adiabat(dat, *args, **kwargs):
+  call_basic = kwargs.get('call_basic', True)
+  
+  # Volume must be times by 2*pi in RZ
+  fac = 1.0
+  if dat.Logical_flags.use_rz:
+    fac = 2*np.pi
+
+  small_number = 1e-100
+
+  rho = dat.Fluid_Rho.data
+  pressure = dat.Fluid_Pressure.data
+  
+  # Variables that change in time and space
+  var_list = dat.variables
+
+  var_name = "Fluid_Adiabat"
+  var_list.append(var_name)
+  # The conversion to electron degeneracy pressure is only true for DT
+  deg_pressure = 2.17e12 * (rho / 1000)**(5.0/3.0) / 10 + small_number
+  adiabat = pressure / deg_pressure
+  max_val = 10.0
+  adiabat = np.where(adiabat < max_val, adiabat, max_val)
+  setattr(dat, var_name, new_variable(data = adiabat,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "unitless",
+                                      unit_conversion = 1,
+                                      name = "Adiabat"))
+
+  var_name = "Fluid_Inverse_Pressure_Length_Scale"
+  var_list.append(var_name)
+  # As used by Craxton et al 2015 the inverse pressure scale length
+  # makes the discontinous shock clear. Requires similar spatial and
+  # temporal resolution
+  dx = dat.Radius_mid.data[0][:-1,:-1] - dat.Radius_mid.data[0][1:,:-1]
+  dlnp = np.log(pressure[:-1,:-1] + small_number) - np.log(pressure[1:,:-1] + small_number)
+  pressure_ls = np.abs(dlnp / dx)
+  setattr(dat, var_name, new_variable(data = pressure_ls,
+                                      grid = dat.Grid_Grid_mid,
+                                      units_new = "unitless",
+                                      unit_conversion = 1,
+                                      name = "Inverse Pressure Length Scale"))
+  
+  setattr(dat, "variables", var_list)
+
   return dat
 
 
