@@ -109,6 +109,8 @@ def check_analysis(use_analysis):
 def snapshot(dat, ax1, *args, **kwargs):
   """
   """
+  zoomed_axis1=np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
+                         ax1.get_ylim()[0], ax1.get_ylim()[1]])
   ax1.clear()
   
   fs = 12
@@ -130,16 +132,35 @@ def snapshot(dat, ax1, *args, **kwargs):
   x_label = 'X (' + getattr(var_grid, 'units')[0] + ')'
   y_label = 'Y (' + getattr(var_grid, 'units')[1] + ')'
   c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
-  ax1.tick_params(axis='x', labelsize = fs)
-  ax1.tick_params(axis='y', labelsize = fs)
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
-  ax1.set_title('Time = {0:5.3f}'.format(dat.Header['time']*1e9))
-  cbar.set_clim(np.min(c_data), np.max(c_data))
   cbar.set_label(c_label, fontsize = fs)
+  
+  ax1.tick_params(axis='x', labelsize = fs)
+  ax1.tick_params(axis='y', labelsize = fs)
+  ax1.set_title('Time = {0:5.3f}'.format(dat.Header['time']*1e9) + ' ns')
+  
+  cbar.set_clim(np.min(c_data), np.max(c_data))
   cbar.ax.tick_params(labelsize=fs)
-    
+  
+  ax1.set_xlim(zoomed_axis1[:2])
+  ax1.set_ylim(zoomed_axis1[2:])
+  
   plt.show()
+
+
+
+def set_axis_lim(dat, ax1, var_name):
+
+  var = getattr(dat, var_name)
+  var_grid = getattr(var, 'grid')
+        
+  x_data = getattr(var_grid, 'data')[0]
+  y_data = getattr(var_grid, 'data')[1]
+  c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
+  
+  ax1.set_xlim([np.min(x_data[:-1,:]),np.max(x_data[:-1,:])])
+  ax1.set_ylim([np.min(y_data[:-1,:]),np.max(y_data[:-1,:])])
 
 
 
