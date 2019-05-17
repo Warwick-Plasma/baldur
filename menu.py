@@ -45,7 +45,7 @@ def options():
   fig = plt.figure(num=1,figsize=(12,8),facecolor='white')
   ax1 = plt.axes()
   setattr(ax1, 'cbar', 'None')
-  move_figure(fig, 500, 10)
+  move_figure(fig, 550, 10)
 
   def callbackFunc(event):
     sdf_num = slider1.get()
@@ -54,12 +54,12 @@ def options():
     op.snapshot(dat, ax1, var_name = var_name)
 
   app = tk.Tk() 
-  app.geometry('400x200+10+10')
+  app.geometry('450x200+10+10')
 
   label_slider1 = tk.Label(app, text = "Select sdf number:")
   label_slider1.grid(column=0, row=0)
 
-  slider1 = tk.Scale(app, from_ = istart, to = RunCounter, tickinterval=100, orient=tk.HORIZONTAL, command=callbackFunc)
+  slider1 = tk.Scale(app, from_ = istart, to = RunCounter, tickinterval=100, orient=tk.HORIZONTAL, command=callbackFunc, length  = 300, resolution = 1.0)
   slider1.grid(column=1, row=0)
   slider1.set(23)
 
@@ -71,6 +71,18 @@ def options():
   print(dict(combo1))
   combo1.grid(column=1, row=1)
   combo1.current(3)
+  
+  
+  def leftKey(event):
+    sdf_num = slider1.get()
+    slider1.set(sdf_num - 1)
+
+  def rightKey(event):
+    sdf_num = slider1.get()
+    slider1.set(sdf_num + 1)
+  
+  app.bind('<Left>', leftKey)
+  app.bind('<Right>', rightKey)
   
   op.set_axis_lim(dat, ax1, combo1.get())
 

@@ -95,14 +95,14 @@ def adiabat(*args, **kwargs):
 
 
 def check_analysis(use_analysis):
-        if use_analysis == True:
-                print("starting analysis")
-        elif use_analysis == False:
-                print("set: <use_analysis = True>, for analysis")
-        else:
-                print("set: <use_analysis = True> or <False>")
-                print("it requires certain dump_masks")
-                sys.exit()
+  if use_analysis == True:
+    print("starting analysis")
+  elif use_analysis == False:
+    print("set: <use_analysis = True>, for analysis")
+  else:
+    print("set: <use_analysis = True> or <False>")
+    print("it requires certain dump_masks")
+    sys.exit()
 
 
 
@@ -136,12 +136,16 @@ def snapshot(dat, ax1, *args, **kwargs):
   ax1.set_ylabel(y_label, fontsize = fs)
   cbar.set_label(c_label, fontsize = fs)
   
+  time = getattr(dat, "Times")
+  t_data = getattr(time, "data") * getattr(time, 'unit_conversion')
+  t_label = getattr(time, "name") + ' = {0:5.3f}'.format(t_data) + getattr(time, "units_new")
   ax1.tick_params(axis='x', labelsize = fs)
   ax1.tick_params(axis='y', labelsize = fs)
-  ax1.set_title('Time = {0:5.3f}'.format(dat.Header['time']*1e9) + ' ns')
+  ax1.set_title(t_label)
   
   cbar.set_clim(np.min(c_data), np.max(c_data))
   cbar.ax.tick_params(labelsize=fs)
+  cbar.draw_all()
   
   ax1.set_xlim(zoomed_axis1[:2])
   ax1.set_ylim(zoomed_axis1[2:])
