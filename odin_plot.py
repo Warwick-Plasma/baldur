@@ -94,133 +94,51 @@ def adiabat(*args, **kwargs):
 
 
 
-def check_analysis(analysis):
-        if analysis == True:
+def check_analysis(use_analysis):
+        if use_analysis == True:
                 print("starting analysis")
-        elif analysis == False:
-                print("set: <analysis = True>, for analysis")
+        elif use_analysis == False:
+                print("set: <use_analysis = True>, for analysis")
         else:
-                print("set: <analysis = True> or <False>")
+                print("set: <use_analysis = True> or <False>")
                 print("it requires certain dump_masks")
                 sys.exit()
 
 
 
-def snapshot(istart, *args, **kwargs):
+def snapshot(dat, ax1, *args, **kwargs):
   """
   """
+  ax1.clear()
+  
+  fs = 12
+  
   var_name = kwargs.get('var_name', "Fluid_Rho")
-  analysis = kwargs.get('analysis', False)
-  check_analysis(analysis)
-    
-  pathname = os.path.abspath(os.getcwd())
-  runs = glob.glob1(pathname,"*.sdf")
-  RunCounter = len(runs)
-  
-  dat1 = isdf.use_sdf(istart, pathname, use_analysis = analysis, istart = istart)
-  
-  plt.ion()
-  plt.close('all')
-       
-  fig=plt.figure(num=1,figsize=(12,8),facecolor='white')
-  ax1=plt.axes([0.1, 0.1, 0.5, 0.6])
-  
-  var = getattr(dat1, 'Fluid_Rho')
+  var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
         
   x_data = getattr(var_grid, 'data')[0]
   y_data = getattr(var_grid, 'data')[1]
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
   
+  cbar = getattr(ax1, 'cbar')
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
-  cbar = plt.colorbar(cmesh)
-  ax1.set_xlim([np.min(x_data[:-1,:]),np.max(x_data[:-1,:])])
-  ax1.set_ylim([np.min(y_data[:-1,:]),np.max(y_data[:-1,:])])
+  if cbar == 'None':
+    cbar = plt.colorbar(cmesh)
+    setattr(ax1, 'cbar', cbar)
   
-  axcolor='lightgoldenrodyellow' # slider background colour
-  axtime=plt.axes([0.1, 0.85, 0.4, 0.03], facecolor=axcolor) # slider size
-  stime=Slider(axtime, ' ', istart, RunCounter-1, valinit = istart, valfmt = '%1.0f')
-  
-  axcolor = 'lightgoldenrodyellow'
-  rax = plt.axes([0.65, 0.05, 0.35, 0.9], facecolor=axcolor)
-  radio = RadioButtons(rax, (dat1.variables))
-  
-  grid_colour = "none"
-  setattr(fig, "grid_colour", grid_colour)
-  
-  def change_variable(label):
-        max_x=stime.val
-        stime.set_val(max_x)
-  
-  def press(event): # Defining a function for keyboard inputs for o and p
-        max_x=stime.val
-        if event.key == 'o' and max_x > istart + 0.5:
-                stime.set_val(max_x-1) # define the increment
-        elif event.key == 'p' and max_x < RunCounter - 1.5:
-                stime.set_val(max_x+1)
-        elif event.key == 'i':
-                grid_colour = getattr(fig, "grid_colour")
-                if grid_colour == "none":
-                        grid_colour = "black"
-                elif grid_colour == "black":
-                        grid_colour = "none"
-                setattr(fig, "grid_colour", grid_colour)
-                stime.set_val(max_x)
-        # publish the current view of the top figure
-        elif event.key == 't':
-                plt.draw()
-                filename1 = 'test.pdf'
-                extent = ax1.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-                fig.savefig(filename1, bbox_inches=extent.expanded(1.7, 1.25))
-  
-  def update(val):
-    """
-    """
+  x_label = 'X (' + getattr(var_grid, 'units')[0] + ')'
+  y_label = 'Y (' + getattr(var_grid, 'units')[1] + ')'
+  c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
+  ax1.tick_params(axis='x', labelsize = fs)
+  ax1.tick_params(axis='y', labelsize = fs)
+  ax1.set_xlabel(x_label, fontsize = fs)
+  ax1.set_ylabel(y_label, fontsize = fs)
+  ax1.set_title('Time = {0:5.3f}'.format(dat.Header['time']*1e9))
+  cbar.set_clim(np.min(c_data), np.max(c_data))
+  cbar.set_label(c_label, fontsize = fs)
+  cbar.ax.tick_params(labelsize=fs)
     
-    x=ax1.get_xlim()
-    y=ax1.get_ylim()
-    zoomed_axis1=np.array([x[0],x[1],y[0],y[1]])
-  
-    sdf_num = int(round(stime.val))
-    
-    var_name = radio.value_selected
-    dat = isdf.use_sdf(sdf_num, pathname, use_analysis = analysis, istart = istart)
-
-    var = getattr(dat, var_name)
-    var_grid = getattr(var, 'grid')
-    
-    X_data = getattr(var_grid, 'data')[0]
-    Y_data = getattr(var_grid, 'data')[1]
-    C_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
-    
-    X_label = 'X (' + getattr(var_grid, 'units')[0] + ')'
-    Y_label = 'Y (' + getattr(var_grid, 'units')[1] + ')'
-    C_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
-    
-    fs = 12
-    ax1.clear()
-    cmesh = ax1.pcolormesh(X_data, Y_data, C_data, linewidth=0.01)
-    ax1.tick_params(axis='x', labelsize = fs)
-    ax1.tick_params(axis='y', labelsize = fs)
-    ax1.set_xlabel(X_label, fontsize = fs)
-    ax1.set_ylabel(Y_label, fontsize = fs)
-    grid_colour = getattr(fig, "grid_colour")
-    cmesh.set_edgecolor(grid_colour)
-    ax1.set_title('Time = {0:5.3f}'.format(dat.Header['time']*1e9))
-    cbar.set_clim(np.min(C_data), np.max(C_data))
-    cbar.set_label(C_label, fontsize = fs)
-    cbar.ax.tick_params(labelsize=fs) 
-    cbar.draw_all()
-    
-    ax1.set_xlim(zoomed_axis1[:2])
-    ax1.set_ylim(zoomed_axis1[2:])
-
-    fig.canvas.draw_idle()
-
-  fig.canvas.mpl_connect('key_press_event', press) # this makes the keyboard function work (key press)
-  stime.on_changed(update) # this makes the slider work
-  radio.on_clicked(change_variable)
-  update(istart)
   plt.show()
 
 
@@ -329,7 +247,7 @@ def mass(*args, **kwargs):
 def lineout(istart, *args, **kwargs):
   """
   """
-  use_analysis = kwargs.get('analysis', False)
+  use_analysis = kwargs.get('use_analysis', False)
   check_analysis(use_analysis)
   
   pathname = os.path.abspath(os.getcwd())
