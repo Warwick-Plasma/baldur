@@ -116,6 +116,8 @@ def snapshot(dat, ax1, *args, **kwargs):
   fs = 12
   
   var_name = kwargs.get('var_name', "Fluid_Rho")
+  grid_colour = kwargs.get('grid_colour', 'None')
+  
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
         
@@ -125,6 +127,7 @@ def snapshot(dat, ax1, *args, **kwargs):
   
   cbar = getattr(ax1, 'cbar')
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
+  cmesh.set_edgecolor(grid_colour)
   if cbar == 'None':
     cbar = plt.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)

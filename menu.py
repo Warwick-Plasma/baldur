@@ -10,6 +10,7 @@ import tkinter as tk
 from tkinter import ttk
 import odin_plot as op
 import import_sdf as isdf
+from functools import partial
 
 
 
@@ -42,20 +43,26 @@ def options():
   use_analysis = True
   dat = isdf.use_sdf(sdf_num, pathname, use_analysis = use_analysis, istart = istart)
   
-  fig = plt.figure(num=1,figsize=(12,8),facecolor='white')
+  fig = plt.figure(num=1,figsize=(10,8),facecolor='white')
   ax1 = plt.axes()
   setattr(ax1, 'cbar', 'None')
   move_figure(fig, 550, 10)
 
   def callbackFunc(event):
+    grid_colour = grid_variable.get()
     sdf_num = slider1.get()
     var_name = combo1.get()
     dat = isdf.use_sdf(sdf_num, pathname, use_analysis = use_analysis, istart = istart)
-    op.snapshot(dat, ax1, var_name = var_name)
+    op.snapshot(dat, ax1, var_name = var_name, grid_colour = grid_colour)
+  
+  filename1 = 'test.pdf'
+  def save_pdf():
+    fig.savefig(filename1)
 
   app = tk.Tk() 
   app.geometry('450x200+10+10')
 
+  # slider
   label_slider1 = tk.Label(app, text = "Select sdf number:")
   label_slider1.grid(column=0, row=0)
 
@@ -63,16 +70,26 @@ def options():
   slider1.grid(column=1, row=0)
   slider1.set(23)
 
+  # Combo box
   labelTop_combo1 = tk.Label(app, text = "Select variable:")
   labelTop_combo1.grid(column=0, row=1)
 
-  combo1 = ttk.Combobox(app,
-      values = dat.variables)
-  print(dict(combo1))
+  combo1 = ttk.Combobox(app, values = dat.variables)
   combo1.grid(column=1, row=1)
   combo1.current(3)
+  op.set_axis_lim(dat, ax1, combo1.get())
   
+  # check box
+  grid_variable = tk.StringVar(app)
+  grid_button = tk.Checkbutton(app, text="grid", variable = grid_variable, onvalue="black", offvalue="None")
+  grid_button.deselect()
+  grid_button.grid(column=0, row=2)
   
+  # button
+  print_button = tk.Button(app, text="Save .pdf", command = save_pdf)
+  print_button.grid(column=1, row=2)
+  
+  # slider key bindings
   def leftKey(event):
     sdf_num = slider1.get()
     slider1.set(sdf_num - 1)
@@ -83,10 +100,8 @@ def options():
   
   app.bind('<Left>', leftKey)
   app.bind('<Right>', rightKey)
-  
-  op.set_axis_lim(dat, ax1, combo1.get())
-
   combo1.bind("<<ComboboxSelected>>", callbackFunc)
+  grid_button.bind("<ButtonRelease-1>", callbackFunc)
 
   app.mainloop()
 
