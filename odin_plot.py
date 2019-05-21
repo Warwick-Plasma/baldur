@@ -109,8 +109,6 @@ def check_analysis(use_analysis):
 def snapshot(dat, ax1, *args, **kwargs):
   """
   """
-  #ax1.clear()
-  
   fs = 12
   
   var_name = kwargs.get('var_name', "Fluid_Rho")
@@ -126,6 +124,13 @@ def snapshot(dat, ax1, *args, **kwargs):
   if use_polar: x_data, y_data = polar_coordinates(x_data, y_data)
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
   
+  if reset_axis:
+    zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
+                             np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
+  else:
+    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
+                             ax1.get_ylim()[0], ax1.get_ylim()[1]])
+  ax1.clear() # This is nessasary for speed
   
   cbar = getattr(ax1, 'cbar')
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
@@ -148,12 +153,6 @@ def snapshot(dat, ax1, *args, **kwargs):
   ax1.tick_params(axis='y', labelsize = fs)
   ax1.set_title(t_label)
   
-  if reset_axis:
-    zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
-                             np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
-  else:
-    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
-                             ax1.get_ylim()[0], ax1.get_ylim()[1]])
   
   ax1.set_xlim(zoomed_axis1[:2])
   ax1.set_ylim(zoomed_axis1[2:])
@@ -162,8 +161,6 @@ def snapshot(dat, ax1, *args, **kwargs):
   cbar.ax.tick_params(labelsize=fs)
   cbar.draw_all()
   plt.show()
-  
-  return ax1
 
 
 
@@ -171,6 +168,7 @@ def polar_coordinates(xc, yc):
   
   x_data = np.sqrt(xc**2 + yc**2)
   y_data = np.arctan2(yc, xc)
+  y_data[0,:] = y_data[1,:]
   
   return x_data, y_data
 

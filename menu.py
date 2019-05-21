@@ -98,7 +98,7 @@ class menu_GUI:
     self.print_button = tk.Button(app, text="Save .pdf", command = self.save_pdf())
     self.print_button.grid(column=1, row=2)
     
-    # button - save fig as pdf
+    # button - reset button
     self.reset_button = tk.Button(app, text="Reset zoom")
     self.reset_button.grid(column=1, row=3)
   
@@ -109,7 +109,6 @@ class menu_GUI:
     self.polar_button.bind("<ButtonRelease-1>", self.callbackFunc1)
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
     
-
   def callbackFunc1(self, event):
     self.reset_grid_variable.set(True)
     self.callbackFunc(event)
@@ -122,7 +121,7 @@ class menu_GUI:
     reset_axis = self.reset_grid_variable.get()
 
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
-    self.ax1 = op.snapshot(dat, self.ax1, var_name = var_name,
+    op.snapshot(dat, self.ax1, var_name = var_name,
                            grid_colour = grid_colour, use_polar = use_polar,
                            reset_axis = reset_axis)
 
