@@ -93,6 +93,14 @@ class menu_GUI:
                                        onvalue=True, offvalue=False)
     self.polar_button.deselect()
     self.polar_button.grid(column=0, row=3)
+    
+    # check box - anisotropies
+    self.anisotropies_variable = tk.BooleanVar(app)
+    self.anisotropies_button = tk.Checkbutton(app, text="View anisotropies",
+                                       variable = self.anisotropies_variable,
+                                       onvalue=True, offvalue=False)
+    self.anisotropies_button.deselect()
+    self.anisotropies_button.grid(column=0, row=4)
   
     # button - save fig as pdf
     self.print_button = tk.Button(app, text="Save .pdf", command = self.save_pdf())
@@ -107,6 +115,7 @@ class menu_GUI:
     self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.grid_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.polar_button.bind("<ButtonRelease-1>", self.callbackFunc1)
+    self.anisotropies_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
     
   def callbackFunc1(self, event):
@@ -119,11 +128,12 @@ class menu_GUI:
     sdf_num = self.slider1.get()
     var_name = self.combo1.get()
     reset_axis = self.reset_grid_variable.get()
+    view_anisotropies = self.anisotropies_variable.get()
 
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
     op.snapshot(dat, self.ax1, var_name = var_name,
-                           grid_colour = grid_colour, use_polar = use_polar,
-                           reset_axis = reset_axis)
+        grid_colour = grid_colour, use_polar = use_polar,
+        reset_axis = reset_axis, view_anisotropies = view_anisotropies)
 
     self.reset_grid_variable.set(False)
 

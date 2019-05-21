@@ -114,7 +114,8 @@ def snapshot(dat, ax1, *args, **kwargs):
   var_name = kwargs.get('var_name', "Fluid_Rho")
   grid_colour = kwargs.get('grid_colour', 'None')
   use_polar = kwargs.get('use_polar', False)
-  reset_axis =  kwargs.get('reset_axis', True)
+  reset_axis = kwargs.get('reset_axis', True)
+  view_anisotropies = kwargs.get('view_anisotropies', False)
   
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
@@ -123,6 +124,7 @@ def snapshot(dat, ax1, *args, **kwargs):
   y_data = getattr(var_grid, 'data')[1]
   if use_polar: x_data, y_data = polar_coordinates(x_data, y_data)
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
+  if view_anisotropies: c_data = mean_subtract(c_data)
   
   if reset_axis:
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
@@ -161,6 +163,12 @@ def snapshot(dat, ax1, *args, **kwargs):
   cbar.ax.tick_params(labelsize=fs)
   cbar.draw_all()
   plt.show()
+
+
+
+def mean_subtract(cc):
+  c_data = cc - np.mean(cc, 1, keepdims = True)
+  return c_data
 
 
 
