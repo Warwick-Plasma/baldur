@@ -97,12 +97,18 @@ class menu_GUI:
     # button - save fig as pdf
     self.print_button = tk.Button(app, text="Save .pdf", command = self.save_pdf())
     self.print_button.grid(column=1, row=2)
+    
+    # button - save fig as pdf
+    self.reset_button = tk.Button(app, text="Reset zoom")
+    self.reset_button.grid(column=1, row=3)
   
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
     self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.grid_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.polar_button.bind("<ButtonRelease-1>", self.callbackFunc1)
+    self.reset_button.bind("<Button-1>", self.callbackFunc1)
+    
 
   def callbackFunc1(self, event):
     self.reset_grid_variable.set(True)
@@ -114,7 +120,7 @@ class menu_GUI:
     sdf_num = self.slider1.get()
     var_name = self.combo1.get()
     reset_axis = self.reset_grid_variable.get()
-    
+
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
     self.ax1 = op.snapshot(dat, self.ax1, var_name = var_name,
                            grid_colour = grid_colour, use_polar = use_polar,
