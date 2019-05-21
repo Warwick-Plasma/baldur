@@ -122,7 +122,9 @@ def snapshot(dat, ax1, *args, **kwargs):
         
   x_data = getattr(var_grid, 'data')[0]
   y_data = getattr(var_grid, 'data')[1]
-  if use_polar: x_data, y_data = polar_coordinates(x_data, y_data)
+  x_label = 'R (' + getattr(var_grid, 'units')[0] + ')'
+  y_label = 'Z (' + getattr(var_grid, 'units')[1] + ')'
+  if use_polar: x_data, y_data, y_label = polar_coordinates(x_data, y_data)
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
   if view_anisotropies: c_data = mean_subtract(c_data)
   
@@ -140,9 +142,6 @@ def snapshot(dat, ax1, *args, **kwargs):
   if cbar == 'None':
     cbar = plt.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
-  
-  x_label = 'X (' + getattr(var_grid, 'units')[0] + ')'
-  y_label = 'Y (' + getattr(var_grid, 'units')[1] + ')'
   c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
@@ -173,12 +172,13 @@ def mean_subtract(cc):
 
 
 def polar_coordinates(xc, yc):
+  y_label = "Radians"
   
   x_data = np.sqrt(xc**2 + yc**2)
-  y_data = np.arctan2(yc, xc)
+  y_data = np.arctan2(yc, xc) / np.pi
   y_data[0,:] = y_data[1,:]
   
-  return x_data, y_data
+  return x_data, y_data, y_label
 
 
 

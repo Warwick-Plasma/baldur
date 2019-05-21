@@ -42,13 +42,18 @@ class menu_GUI:
     
     plt.ion()
     plt.close('all')
-  
-    self.istart = 0
-    sdf_num = 10
     
     self.pathname = os.path.abspath(os.getcwd())
     runs = glob.glob1(self.pathname,"*.sdf")
     RunCounter = len(runs)-1
+    run_array = np.zeros(RunCounter)
+    for ir in range(0, RunCounter):
+      run_name = runs[ir]
+      run_num = int(run_name[:-4])
+      run_array[ir] = run_num
+    run_array = sorted(run_array)
+    self.istart = int(run_array[0])
+    sdf_num = int(run_array[0])
 
     self.use_analysis = True
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
