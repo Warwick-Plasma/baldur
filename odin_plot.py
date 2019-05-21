@@ -109,7 +109,7 @@ def check_analysis(use_analysis):
 def snapshot(dat, ax1, *args, **kwargs):
   """
   """
-  ax1.clear()
+  #ax1.clear()
   
   fs = 12
   
@@ -125,6 +125,7 @@ def snapshot(dat, ax1, *args, **kwargs):
   y_data = getattr(var_grid, 'data')[1]
   if use_polar: x_data, y_data = polar_coordinates(x_data, y_data)
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
+  
   
   cbar = getattr(ax1, 'cbar')
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
@@ -147,10 +148,6 @@ def snapshot(dat, ax1, *args, **kwargs):
   ax1.tick_params(axis='y', labelsize = fs)
   ax1.set_title(t_label)
   
-  cbar.set_clim(np.min(c_data), np.max(c_data))
-  cbar.ax.tick_params(labelsize=fs)
-  cbar.draw_all()
-  
   if reset_axis:
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
                              np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
@@ -160,7 +157,13 @@ def snapshot(dat, ax1, *args, **kwargs):
   
   ax1.set_xlim(zoomed_axis1[:2])
   ax1.set_ylim(zoomed_axis1[2:])
+  
+  cbar.set_clim(np.min(c_data), np.max(c_data))
+  cbar.ax.tick_params(labelsize=fs)
+  cbar.draw_all()
   plt.show()
+  
+  return ax1
 
 
 
@@ -170,16 +173,6 @@ def polar_coordinates(xc, yc):
   y_data = np.arctan2(yc, xc)
   
   return x_data, y_data
-
-
-def set_axis_lim(dat, ax1, var_name):
-
-  var = getattr(dat, var_name)
-  var_grid = getattr(var, 'grid')
-        
-  x_data = getattr(var_grid, 'data')[0]
-  y_data = getattr(var_grid, 'data')[1]
-  c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
 
 
 
