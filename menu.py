@@ -122,7 +122,7 @@ class menu_GUI:
     reset_axis = self.reset_grid_variable.get()
 
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
-    self.ax1 = op.snapshot(dat, self.ax1, var_name = var_name,
+    op.snapshot(dat, self.ax1, var_name = var_name,
                            grid_colour = grid_colour, use_polar = use_polar,
                            reset_axis = reset_axis)
 
