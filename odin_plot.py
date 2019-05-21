@@ -109,20 +109,21 @@ def check_analysis(use_analysis):
 def snapshot(dat, ax1, *args, **kwargs):
   """
   """
-  zoomed_axis1=np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
-                         ax1.get_ylim()[0], ax1.get_ylim()[1]])
   ax1.clear()
   
   fs = 12
   
   var_name = kwargs.get('var_name', "Fluid_Rho")
   grid_colour = kwargs.get('grid_colour', 'None')
+  use_polar = kwargs.get('use_polar', False)
+  reset_axis =  kwargs.get('reset_axis', True)
   
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
         
   x_data = getattr(var_grid, 'data')[0]
   y_data = getattr(var_grid, 'data')[1]
+  if use_polar: x_data, y_data = polar_coordinates(x_data, y_data)
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
   
   cbar = getattr(ax1, 'cbar')
@@ -150,11 +151,25 @@ def snapshot(dat, ax1, *args, **kwargs):
   cbar.ax.tick_params(labelsize=fs)
   cbar.draw_all()
   
+  if reset_axis:
+    zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
+                             np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
+  else:
+    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
+                             ax1.get_ylim()[0], ax1.get_ylim()[1]])
+  
   ax1.set_xlim(zoomed_axis1[:2])
   ax1.set_ylim(zoomed_axis1[2:])
-  
   plt.show()
 
+
+
+def polar_coordinates(xc, yc):
+  
+  x_data = np.sqrt(xc**2 + yc**2)
+  y_data = np.arctan2(yc, xc)
+  
+  return x_data, y_data
 
 
 def set_axis_lim(dat, ax1, var_name):
@@ -165,9 +180,6 @@ def set_axis_lim(dat, ax1, var_name):
   x_data = getattr(var_grid, 'data')[0]
   y_data = getattr(var_grid, 'data')[1]
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
-  
-  ax1.set_xlim([np.min(x_data[:-1,:]),np.max(x_data[:-1,:])])
-  ax1.set_ylim([np.min(y_data[:-1,:]),np.max(y_data[:-1,:])])
 
 
 

@@ -50,10 +50,13 @@ def options():
 
   def callbackFunc(event):
     grid_colour = grid_variable.get()
+    use_polar = polar_variable.get()
     sdf_num = slider1.get()
     var_name = combo1.get()
+    
     dat = isdf.use_sdf(sdf_num, pathname, use_analysis = use_analysis, istart = istart)
-    op.snapshot(dat, ax1, var_name = var_name, grid_colour = grid_colour)
+    op.snapshot(dat, ax1, var_name = var_name, grid_colour = grid_colour,
+                      use_polar = use_polar)
   
   filename1 = 'test.pdf'
   def save_pdf():
@@ -62,7 +65,7 @@ def options():
   app = tk.Tk() 
   app.geometry('450x200+10+10')
 
-  # slider
+  # slider - time
   label_slider1 = tk.Label(app, text = "Select sdf number:")
   label_slider1.grid(column=0, row=0)
 
@@ -70,22 +73,27 @@ def options():
   slider1.grid(column=1, row=0)
   slider1.set(23)
 
-  # Combo box
+  # Combo box - variable
   labelTop_combo1 = tk.Label(app, text = "Select variable:")
   labelTop_combo1.grid(column=0, row=1)
 
   combo1 = ttk.Combobox(app, values = dat.variables)
   combo1.grid(column=1, row=1)
   combo1.current(3)
-  op.set_axis_lim(dat, ax1, combo1.get())
   
-  # check box
+  # check box - grid
   grid_variable = tk.StringVar(app)
   grid_button = tk.Checkbutton(app, text="grid", variable = grid_variable, onvalue="black", offvalue="None")
   grid_button.deselect()
   grid_button.grid(column=0, row=2)
   
-  # button
+  # check box - polar coordinates
+  polar_variable = tk.BooleanVar(app)
+  polar_button = tk.Checkbutton(app, text="polar coordinates", variable = polar_variable, onvalue=True, offvalue=False)
+  polar_button.deselect()
+  polar_button.grid(column=0, row=3)
+  
+  # button - save fig as pdf
   print_button = tk.Button(app, text="Save .pdf", command = save_pdf)
   print_button.grid(column=1, row=2)
   
@@ -102,6 +110,7 @@ def options():
   app.bind('<Right>', rightKey)
   combo1.bind("<<ComboboxSelected>>", callbackFunc)
   grid_button.bind("<ButtonRelease-1>", callbackFunc)
+  polar_button.bind("<ButtonRelease-1>", callbackFunc)
 
   app.mainloop()
 
