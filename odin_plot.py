@@ -171,6 +171,7 @@ def polar_coordinates(xc, yc):
   
   x_data = np.sqrt(xc**2 + yc**2)
   y_data = np.arctan2(yc, xc)
+  y_data[0,:] = y_data[1,:]
   
   return x_data, y_data
 

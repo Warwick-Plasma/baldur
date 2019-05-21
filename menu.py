@@ -98,7 +98,7 @@ class menu_GUI:
     self.print_button = tk.Button(app, text="Save .pdf", command = self.save_pdf())
     self.print_button.grid(column=1, row=2)
     
-    # button - save fig as pdf
+    # button - reset button
     self.reset_button = tk.Button(app, text="Reset zoom")
     self.reset_button.grid(column=1, row=3)
   
