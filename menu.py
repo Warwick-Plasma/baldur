@@ -57,11 +57,17 @@ class menu_GUI:
 
     self.use_analysis = True
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
-  
-    self.fig = plt.figure(num=1,figsize=(10,8),facecolor='white')
+    self.fig = plt.figure(num=1, figsize=(6,6), facecolor='white')
+    move_figure(self.fig, 700, 10)
     self.ax1 = plt.axes()
     setattr(self.ax1, 'cbar', 'None')
-    move_figure(self.fig, 550, 10)
+
+    cs = 20
+    self.dat0 = isdf.get_data_all(dat, self.istart, RunCounter, self.pathname, self.use_analysis, cs)
+    self.fig2 = plt.figure(num=2, figsize=(6,6), facecolor='white')
+    move_figure(self.fig2, 700, 1400)
+    self.ax2 = plt.axes()
+    self.ax3 = op.empty_lineout(self.dat0, self.fig2, self.ax2)
     
     self.reset_grid_variable = tk.BooleanVar(app)
     self.reset_grid_variable.set(True)
@@ -136,9 +142,11 @@ class menu_GUI:
     view_anisotropies = self.anisotropies_variable.get()
 
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
-    op.snapshot(dat, self.ax1, var_name = var_name,
+    op.snapshot(dat, self.fig, self.ax1, var_name = var_name,
         grid_colour = grid_colour, use_polar = use_polar,
         reset_axis = reset_axis, view_anisotropies = view_anisotropies)
+    
+    op.lineout(self.dat0, self.fig2, self.ax2, self.ax3, var_name, sdf_num)
 
     self.reset_grid_variable.set(False)
 
@@ -146,7 +154,6 @@ class menu_GUI:
     filename1 = 'test.pdf'
     self.fig.savefig(filename1)
   
-  # slider key bindings
   def leftKey(self, event):
     sdf_num = self.slider1.get()
     self.slider1.set(sdf_num - 1)
