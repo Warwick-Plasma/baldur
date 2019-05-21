@@ -127,11 +127,11 @@ class menu_GUI:
     self.fig.savefig(filename1)
   
   # slider key bindings
-  def leftKey(self):
+  def leftKey(self, event):
     sdf_num = self.slider1.get()
     self.slider1.set(sdf_num - 1)
 
-  def rightKey(self):
+  def rightKey(self, event):
     sdf_num = self.slider1.get()
     self.slider1.set(sdf_num + 1)
 
