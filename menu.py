@@ -109,7 +109,6 @@ class menu_GUI:
     self.polar_button.bind("<ButtonRelease-1>", self.callbackFunc1)
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
     
-
   def callbackFunc1(self, event):
     self.reset_grid_variable.set(True)
     self.callbackFunc(event)
