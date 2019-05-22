@@ -58,7 +58,6 @@ class menu_GUI:
     run_array = sorted(run_array)
     self.istart = int(run_array[0])
     self.iend = int(run_array[-1])
-    print(run_array)
     sdf_num = int(run_array[0])
 
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
