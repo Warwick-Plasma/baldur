@@ -188,9 +188,10 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
 def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
   """
   """
-  dat1 = preallocate_dat(dat1, iend, cs)
+  irange = iend - istart + 1
+  dat1 = preallocate_dat(dat1, irange, cs)
   
-  for n in range(istart+1, iend):     
+  for n in range(istart+1, irange):     
     dat = use_sdf(n, pathname, use_analysis = use_analysis)
     
     # grid for this data is either radius or X depending on rz t/f

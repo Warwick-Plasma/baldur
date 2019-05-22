@@ -14,29 +14,33 @@ import import_sdf as isdf
 
 
 def move_figure(f, x, y): # cxrodgers
-    """Move figure's upper left corner to pixel (x, y)"""
-    backend = matplotlib.get_backend()
-    if backend == 'TkAgg':
-        f.canvas.manager.window.wm_geometry("+%d+%d" % (x, y))
-    elif backend == 'WXAgg':
-        f.canvas.manager.window.SetPosition((x, y))
-    else:
-        # This works for QT and GTK
-        # You can also use window.setGeometry
-        f.canvas.manager.window.move(x, y)
+  """Move figure's upper left corner to pixel (x, y)
+  https://yagisanatode.com/2018/02/23/how-do-i-change-the-size-and-position-of-the-main-window-in-tkinter-and-python-3/
+  """
+  backend = matplotlib.get_backend()
+  if backend == 'TkAgg':
+    f.canvas.manager.window.wm_geometry("+%d+%d" % (x, y))
+  elif backend == 'WXAgg':
+    f.canvas.manager.window.SetPosition((x, y))
+  else:
+    # This works for QT and GTK
+    # You can also use window.setGeometry
+    f.canvas.manager.window.move(x, y)
 
 
 
-def options():
+def options(*args, **kwargs):
+  use_analysis = kwargs.get('use_analysis', False)
   root = tk.Tk()
-  my_gui = menu_GUI(root)
+  my_gui = menu_GUI(root, use_analysis)
   root.mainloop()
 
 
 
 class menu_GUI:
-  def __init__(self, app):
+  def __init__(self, app, use_analysis):
     self.app = app
+    self.use_analysis = use_analysis
     app.title("A simple GUI") 
     app.geometry('450x200+10+10')
     
@@ -45,25 +49,26 @@ class menu_GUI:
     
     self.pathname = os.path.abspath(os.getcwd())
     runs = glob.glob1(self.pathname,"*.sdf")
-    RunCounter = len(runs)-1
+    RunCounter = len(runs)
     run_array = np.zeros(RunCounter)
-    for ir in range(0, RunCounter):
+    for ir in range(0, RunCounter-1):
       run_name = runs[ir]
       run_num = int(run_name[:-4])
       run_array[ir] = run_num
     run_array = sorted(run_array)
     self.istart = int(run_array[0])
+    self.iend = int(run_array[-1])
+    print(run_array)
     sdf_num = int(run_array[0])
 
-    self.use_analysis = True
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
     self.fig = plt.figure(num=1, figsize=(6,6), facecolor='white')
     move_figure(self.fig, 700, 10)
     self.ax1 = plt.axes()
     setattr(self.ax1, 'cbar', 'None')
 
-    cs = 20
-    self.dat0 = isdf.get_data_all(dat, self.istart, RunCounter, self.pathname, self.use_analysis, cs)
+    cs = 1
+    self.dat0 = isdf.get_data_all(dat, self.istart, self.iend, self.pathname, self.use_analysis, cs)
     self.fig2 = plt.figure(num=2, figsize=(6,6), facecolor='white')
     move_figure(self.fig2, 700, 1400)
     self.ax2 = plt.axes()
@@ -76,11 +81,11 @@ class menu_GUI:
     self.label_slider1 = tk.Label(app, text = "Select sdf number:")
     self.label_slider1.grid(column=0, row=0)
 
-    self.slider1 = tk.Scale(app, from_ = self.istart, to = RunCounter, tickinterval=100,
+    self.slider1 = tk.Scale(app, from_ = self.istart, to = self.iend, tickinterval=100,
                             orient=tk.HORIZONTAL, command=self.callbackFunc,
                             length  = 300, resolution = 1.0)
     self.slider1.grid(column=1, row=0)
-    self.slider1.set(23)
+    self.slider1.set(self.istart)
 
     # Combo box - variable
     self.labelTop_combo1 = tk.Label(app, text = "Select variable:")
@@ -146,7 +151,7 @@ class menu_GUI:
         grid_colour = grid_colour, use_polar = use_polar,
         reset_axis = reset_axis, view_anisotropies = view_anisotropies)
     
-    op.lineout(self.dat0, self.fig2, self.ax2, self.ax3, var_name, sdf_num)
+    op.lineout(self.dat0, self.fig2, self.ax2, self.ax3, var_name, sdf_num-self.istart)
 
     self.reset_grid_variable.set(False)
 
