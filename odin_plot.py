@@ -126,7 +126,8 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   y_label = 'Z (' + getattr(var_grid, 'units')[1] + ')'
   if use_polar: x_data, y_data, y_label = polar_coordinates(x_data, y_data)
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
-  if view_anisotropies: c_data = mean_subtract(c_data)
+  c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
+  if view_anisotropies: c_data, c_label = mean_subtract(c_data, c_label)
   
   if reset_axis:
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
@@ -142,7 +143,6 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   if cbar == 'None':
     cbar = fig.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
-  c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
   cbar.set_label(c_label, fontsize = fs)
@@ -165,9 +165,10 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
 
 
 
-def mean_subtract(cc):
-  c_data = cc - np.mean(cc, 1, keepdims = True)
-  return c_data
+def mean_subtract(cc, cl):
+  c_data = (cc - np.mean(cc, 1, keepdims = True)) / np.maximum(np.mean(cc, 1, keepdims = True), 1e-17)
+  c_label = cl + "[As % of average]"
+  return c_data, c_label
 
 
 

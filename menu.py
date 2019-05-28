@@ -118,7 +118,7 @@ class menu_GUI:
     self.anisotropies_button.grid(column=0, row=4)
   
     # button - save fig as pdf
-    self.print_button = tk.Button(app, text="Save .pdf", command = self.save_pdf())
+    self.print_button = tk.Button(app, text="Save .pdf", command = self.save_pdf)
     self.print_button.grid(column=1, row=2)
     
     # button - reset button
