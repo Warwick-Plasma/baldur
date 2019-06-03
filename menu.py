@@ -32,16 +32,19 @@ def move_figure(f, x, y): # cxrodgers
 def options(*args, **kwargs):
   use_analysis = kwargs.get('use_analysis', False)
   root = tk.Tk()
-  my_gui = menu_GUI(root, use_analysis)
+  my_gui = snapshot_GUI(root, use_analysis)
+  root.mainloop()
+  root = tk.Tk()
+  my_gui = time_history_GUI(root, use_analysis)
   root.mainloop()
 
 
 
-class menu_GUI:
+class time_history_GUI:
   def __init__(self, app, use_analysis):
     self.app = app
     self.use_analysis = use_analysis
-    app.title("A simple GUI") 
+    app.title("Time history GUI")
     app.geometry('450x200+10+10')
     
     plt.ion()
@@ -49,6 +52,64 @@ class menu_GUI:
     
     self.cs = 3
     
+    # find sdf files and count
+    self.pathname = os.path.abspath(os.getcwd())
+    runs = glob.glob1(self.pathname,"*.sdf")
+    RunCounter = len(runs)
+    run_array = np.zeros(RunCounter)
+    for ir in range(0, RunCounter-1):
+      run_name = runs[ir]
+      run_num = int(run_name[:-4])
+      run_array[ir] = run_num
+    run_array = sorted(run_array)
+    self.istart = int(run_array[0])
+    self.iend = int(run_array[-1])
+    sdf_num = int(run_array[0])
+    
+    # initial data import, needed for variable selection combo box
+    dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
+    self.dat = isdf.get_data_all(dat, self.istart, self.iend, self.pathname, self.use_analysis, self.cs)
+    
+    # create empty figures
+    self.fig = plt.figure(num=1, figsize=(6,6), facecolor='white')
+    move_figure(self.fig, 700, 10)
+    self.ax1 = plt.axes()
+    setattr(self.ax1, 'cbar', 'None')
+
+    #self.fig2 = plt.figure(num=2, figsize=(6,6), facecolor='white')
+    #move_figure(self.fig2, 10, 1000)
+    #self.ax2 = plt.axes()
+    #self.ax3 = op.empty_lineout(self.fig2, self.ax2)
+    
+    # Combo box - variable
+    self.labelTop_combo1 = tk.Label(app, text = "Select variable:")
+    self.labelTop_combo1.grid(column=0, row=1)
+
+    self.combo1 = ttk.Combobox(app, values = dat.variables)
+    self.combo1.grid(column=1, row=1)
+    self.combo1.current(3)
+    self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
+    
+  def callbackFunc(self, event):
+    var_name = self.combo1.get()
+      
+    op.time_history(self.dat, self.fig, self.ax1, self.cs, var_name = var_name)
+      
+
+
+class snapshot_GUI:
+  def __init__(self, app, use_analysis):
+    self.app = app
+    self.use_analysis = use_analysis
+    app.title("Snapshot GUI")
+    app.geometry('450x200+10+10')
+    
+    plt.ion()
+    plt.close('all')
+    
+    self.cs = 3
+    
+    # find sdf files and count
     self.pathname = os.path.abspath(os.getcwd())
     runs = glob.glob1(self.pathname,"*.sdf")
     RunCounter = len(runs)
@@ -62,7 +123,10 @@ class menu_GUI:
     self.iend = int(run_array[-1])
     sdf_num = int(run_array[0])
 
+    # initial data import, needed for variable selection combo box
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
+    
+    # create empty figures
     self.fig = plt.figure(num=1, figsize=(6,6), facecolor='white')
     move_figure(self.fig, 700, 10)
     self.ax1 = plt.axes()
@@ -73,8 +137,6 @@ class menu_GUI:
     self.ax2 = plt.axes()
     self.ax3 = op.empty_lineout(self.fig2, self.ax2)
     
-    self.reset_axis_variable = tk.BooleanVar(app)
-    self.reset_axis_variable.set(True)
     
     # slider - time
     self.label_slider1 = tk.Label(app, text = "Select sdf number:")
@@ -124,6 +186,8 @@ class menu_GUI:
     # button - reset button
     self.reset_button = tk.Button(app, text="Reset zoom")
     self.reset_button.grid(column=1, row=3)
+    self.reset_axis_variable = tk.BooleanVar(app)
+    self.reset_axis_variable.set(True)
   
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)

@@ -9,6 +9,60 @@ from matplotlib.widgets import Slider, RadioButtons
 
 
 
+def time_history(dat, fig, ax1, cs, *args, **kwargs):
+  
+  var_name = kwargs.get('var_name', "Fluid_Rho")
+  
+  ax1.clear() # This is nessasary for speed
+  
+  var = getattr(dat, var_name)
+  unit_conv = getattr(var, "unit_conversion")
+  units = getattr(var, "units_new")
+  name = getattr(var, "name")
+  grid = getattr(var, "grid")
+  grid_name = getattr(grid, "name")
+  grid_data = getattr(grid, "all_time_data")
+  grid_conv = getattr(grid, "unit_conversion")
+  grid_units = getattr(grid, "units_new")
+  
+  c_data = getattr(var, "all_time_data") * unit_conv
+  y_data, c_data = two_dim_grid(dat, c_data, cs)
+  x_data, grid = np.meshgrid(dat.Times.all_time_data, y_data[0,:], indexing='ij')
+
+  cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
+  cbar = getattr(ax1, 'cbar')
+  if cbar == 'None':
+    cbar = fig.colorbar(cmesh)
+    setattr(ax1, 'cbar', cbar)
+  cbar.set_clim(np.min(c_data), np.max(c_data))
+  cbar.draw_all()
+  
+  plt.show()
+
+
+def two_dim_grid(dat, data, cs):
+  
+  x_mid = dat.Grid_Grid_mid.all_time_data[0] * dat.Grid_Grid_mid.unit_conversion
+  y_mid = dat.Grid_Grid_mid.all_time_data[1] * dat.Grid_Grid_mid.unit_conversion
+  grid = np.sqrt(x_mid**2 + y_mid**2)
+  
+  x_edge = dat.Grid_Grid.all_time_data[0] * dat.Grid_Grid_mid.unit_conversion
+  y_edge = dat.Grid_Grid.all_time_data[1] * dat.Grid_Grid_mid.unit_conversion
+  grid_edge = np.sqrt(x_edge**2 + y_edge**2)
+  
+  if np.shape(data) != np.shape(grid):
+    if np.shape(data) == np.shape(grid_edge):
+      grid = grid_edge
+    else:
+      print("Unknown geometry variable")
+      print("Creating uniform grid")
+      pos = np.linspace(0, np.shape(data)[1]-1, np.shape(data)[1])
+      times, grid = np.meshgrid(dat.Times.all_time_data, pos, indexing='ij')
+  
+  return grid, data
+
+
+
 def adiabat(*args, **kwargs):
         """ The adiabat is plot on a time vs mass coordinate graph. The adiabat
         was derived as shown in Atzeni "The Physics of Inertial Fusion" under the
@@ -62,7 +116,7 @@ def adiabat(*args, **kwargs):
                 # temporal resolution
                 dx = xc[1:,cross_section] - xc[:-1,cross_section]
                 dlnp = np.abs(np.log(pressure[1:]) - np.log(pressure[:-1]))
-                pressure_ls = idlnp / dx
+                pressure_ls = dlnp / dx
                 
                 # Save the cross sections, isentrope's maximum is set as 3
                 all_time[n,:] =  t
@@ -333,7 +387,9 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   grid_conv = getattr(grid, "unit_conversion")
   grid_units = getattr(grid, "units_new")
   
-  x_data = dat.Grid_Grid_mid.data[0][:,cs] * dat.Grid_Grid_mid.unit_conversion
+  pos1 = dat.Grid_Grid_mid.data[0][:,cs] * dat.Grid_Grid_mid.unit_conversion
+  pos2 = dat.Grid_Grid_mid.data[1][:,cs] * dat.Grid_Grid_mid.unit_conversion
+  x_data = np.sqrt(pos1**2 + pos2**2)
   y_data1 = getattr(var, "data")[:,cs] * unit_conv
   
   y_data1 = one_dim_grid(np.array(grid_data)[:,:,cs], grid_conv, x_data, y_data1)
@@ -350,15 +406,15 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   
   if reset_axis:
     dat.Fluid_Rho
-    zoomed_axis = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
-                             np.min(y_data[:-1]), np.max(y_data[:-1])])
-    zoomed_axis1 = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
-                             np.min(y_data1[:-1]), np.max(y_data1[:-1])])
+    zoomed_axis = np.array([np.min(x_data[:-1]), 1.3 * np.max(x_data[:-1]), 
+                             np.min(y_data[:-1]), 1.3 * np.max(y_data[:-1])])
+    zoomed_axis1 = np.array([np.min(x_data[:-1]), 1.3 * np.max(x_data[:-1]), 
+                             np.min(y_data1[:-1]), 1.3 * np.max(y_data1[:-1])])
   else:
     zoomed_axis = np.array([ax.get_xlim()[0], ax.get_xlim()[1], 
                              ax.get_ylim()[0], ax.get_ylim()[1]])
     zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
-                             np.min(y_data1[:-1]), np.max(y_data1[:-1])])
+                             np.min(y_data1[:-1]), 1.3 * np.max(y_data1[:-1])])
   ax.set_xlim(zoomed_axis[:2])
   ax.set_ylim(zoomed_axis[2:])
   ax1.set_xlim(zoomed_axis1[:2])
