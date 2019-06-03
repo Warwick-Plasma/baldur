@@ -31,16 +31,15 @@ def time_history(dat, fig, ax1, cs, *args, **kwargs):
   x_data, grid = np.meshgrid(dat.Times.all_time_data, y_data[0,:], indexing='ij')
 
   cbar_range = np.max(c_data) - np.min(c_data)
-  cbar_min = np.min(c_data) + np.exp(np.log(cbar_range) + cbar_upscale)
-
-  c_data = np.where(c_data > cbar_min, c_data, cbar_min)
-  cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
+  cbar_max = np.min(c_data) + np.exp(np.log(cbar_range) + cbar_upscale)
+  
+  cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1, vmax = cbar_max)
   cbar = getattr(ax1, 'cbar')
   if cbar == 'None':
     cbar = fig.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
   
-  cbar.set_clim(cbar_min, np.max(c_data))
+  cbar.set_clim(np.min(c_data), cbar_max)
   cbar.draw_all()
   
   plt.show()

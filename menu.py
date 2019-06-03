@@ -105,9 +105,9 @@ class time_history_GUI:
 
     self.slider1 = tk.Scale(app, from_ = -10, to = 0, tickinterval=100,
                             orient=tk.HORIZONTAL, command=self.callbackFunc,
-                            length  = 200, resolution = 1.0)
+                            length  = 200, resolution = 0.01)
     self.slider1.grid(column=1, row=3)
-    self.slider1.set(-10)
+    self.slider1.set(0)
     
   def callbackFunc(self, event):
     var_name = self.combo1.get()
