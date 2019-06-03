@@ -112,7 +112,11 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   fs = 10
   
   var_name = kwargs.get('var_name', "Fluid_Rho")
-  grid_colour = kwargs.get('grid_colour', 'None')
+  grid_boolean = kwargs.get('grid_boolean', False)
+  if grid_boolean == False:
+    grid_colour = 'None'
+  else:
+    grid_colour = 'k'
   use_polar = kwargs.get('use_polar', False)
   reset_axis = kwargs.get('reset_axis', True)
   view_anisotropies = kwargs.get('view_anisotropies', False)
@@ -154,7 +158,6 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   ax1.tick_params(axis='y', labelsize = fs)
   ax1.set_title(t_label)
   
-  
   ax1.set_xlim(zoomed_axis1[:2])
   ax1.set_ylim(zoomed_axis1[2:])
   
@@ -167,7 +170,7 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
 
 def mean_subtract(cc, cl):
   c_data = (cc - np.mean(cc, 1, keepdims = True)) / np.maximum(np.mean(cc, 1, keepdims = True), 1e-17)
-  c_label = cl + "[As % of average]"
+  c_label = cl + "[As fraction of average]"
   return c_data, c_label
 
 
@@ -283,7 +286,7 @@ def mass(*args, **kwargs):
   plt.show()
 
 
-def empty_lineout(dat1, fig, ax):
+def empty_lineout(fig, ax):
   
   ax1 = ax.twinx()
   
@@ -298,22 +301,27 @@ def empty_lineout(dat1, fig, ax):
   return ax1
 
 
-def lineout(dat, fig, ax, ax1, var_name, t0):
+def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   """
   """
+  reset_axis = kwargs.get('reset_axis', True)
+  grid_boolean = kwargs.get('grid_boolean', False)
+  if grid_boolean == False:
+    grid_style = 'None'
+  else:
+    grid_style = 'x'
   
   l1 = getattr(ax, 'line1')
   l2 = getattr(ax1, 'line1')
   l3 = getattr(ax1, 'line2')
   
   var = dat.Fluid_Rho
-  y_data = var.all_time_data[t0,:] * var.unit_conversion
+  y_data = var.data[:,cs] * var.unit_conversion
   name = var.name
   units = var.units_new
   
   l1.set_ydata(y_data)
   ax.set_ylabel(name + ' (' + units + ')')
-  ax.set_ylim(np.min(y_data[:-1]), np.max(y_data[:-1]))
   
   var = getattr(dat, var_name)
   unit_conv = getattr(var, "unit_conversion")
@@ -321,29 +329,43 @@ def lineout(dat, fig, ax, ax1, var_name, t0):
   name = getattr(var, "name")
   grid = getattr(var, "grid")
   grid_name = getattr(grid, "name")
-  grid_data = getattr(grid, "all_time_data")
+  grid_data = getattr(grid, "data")
   grid_conv = getattr(grid, "unit_conversion")
   grid_units = getattr(grid, "units_new")
   
-  x_data = dat.Grid_Grid_mid.all_time_data[0,t0,:] * dat.Grid_Grid_mid.unit_conversion
-  y_data = getattr(var, "all_time_data")[t0,:] * unit_conv
+  x_data = dat.Grid_Grid_mid.data[0][:,cs] * dat.Grid_Grid_mid.unit_conversion
+  y_data1 = getattr(var, "data")[:,cs] * unit_conv
   
-  y_data = one_dim_grid(grid_data[:,t0,:], grid_conv, x_data, y_data)
+  y_data1 = one_dim_grid(np.array(grid_data)[:,:,cs], grid_conv, x_data, y_data1)
   
   ax.set_xlabel(grid_name + " (" + grid_units + ")")
   l1.set_xdata(x_data)
   l2.set_xdata(x_data)
   l3.set_xdata(x_data)
-  ax.set_xlim(np.min(x_data[:-1]), np.max(x_data[:-1]))
   
   ax1.set_ylabel(name + " (" + units + ")", color='tab:red')
-  l3.set_ydata(y_data)
+  l3.set_ydata(y_data1)
   l3.set_label("Not Fixed")
+  l1.set_marker(grid_style)
   
-  ax1.set_ylim(np.min(y_data[:-1]), np.max(y_data[:-1]))
+  if reset_axis:
+    dat.Fluid_Rho
+    zoomed_axis = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
+                             np.min(y_data[:-1]), np.max(y_data[:-1])])
+    zoomed_axis1 = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
+                             np.min(y_data1[:-1]), np.max(y_data1[:-1])])
+  else:
+    zoomed_axis = np.array([ax.get_xlim()[0], ax.get_xlim()[1], 
+                             ax.get_ylim()[0], ax.get_ylim()[1]])
+    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
+                             np.min(y_data1[:-1]), np.max(y_data1[:-1])])
+  ax.set_xlim(zoomed_axis[:2])
+  ax.set_ylim(zoomed_axis[2:])
+  ax1.set_xlim(zoomed_axis1[:2])
+  ax1.set_ylim(zoomed_axis1[2:])
   
   ax.set_title(dat.Times.name
-      + ' = {0:5.3f}'.format(dat.Times.all_time_data[t0]
+      + ' = {0:5.3f}'.format(dat.Times.data
       * dat.Times.unit_conversion))
 
   plt.show()

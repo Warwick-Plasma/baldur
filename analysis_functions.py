@@ -30,6 +30,9 @@ def basic(dat):
 	grid_mid = dat.Grid_Grid_mid.data
 	xc = grid_mid[0]
 	yc = grid_mid[1]
+	grid = dat.Grid_Grid.data
+	x = grid[0]
+	y = grid[1]
 	
 	# Grids, all grids need to be 3D arrays so we stack radius
 	var_list = dat.grids
@@ -56,6 +59,21 @@ def basic(dat):
 	                                    units_new = "m$^3$",
 	                                    unit_conversion = 1,
 	                                    name = "Volume"))
+	                                    
+	var_name = "Area"
+	var_list.append(var_name)
+	len_a = np.sqrt((x[:-1,:-1] - x[:-1,1:])**2 + (y[:-1,:-1] - y[:-1,1:])**2)
+	len_b = np.sqrt((x[:-1,1:] - x[1:,1:])**2 + (y[:-1,1:] - y[1:,1:])**2)
+	len_c = np.sqrt((x[1:,1:] - x[1:,:-1])**2 + (y[1:,1:] - y[1:,:-1])**2)
+	len_d = np.sqrt((x[1:,:-1] - x[:-1,:-1])**2 + (y[1:,:-1] - y[:-1,:-1])**2)
+	angle_a = np.arctan2(np.abs(y[:-1,:-1] - y[1:,:-1]), np.abs(x[:-1,:-1] - x[1:,:-1])) + np.arctan2(np.abs(y[:-1,1:] - y[:-1,:-1]),np.abs(x[:-1,1:] - x[:-1,:-1]))
+	angle_c = np.arctan2(np.abs(y[:-1,1:] - y[1:,1:]),np.abs(x[:-1,1:] - x[1:,1:])) + np.arctan2(np.abs(y[1:,1:] - y[1:,:-1]),np.abs(x[1:,1:] - x[1:,:-1]))
+	area = 0.5 * len_a * len_d * np.sin(angle_a) + 0.5 * len_b * len_c * np.sin(angle_c)
+	setattr(dat, var_name, new_variable(data = area,
+	                                    grid = dat.Grid_Grid,
+	                                    units_new = "m$^2$",
+	                                    unit_conversion = 1,
+	                                    name = "Area"))
 	
 	var_name = "Cell_Mass"
 	var_list.append(var_name)

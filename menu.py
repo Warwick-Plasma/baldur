@@ -47,6 +47,8 @@ class menu_GUI:
     plt.ion()
     plt.close('all')
     
+    self.cs = 3
+    
     self.pathname = os.path.abspath(os.getcwd())
     runs = glob.glob1(self.pathname,"*.sdf")
     RunCounter = len(runs)
@@ -66,15 +68,13 @@ class menu_GUI:
     self.ax1 = plt.axes()
     setattr(self.ax1, 'cbar', 'None')
 
-    cs = 1
-    self.dat0 = isdf.get_data_all(dat, self.istart, self.iend, self.pathname, self.use_analysis, cs)
     self.fig2 = plt.figure(num=2, figsize=(6,6), facecolor='white')
-    move_figure(self.fig2, 700, 1400)
+    move_figure(self.fig2, 10, 1000)
     self.ax2 = plt.axes()
-    self.ax3 = op.empty_lineout(self.dat0, self.fig2, self.ax2)
+    self.ax3 = op.empty_lineout(self.fig2, self.ax2)
     
-    self.reset_grid_variable = tk.BooleanVar(app)
-    self.reset_grid_variable.set(True)
+    self.reset_axis_variable = tk.BooleanVar(app)
+    self.reset_axis_variable.set(True)
     
     # slider - time
     self.label_slider1 = tk.Label(app, text = "Select sdf number:")
@@ -95,9 +95,9 @@ class menu_GUI:
     self.combo1.current(3)
   
     # check box - grid
-    self.grid_variable = tk.StringVar(app)
+    self.grid_variable = tk.BooleanVar(app)
     self.grid_button = tk.Checkbutton(app, text="grid", variable = self.grid_variable,
-                                      onvalue="black", offvalue="None")
+                                      onvalue=True, offvalue=False)
     self.grid_button.deselect()
     self.grid_button.grid(column=0, row=2)
   
@@ -134,25 +134,26 @@ class menu_GUI:
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
     
   def callbackFunc1(self, event):
-    self.reset_grid_variable.set(True)
+    self.reset_axis_variable.set(True)
     self.callbackFunc(event)
 
   def callbackFunc(self, event):
-    grid_colour = self.grid_variable.get()
+    grid_boolean = self.grid_variable.get()
     use_polar = self.polar_variable.get()
     sdf_num = self.slider1.get()
     var_name = self.combo1.get()
-    reset_axis = self.reset_grid_variable.get()
+    reset_axis = self.reset_axis_variable.get()
     view_anisotropies = self.anisotropies_variable.get()
 
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
     op.snapshot(dat, self.fig, self.ax1, var_name = var_name,
-        grid_colour = grid_colour, use_polar = use_polar,
+        grid_boolean = grid_boolean, use_polar = use_polar,
         reset_axis = reset_axis, view_anisotropies = view_anisotropies)
-    
-    op.lineout(self.dat0, self.fig2, self.ax2, self.ax3, var_name, sdf_num-self.istart)
 
-    self.reset_grid_variable.set(False)
+    op.lineout(dat, self.cs, self.fig2, self.ax2, self.ax3, var_name,
+        grid_boolean = grid_boolean, reset_axis = reset_axis)
+
+    self.reset_axis_variable.set(False)
 
   def save_pdf(self):
     filename1 = 'test.pdf'
