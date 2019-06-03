@@ -99,11 +99,22 @@ class time_history_GUI:
     self.combo2.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.combo2.current(0)
     
+    # slider - scale up colour
+    self.label_slider1 = tk.Label(app, text = "Minimum value on colourbar:")
+    self.label_slider1.grid(column=0, row=3)
+
+    self.slider1 = tk.Scale(app, from_ = -10, to = 0, tickinterval=100,
+                            orient=tk.HORIZONTAL, command=self.callbackFunc,
+                            length  = 200, resolution = 1.0)
+    self.slider1.grid(column=1, row=3)
+    self.slider1.set(-10)
+    
   def callbackFunc(self, event):
     var_name = self.combo1.get()
     var_name2 = self.combo2.get()
+    cbar_upscale = self.slider1.get()
       
-    op.time_history(self.dat, self.fig, self.ax1, self.cs, var_name = var_name)
+    op.time_history(self.dat, self.fig, self.ax1, self.cs, var_name = var_name, cbar_upscale = cbar_upscale)
       
     op.time_history_lineout(self.dat, self.fig2, self.ax2, self.ax3, var_name = var_name2,  use_analysis = self.use_analysis)
 
@@ -146,7 +157,6 @@ class snapshot_GUI:
     move_figure(self.fig2, 10, 1000)
     self.ax2 = plt.axes()
     self.ax3 = op.empty_lineout(self.fig2, self.ax2)
-    
     
     # slider - time
     self.label_slider1 = tk.Label(app, text = "Select sdf number:")

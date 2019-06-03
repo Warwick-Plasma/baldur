@@ -12,6 +12,7 @@ from matplotlib.widgets import Slider, RadioButtons
 def time_history(dat, fig, ax1, cs, *args, **kwargs):
   
   var_name = kwargs.get('var_name', "Fluid_Rho")
+  cbar_upscale = kwargs.get('cbar_upscale', -10.0)
   
   ax1.clear() # This is nessasary for speed
   
@@ -29,12 +30,17 @@ def time_history(dat, fig, ax1, cs, *args, **kwargs):
   y_data, c_data = two_dim_grid(dat, c_data, cs)
   x_data, grid = np.meshgrid(dat.Times.all_time_data, y_data[0,:], indexing='ij')
 
+  cbar_range = np.max(c_data) - np.min(c_data)
+  cbar_min = np.min(c_data) + np.exp(np.log(cbar_range) + cbar_upscale)
+
+  c_data = np.where(c_data > cbar_min, c_data, cbar_min)
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
   cbar = getattr(ax1, 'cbar')
   if cbar == 'None':
     cbar = fig.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
-  cbar.set_clim(np.min(c_data), np.max(c_data))
+  
+  cbar.set_clim(cbar_min, np.max(c_data))
   cbar.draw_all()
   
   plt.show()
@@ -66,28 +72,28 @@ def two_dim_grid(dat, data, cs):
 def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
   use_analysis = kwargs.get('use_analysis', False)
   var_name = kwargs.get('var_name', "Laser_Energy_Total_Deposited")
-  
+
   l1 = getattr(ax, 'line1')
   l2 = getattr(ax1, 'line1')
   l3 = getattr(ax1, 'line2')
-  
+
   if use_analysis:
     var = dat.Laser_Power_Total_Deposited
     y_data = var.all_time_data * var.unit_conversion
     name = var.name
     units = var.units_new
-  
+
     l1.set_ydata(y_data)
     ax.set_ylabel(name + ' (' + units + ')')
-  
+
     var = getattr(dat, var_name)
     unit_conv = getattr(var, "unit_conversion")
     units = getattr(var, "units_new")
     name = getattr(var, "name")
     y_data1 = getattr(var, "all_time_data")
-  
+
     ax.set_xlabel(dat.Times.name + " (" + dat.Times.units_new + ")")
-    
+
     x_data = dat.Times.all_time_data
     l1.set_xdata(x_data)
     l2.set_xdata(x_data)
@@ -100,7 +106,6 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
     ax.set_ylim(np.min(y_data[:-1]), 1.3 * np.max(y_data[:-1]))
     ax1.set_xlim(np.min(x_data[:-1]), np.max(x_data[:-1]))
     ax1.set_ylim(np.min(y_data1[:-1]), 1.3 * np.max(y_data1[:-1]))
-    
 
     plt.show()
 
