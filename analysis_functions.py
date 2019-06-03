@@ -13,6 +13,7 @@ class new_variable:
   """
   def __init__(self, *args, **kwargs):
     self.data = kwargs.get('data', 1)
+    self.all_time_data = kwargs.get('all_time_data', 1)
     self.grid =  kwargs.get('grid', 1)
     self.units = kwargs.get('units', 'Not set')
     self.name = kwargs.get('name', 'Not set')
@@ -141,7 +142,7 @@ def laser(dat, *args, **kwargs):
   # variables that only change in time
   var_list = dat.variables_time
   
-  var_name = "Total_Energy_Laser_deposited"
+  var_name = "Laser_Energy_Total_Deposited"
   var_list.append(var_name)
   tot_laser_dep = np.sum(np.sum(dat.Cell_Mass.data * laser_dep))
   setattr(dat, var_name, new_variable(data = tot_laser_dep,
@@ -152,6 +153,28 @@ def laser(dat, *args, **kwargs):
   setattr(dat, "variables_time", var_list)
   
   return dat
+
+
+
+def time_variables(dat, *args, **kwargs):
+
+  # variables that only change in time
+  var_list = dat.variables_time
+  
+  var_name = "Laser_Power_Total_Deposited"
+  var_list.append(var_name)
+  dt = dat.Times.all_time_data[1:] - dat.Times.all_time_data[:-1]
+  tot_laser_pwr_dep = (dat.Laser_Energy_Total_Deposited.all_time_data[1:]
+      - dat.Laser_Energy_Total_Deposited.all_time_data[:-1]) / dt
+  tot_laser_pwr_dep = np.insert(tot_laser_pwr_dep, 0, 0)
+  setattr(dat, var_name, new_variable(data = 0.0,
+                                      all_time_data = tot_laser_pwr_dep,
+                                      units_new = 'W',
+                                      unit_conversion = 1,
+                                      name = "Total laser power deposited"))
+  
+  setattr(dat, "variables_time", var_list)
+
 
 def adiabat(dat, *args, **kwargs):
   call_basic = kwargs.get('call_basic', True)

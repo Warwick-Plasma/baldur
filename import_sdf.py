@@ -213,6 +213,10 @@ def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
       data = getattr(getattr(dat, var_name), "data")
       array[n] = data
       setattr(getattr(dat1, var_name), "all_time_data", array)
+  
+  if use_analysis:
+    afunc.time_variables(dat1)
+  
   return dat1
 
 

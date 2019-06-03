@@ -63,6 +63,47 @@ def two_dim_grid(dat, data, cs):
 
 
 
+def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
+  use_analysis = kwargs.get('use_analysis', False)
+  var_name = kwargs.get('var_name', "Laser_Energy_Total_Deposited")
+  
+  l1 = getattr(ax, 'line1')
+  l2 = getattr(ax1, 'line1')
+  l3 = getattr(ax1, 'line2')
+  
+  if use_analysis:
+    var = dat.Laser_Power_Total_Deposited
+    y_data = var.all_time_data * var.unit_conversion
+    name = var.name
+    units = var.units_new
+  
+    l1.set_ydata(y_data)
+    ax.set_ylabel(name + ' (' + units + ')')
+  
+    var = getattr(dat, var_name)
+    unit_conv = getattr(var, "unit_conversion")
+    units = getattr(var, "units_new")
+    name = getattr(var, "name")
+    y_data1 = getattr(var, "all_time_data")
+  
+    ax.set_xlabel(dat.Times.name + " (" + dat.Times.units_new + ")")
+    
+    x_data = dat.Times.all_time_data
+    l1.set_xdata(x_data)
+    l2.set_xdata(x_data)
+    l3.set_xdata(x_data)
+  
+    ax1.set_ylabel(name + " (" + units + ")", color='tab:red')
+    l3.set_ydata(y_data1)
+
+    ax.set_xlim(np.min(x_data[:-1]), np.max(x_data[:-1]))
+    ax.set_ylim(np.min(y_data[:-1]), 1.3 * np.max(y_data[:-1]))
+    ax1.set_xlim(np.min(x_data[:-1]), np.max(x_data[:-1]))
+    ax1.set_ylim(np.min(y_data1[:-1]), 1.3 * np.max(y_data1[:-1]))
+    
+
+    plt.show()
+
 def adiabat(*args, **kwargs):
         """ The adiabat is plot on a time vs mass coordinate graph. The adiabat
         was derived as shown in Atzeni "The Physics of Inertial Fusion" under the
@@ -405,10 +446,9 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   l1.set_marker(grid_style)
   
   if reset_axis:
-    dat.Fluid_Rho
-    zoomed_axis = np.array([np.min(x_data[:-1]), 1.3 * np.max(x_data[:-1]), 
+    zoomed_axis = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
                              np.min(y_data[:-1]), 1.3 * np.max(y_data[:-1])])
-    zoomed_axis1 = np.array([np.min(x_data[:-1]), 1.3 * np.max(x_data[:-1]), 
+    zoomed_axis1 = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
                              np.min(y_data1[:-1]), 1.3 * np.max(y_data1[:-1])])
   else:
     zoomed_axis = np.array([ax.get_xlim()[0], ax.get_xlim()[1], 

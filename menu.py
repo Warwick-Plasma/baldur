@@ -76,10 +76,10 @@ class time_history_GUI:
     self.ax1 = plt.axes()
     setattr(self.ax1, 'cbar', 'None')
 
-    #self.fig2 = plt.figure(num=2, figsize=(6,6), facecolor='white')
-    #move_figure(self.fig2, 10, 1000)
-    #self.ax2 = plt.axes()
-    #self.ax3 = op.empty_lineout(self.fig2, self.ax2)
+    self.fig2 = plt.figure(num=2, figsize=(6,6), facecolor='white')
+    move_figure(self.fig2, 10, 1000)
+    self.ax2 = plt.axes()
+    self.ax3 = op.empty_lineout(self.fig2, self.ax2)
     
     # Combo box - variable
     self.labelTop_combo1 = tk.Label(app, text = "Select variable:")
@@ -87,15 +87,25 @@ class time_history_GUI:
 
     self.combo1 = ttk.Combobox(app, values = dat.variables)
     self.combo1.grid(column=1, row=1)
-    self.combo1.current(3)
     self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
+    self.combo1.current(0)
+    
+    # Combo box - time variable
+    self.labelTop_combo2 = tk.Label(app, text = "Select time variable:")
+    self.labelTop_combo2.grid(column=0, row=2)
+
+    self.combo2 = ttk.Combobox(app, values = dat.variables_time)
+    self.combo2.grid(column=1, row=2)
+    self.combo2.bind("<<ComboboxSelected>>", self.callbackFunc)
+    self.combo2.current(0)
     
   def callbackFunc(self, event):
     var_name = self.combo1.get()
+    var_name2 = self.combo2.get()
       
     op.time_history(self.dat, self.fig, self.ax1, self.cs, var_name = var_name)
       
-
+    op.time_history_lineout(self.dat, self.fig2, self.ax2, self.ax3, var_name = var_name2,  use_analysis = self.use_analysis)
 
 class snapshot_GUI:
   def __init__(self, app, use_analysis):
@@ -154,7 +164,7 @@ class snapshot_GUI:
 
     self.combo1 = ttk.Combobox(app, values = dat.variables)
     self.combo1.grid(column=1, row=1)
-    self.combo1.current(3)
+    self.combo1.current(0)
   
     # check box - grid
     self.grid_variable = tk.BooleanVar(app)
