@@ -7,9 +7,15 @@ import import_sdf as isdf
 import sys, os
 from matplotlib.widgets import Slider, RadioButtons
 
+# This sets a global fontsize
+global fs
+fs = 12
+
 
 
 def time_history(dat, fig, ax1, cs, *args, **kwargs):
+  """A pcolormesh plot of space against time with a variable shown in colour
+  """
   
   var_name = kwargs.get('var_name', "Fluid_Rho")
   cbar_upscale = kwargs.get('cbar_upscale', -10.0)
@@ -28,20 +34,36 @@ def time_history(dat, fig, ax1, cs, *args, **kwargs):
   
   c_data = getattr(var, "all_time_data") * unit_conv
   y_data, c_data = two_dim_grid(dat, c_data, cs)
-  x_data, grid = np.meshgrid(dat.Times.all_time_data, y_data[0,:], indexing='ij')
+  x_data, _ = np.meshgrid(dat.Times.all_time_data, y_data[0,:], indexing='ij')
 
   cbar_range = np.max(c_data) - np.min(c_data)
   cbar_max = np.min(c_data) + np.exp(np.log(cbar_range) + cbar_upscale)
   
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1, vmax = cbar_max)
+  
   cbar = getattr(ax1, 'cbar')
   if cbar == 'None':
     cbar = fig.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
-  
   cbar.set_clim(np.min(c_data), cbar_max)
-  cbar.draw_all()
   
+  x_label = dat.Times.name + ' (' + getattr(dat.Times, 'units_new') + ')'
+  y_label = 'Radius (' + grid_units + ')'
+  c_label = name + " (" + units + ")"
+  
+  ax1.set_xlabel(x_label, fontsize = fs)
+  ax1.set_ylabel(y_label, fontsize = fs)
+  cbar.set_label(c_label, fontsize = fs)
+  
+  ax1.tick_params(axis='x', labelsize = fs)
+  ax1.tick_params(axis='y', labelsize = fs)
+  cbar.ax.tick_params(labelsize=fs)
+  
+  cbar.ax.yaxis.get_offset_text().set(size = fs)
+  ax1.xaxis.get_offset_text().set_size(fs)
+  ax1.yaxis.get_offset_text().set_size(fs)
+  
+  cbar.draw_all()
   plt.show()
 
 
@@ -83,7 +105,11 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
     units = var.units_new
 
     l1.set_ydata(y_data)
-    ax.set_ylabel(name + ' (' + units + ')')
+    y_label = name + " (" + units + ")"
+    ax.set_ylabel(y_label, fontsize = fs)
+    
+    ax.xaxis.get_offset_text().set_size(fs)
+    ax.yaxis.get_offset_text().set_size(fs)
 
     var = getattr(dat, var_name)
     unit_conv = getattr(var, "unit_conversion")
@@ -91,15 +117,22 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
     name = getattr(var, "name")
     y_data1 = getattr(var, "all_time_data")
 
-    ax.set_xlabel(dat.Times.name + " (" + dat.Times.units_new + ")")
-
     x_data = dat.Times.all_time_data
     l1.set_xdata(x_data)
     l2.set_xdata(x_data)
     l3.set_xdata(x_data)
-  
-    ax1.set_ylabel(name + " (" + units + ")", color='tab:red')
     l3.set_ydata(y_data1)
+
+    x_label = dat.Times.name + " (" + dat.Times.units_new + ")"
+    y_label = name + " (" + units + ")"
+
+    ax.set_xlabel(x_label, fontsize = fs)
+    ax1.set_ylabel(y_label, color='tab:red', fontsize = fs)
+    
+    ax.tick_params(axis='x', labelsize = fs)
+    ax.tick_params(axis='y', labelsize = fs)
+    ax1.tick_params(axis='y', labelsize = fs)
+    ax1.yaxis.get_offset_text().set_size(fs)
 
     ax.set_xlim(np.min(x_data[:-1]), np.max(x_data[:-1]))
     ax.set_ylim(np.min(y_data[:-1]), 1.3 * np.max(y_data[:-1]))
@@ -125,7 +158,6 @@ def check_analysis(use_analysis):
 def snapshot(dat, fig, ax1, *args, **kwargs):
   """
   """
-  fs = 10
   
   var_name = kwargs.get('var_name', "Fluid_Rho")
   grid_boolean = kwargs.get('grid_boolean', False)
@@ -145,6 +177,7 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   x_label = 'R (' + getattr(var_grid, 'units_new') + ')'
   y_label = 'Z (' + getattr(var_grid, 'units_new') + ')'
   if use_polar: x_data, y_data, y_label = polar_coordinates(x_data, y_data)
+  
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
   c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
   if view_anisotropies: c_data, c_label = mean_subtract(c_data, c_label)
@@ -163,22 +196,27 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   if cbar == 'None':
     cbar = fig.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
+  cbar.set_clim(np.min(c_data), np.max(c_data))
+  
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
   cbar.set_label(c_label, fontsize = fs)
   
+  ax1.tick_params(axis='x', labelsize = fs)
+  ax1.tick_params(axis='y', labelsize = fs)
+  cbar.ax.tick_params(labelsize=fs)
+  
+  cbar.ax.yaxis.get_offset_text().set(size = fs)
+  ax1.xaxis.get_offset_text().set_size(fs)
+  ax1.yaxis.get_offset_text().set_size(fs)
+  
   time = getattr(dat, "Times")
   t_data = getattr(time, "data") * getattr(time, 'unit_conversion')
   t_label = getattr(time, "name") + ' = {0:5.3f}'.format(t_data) + getattr(time, "units_new")
-  ax1.tick_params(axis='x', labelsize = fs)
-  ax1.tick_params(axis='y', labelsize = fs)
-  ax1.set_title(t_label)
+  ax1.set_title(t_label, fontsize = fs)
   
   ax1.set_xlim(zoomed_axis1[:2])
   ax1.set_ylim(zoomed_axis1[2:])
-  
-  cbar.set_clim(np.min(c_data), np.max(c_data))
-  cbar.ax.tick_params(labelsize=fs)
   cbar.draw_all()
   plt.show()
 
@@ -272,7 +310,11 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   units = var.units_new
   
   l1.set_ydata(y_data)
-  ax.set_ylabel(name + ' (' + units + ')')
+  y_label = name + ' (' + units + ')'
+  ax.set_ylabel(y_label, fontsize = fs)
+    
+  ax.xaxis.get_offset_text().set_size(fs)
+  ax.yaxis.get_offset_text().set_size(fs)
   
   var = getattr(dat, var_name)
   unit_conv = getattr(var, "unit_conversion")
@@ -291,15 +333,23 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   
   y_data1 = one_dim_grid(np.array(grid_data)[:,:,cs], grid_conv, x_data, y_data1)
   
-  ax.set_xlabel(grid_name + " (" + grid_units + ")")
   l1.set_xdata(x_data)
   l2.set_xdata(x_data)
   l3.set_xdata(x_data)
-  
-  ax1.set_ylabel(name + " (" + units + ")", color='tab:red')
   l3.set_ydata(y_data1)
-  l3.set_label("Not Fixed")
+  
   l1.set_marker(grid_style)
+  
+  x_label = grid_name + " (" + grid_units + ")"
+  y_label = name + " (" + units + ")"
+
+  ax.set_xlabel(x_label, fontsize = fs)
+  ax1.set_ylabel(y_label, color='tab:red', fontsize = fs)
+
+  ax.tick_params(axis='x', labelsize = fs)
+  ax.tick_params(axis='y', labelsize = fs)
+  ax1.tick_params(axis='y', labelsize = fs)
+  ax1.yaxis.get_offset_text().set_size(fs)
   
   if reset_axis:
     zoomed_axis = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
@@ -318,7 +368,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   
   ax.set_title(dat.Times.name
       + ' = {0:5.3f}'.format(dat.Times.data
-      * dat.Times.unit_conversion))
+      * dat.Times.unit_conversion), fontsize = fs)
 
   plt.show()
 

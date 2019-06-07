@@ -51,7 +51,7 @@ class time_history_GUI:
     plt.ion()
     plt.close('all')
     
-    self.cs = 3
+    self.cs = 1
     
     # find sdf files and count
     self.pathname = os.path.abspath(os.getcwd())
