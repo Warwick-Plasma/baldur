@@ -31,6 +31,7 @@ def move_figure(f, x, y): # cxrodgers
 
 def options(*args, **kwargs):
   use_analysis = kwargs.get('use_analysis', False)
+  op.check_analysis(use_analysis)
   root = tk.Tk()
   my_gui = snapshot_GUI(root, use_analysis)
   root.mainloop()

@@ -8,35 +8,6 @@ from matplotlib.widgets import Slider, RadioButtons
 import analysis_functions as afunc
 
 
-def preallocate_dat(dat, iend, cs):
-  
-  for var_name in dat.grids:
-    var = getattr(dat, var_name)
-    data = getattr(var, "data")
-    len_x = np.shape(data[0])[0]
-    array = np.zeros((2, iend, len_x))
-    array[0,0,:] = data[0][:,cs]
-    array[1,0,:] = data[1][:,cs]
-    setattr(var, "all_time_data", array)
-    setattr(var, "all_time_data_polar", array)
-  
-  for var_name in dat.variables:
-    var = getattr(dat, var_name)
-    data = getattr(var, "data")
-    len_x = np.shape(data)[0]
-    array = np.zeros((iend, len_x))
-    array[0,:] = data[:,cs]
-    setattr(var, "all_time_data", array)
-  
-  for var_name in dat.variables_time:
-    var = getattr(dat, var_name)
-    data = getattr(var, "data")
-    array = np.zeros(iend)
-    array[0] = data
-    setattr(var, "all_time_data", array)
-  
-  return dat
-
 
 def add_label(dat):
   
@@ -65,73 +36,94 @@ def add_label(dat):
   units_new = "KeV"
   setattr(var, "units_new", units_new)
   
+  var = getattr(dat, "Fluid_Temperature_ion")
+  name = 'Ion Temperature'
+  setattr(var, "name", name)
+  unit_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
+  setattr(var, "unit_conversion", unit_conversion)
+  units_new = "KeV"
+  setattr(var, "units_new", units_new)
+  
   var = getattr(dat, "Grid_Grid_mid")
-  name = 'X distance, cell centres'
+  name = 'Distance, cell centred'
   setattr(var, "name", name)
   unit_conversion = 1.0e6 # from m
   setattr(var, "unit_conversion", unit_conversion)
   units_new = "$\mu m$"
   setattr(var, "units_new", units_new)
   
+  var = getattr(dat, "Grid_Grid")
+  name = 'Distance, node centred'
+  setattr(var, "name", name)
+  unit_conversion = 1.0e6 # from m
+  setattr(var, "unit_conversion", unit_conversion)
+  units_new = "$\mu m$"
+  setattr(var, "units_new", units_new)
+  
+  var = getattr(dat, "Fluid_Rho")
+  name = 'Density'
+  setattr(var, "name", name)
+  unit_conversion = 1.0 / 1000.0 # from kg to g
+  setattr(var, "unit_conversion", unit_conversion)
+  units_new = "g/cm$^3$"
+  setattr(var, "units_new", units_new)
+  
+  var = getattr(dat, "Fluid_Pressure_ion")
+  name = 'Ion Pressure'
+  setattr(var, "name", name)
+  unit_conversion = 1.0e-11 # from Pascal to Mbar
+  setattr(var, "unit_conversion", unit_conversion)
+  units_new = "Mbar"
+  setattr(var, "units_new", units_new)
+  
+  var = getattr(dat, "Fluid_Pressure_electron")
+  name = 'Electron Pressure'
+  setattr(var, "name", name)
+  unit_conversion = 1.0e-11 # from Pascal to Mbar
+  setattr(var, "unit_conversion", unit_conversion)
+  units_new = "Mbar"
+  setattr(var, "units_new", units_new)
+  
+  var = getattr(dat, "Fluid_Pressure")
+  name = 'Total Pressure'
+  setattr(var, "name", name)
+  unit_conversion = 1.0e-11 # from Pascal to Mbar
+  setattr(var, "unit_conversion", unit_conversion)
+  units_new = "Mbar"
+  setattr(var, "units_new", units_new)
+  
   return dat
 
 
 
-class read_sdf:
-  """ This class will collect all the data from an sdf file. The units and
-  their conversions from SI are set here
-  """
-  def __init__(self, *args, **kwargs):
-    RunCounter = kwargs.get('RunCounter', 0)
-    nmat =  kwargs.get('nmat', 0)
-    len_x =  kwargs.get('len_x', 0)
-    
-    self.com = np.zeros(RunCounter)
-    self.time = np.zeros(RunCounter)
-    self.time_units = 'Time (ns)'
-    self.time_conversion = 1e9
-    self.max_rho = np.zeros(RunCounter)
-    self.tot_laser_dep = np.zeros(RunCounter)
-    
-    self.nmat = nmat
-    self.material_names = [None] * nmat
-    self.material_Volume_fraction = np.zeros((RunCounter, nmat, len_x))
-                    
-    # 1D
-    self.radius = np.zeros((RunCounter,len_x))
-    
-    # 2D
-    self.X = []
-    self.X_units = 'x ($\mu$m)'
-    self.X_conversion = 1e6
-    self.Y = []
-    self.Y_units = 'y ($\mu$m)'
-    self.Y_conversion = 1e6
-    
-    self.Fluid_Rho = np.zeros((RunCounter,len_x))
-    self.Fluid_Rho_units = 'Density (g/cm$^3$)'
-    self.Fluid_Rho_conversion = 1.0 / 1000.0
-    
-    self.Fluid_Temperature_ion = np.zeros((RunCounter,len_x))
-    self.Fluid_Temperature_electron = np.zeros((RunCounter,len_x))
-    self.Fluid_Temperature_units = 'Temperature (keV)'
-    self.Fluid_Temperature_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
-    
-    self.Fluid_Pressure_ion = np.zeros((RunCounter,len_x))
-    self.Fluid_Pressure_electron = np.zeros((RunCounter,len_x))
-    self.Fluid_Pressure_units = 'Pressure (Mbar)'
-    self.Fluid_Pressure_conversion = 1.0e-11 # from Pascal
-    
-    self.Fluid_Energy_ion = np.zeros((RunCounter,len_x))
-    self.Fluid_Energy_electron = np.zeros((RunCounter,len_x))
-    self.Fluid_Energy_units = 'Energy (J/kg)'
-    self.Fluid_Energy_conversion = 1.0
-    
-    # These values are overwritten (ie do not change here)
-    self.User_defined = np.zeros((RunCounter,len_x))
-    self.User_defined_units = 'Place holder'
-    self.User_defined_conversion =  1.0
-
+def preallocate_dat(dat, iend, cs):
+  
+  for var_name in dat.grids:
+    var = getattr(dat, var_name)
+    data = getattr(var, "data")
+    len_x = np.shape(data[0])[0]
+    array = np.zeros((2, iend, len_x))
+    array[0,0,:] = data[0][:,cs]
+    array[1,0,:] = data[1][:,cs]
+    setattr(var, "all_time_data", array)
+    setattr(var, "all_time_data_polar", array)
+  
+  for var_name in dat.variables:
+    var = getattr(dat, var_name)
+    data = getattr(var, "data")
+    len_x = np.shape(data)[0]
+    array = np.zeros((iend, len_x))
+    array[0,:] = data[:,cs]
+    setattr(var, "all_time_data", array)
+  
+  for var_name in dat.variables_time:
+    var = getattr(dat, var_name)
+    data = getattr(var, "data")
+    array = np.zeros(iend)
+    array[0] = data
+    setattr(var, "all_time_data", array)
+  
+  return dat
 
 
 
@@ -177,8 +169,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
     dat = afunc.laser(dat, call_basic = False, laser_change = True,
         sdf_num = sdf_num, istart = istart, pathname = pathname)
     dat = afunc.adiabat(dat, call_basic = False)
-    # energy
-    # adiabat
+    dat = afunc.energy(dat, call_basic = False)
     # IFAR
   
   return dat

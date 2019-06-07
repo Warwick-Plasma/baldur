@@ -225,8 +225,8 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
         
   x_data = getattr(var_grid, 'data')[0]
   y_data = getattr(var_grid, 'data')[1]
-  x_label = 'R (' + getattr(var_grid, 'units')[0] + ')'
-  y_label = 'Z (' + getattr(var_grid, 'units')[1] + ')'
+  x_label = 'R (' + getattr(var_grid, 'units_new') + ')'
+  y_label = 'Z (' + getattr(var_grid, 'units_new') + ')'
   if use_polar: x_data, y_data, y_label = polar_coordinates(x_data, y_data)
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
   c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
@@ -294,7 +294,7 @@ def total_energy(output_number):
   if dat.Logical_flags.use_rz:
           fac = 2*np.pi
 
-  vol = dat.Fluid_Volume.data *   fac
+  vol = dat.Fluid_Volume.data * fac
   mass = rho[:,:] * vol[:,:]
   
   print("Total mass is: ", np.sum(np.sum(mass)))
@@ -312,11 +312,11 @@ def total_energy(output_number):
   print("Total internal energy in the system is: ", tot_IE)
   
   # pV energy = internal
-  pressure = dat.Fluid_Pressure.data
+  #pressure = dat.Fluid_Pressure.data
   
-  gamma = dat.material_real_flags.gamma
-  tot_pV = np.sum(np.sum((pressure * vol) / (gamma - 1)))
-  print("Total pV energy in the system is:       ", tot_pV)
+  #gamma = dat.material_real_flags.gamma
+  #tot_pV = np.sum(np.sum((pressure * vol) / (gamma - 1)))
+  #print("Total pV energy in the system is:       ", tot_pV)
   
   # Kinetic energy
   corner_mass = dat.Test_Corner_Mass.data *       fac
@@ -385,6 +385,7 @@ def mass(*args, **kwargs):
   plt.show()
 
 
+
 def empty_lineout(fig, ax):
   
   ax1 = ax.twinx()
@@ -398,6 +399,7 @@ def empty_lineout(fig, ax):
   setattr(ax1, 'line2', l3)
   ax1.tick_params(axis='y', labelcolor = 'tab:red')
   return ax1
+
 
 
 def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
@@ -487,14 +489,6 @@ def one_dim_grid(grid, grid_conv, x_data, y_data):
     y_data = np.interp(x_data, XP, y_data)
   
   return y_data
-    
-
-class axis_data:
-  def __init__(self):
-    self.new_axis = np.zeros(4)
-    self.old_axis = np.zeros(4)
-    self.zoomed_axis1 = np.zeros(4)
-    self.zoomed_axis2 = np.zeros(4)
 
 
 
