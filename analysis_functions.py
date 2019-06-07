@@ -194,7 +194,7 @@ def adiabat(dat, *args, **kwargs):
   # The conversion to electron degeneracy pressure is only true for DT
   deg_pressure = 2.17e12 * (rho / 1000)**(5.0/3.0) / 10 + small_number
   adiabat = pressure / deg_pressure
-  max_val = 10.0
+  max_val = 100.0
   adiabat = np.where(adiabat < max_val, adiabat, max_val)
   setattr(dat, var_name, new_variable(data = adiabat,
                                       grid = dat.Grid_Grid,
@@ -209,9 +209,10 @@ def adiabat(dat, *args, **kwargs):
   # temporal resolution
   dx = dat.Radius_mid.data[0][:-1,:-1] - dat.Radius_mid.data[0][1:,:-1]
   dlnp = np.log(pressure[:-1,:-1] + small_number) - np.log(pressure[1:,:-1] + small_number)
-  pressure_ls = np.abs(dlnp / dx)
+  pressure_ls = np.zeros(dat.Radius_mid.data[0].shape)
+  pressure_ls[1:,1:] = np.abs(dlnp / dx)
   setattr(dat, var_name, new_variable(data = pressure_ls,
-                                      grid = dat.Grid_Grid_mid,
+                                      grid = dat.Grid_Grid,
                                       units_new = "unitless",
                                       unit_conversion = 1,
                                       name = "Inverse Pressure Length Scale"))

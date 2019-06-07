@@ -13,12 +13,13 @@ fs = 12
 
 
 
-def time_history(dat, fig, ax1, cs, *args, **kwargs):
+def time_history(dat, fig, ax1, *args, **kwargs):
   """A pcolormesh plot of space against time with a variable shown in colour
   """
   
   var_name = kwargs.get('var_name', "Fluid_Rho")
   cbar_upscale = kwargs.get('cbar_upscale', -10.0)
+  grid_choice = kwargs.get('grid', 'default')
   
   ax1.clear() # This is nessasary for speed
   
@@ -33,24 +34,34 @@ def time_history(dat, fig, ax1, cs, *args, **kwargs):
   grid_units = getattr(grid, "units_new")
   
   c_data = getattr(var, "all_time_data") * unit_conv
-  y_data, c_data = two_dim_grid(dat, c_data, cs)
-  x_data, _ = np.meshgrid(dat.Times.all_time_data, y_data[0,:], indexing='ij')
+  y_data, c_data = two_dim_grid(dat, c_data)
+  x_data, y_data1 = np.meshgrid(dat.Times.all_time_data, y_data[0,:], indexing='ij')
+  
+  x_label = dat.Times.name + ' (' + getattr(dat.Times, 'units_new') + ')'
+  y_label = 'Radius (' + grid_units + ')'
+  c_label = name + " (" + units + ")"
+  
+  if (grid_choice == 'default'):
+    y_data = y_data
+  elif (grid_choice == 'initial'):
+    y_data = y_data1
+    y_label = 'Initial ' + y_label
+  elif (grid_choice == 'cell number'):
+    pos = np.linspace(0, np.shape(c_data)[1]-1, np.shape(c_data)[1])
+    _, y_data = np.meshgrid(dat.Times.all_time_data, pos, indexing='ij')
+    y_label = 'Cell Number'
 
   cbar_range = np.max(c_data) - np.min(c_data)
   cbar_max = np.min(c_data) + np.exp(np.log(cbar_range) + cbar_upscale)
   
-  cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1, vmax = cbar_max)
+  cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
   
   cbar = getattr(ax1, 'cbar')
   if cbar == 'None':
     cbar = fig.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
-  cmesh.set_clim(np.min(c_data), np.max(c_data))
-  cbar.set_clim(np.min(c_data), np.max(c_data))
-  
-  x_label = dat.Times.name + ' (' + getattr(dat.Times, 'units_new') + ')'
-  y_label = 'Radius (' + grid_units + ')'
-  c_label = name + " (" + units + ")"
+  cmesh.set_clim(np.min(c_data), cbar_max)
+  cbar.set_clim(np.min(c_data), cbar_max)
   
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
@@ -68,7 +79,7 @@ def time_history(dat, fig, ax1, cs, *args, **kwargs):
   plt.show()
 
 
-def two_dim_grid(dat, data, cs):
+def two_dim_grid(dat, data):
   
   x_mid = dat.Grid_Grid_mid.all_time_data[0] * dat.Grid_Grid_mid.unit_conversion
   y_mid = dat.Grid_Grid_mid.all_time_data[1] * dat.Grid_Grid_mid.unit_conversion
