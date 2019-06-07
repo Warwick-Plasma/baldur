@@ -16,3 +16,7 @@ IPython 6.1.0 -- An enhanced Interactive Python. Type '?' for help.
 In [1]: import menu as mu
 
 In [2]: mu.options(use_analysis=True)
+
+In order for the code to run: 
+-plotting must be active, you must have an sdf file (*.sdf) in your current working directory, and you need an up-to-date sdf_helper. 
+When running with Odin certain dump masks are required to set use_analysis = True.

@@ -14,62 +14,160 @@ import import_sdf as isdf
 
 
 def move_figure(f, x, y): # cxrodgers
-    """Move figure's upper left corner to pixel (x, y)"""
-    backend = matplotlib.get_backend()
-    if backend == 'TkAgg':
-        f.canvas.manager.window.wm_geometry("+%d+%d" % (x, y))
-    elif backend == 'WXAgg':
-        f.canvas.manager.window.SetPosition((x, y))
-    else:
-        # This works for QT and GTK
-        # You can also use window.setGeometry
-        f.canvas.manager.window.move(x, y)
+  """Move figure's upper left corner to pixel (x, y)
+  https://yagisanatode.com/2018/02/23/how-do-i-change-the-size-and-position-of-the-main-window-in-tkinter-and-python-3/
+  """
+  backend = matplotlib.get_backend()
+  if backend == 'TkAgg':
+    f.canvas.manager.window.wm_geometry("+%d+%d" % (x, y))
+  elif backend == 'WXAgg':
+    f.canvas.manager.window.SetPosition((x, y))
+  else:
+    # This works for QT and GTK
+    # You can also use window.setGeometry
+    f.canvas.manager.window.move(x, y)
 
 
 
-def options():
+def options(*args, **kwargs):
+  use_analysis = kwargs.get('use_analysis', False)
+  op.check_analysis(use_analysis)
   root = tk.Tk()
-  my_gui = menu_GUI(root)
+  my_gui = snapshot_GUI(root, use_analysis)
+  root.mainloop()
+  root = tk.Tk()
+  my_gui = time_history_GUI(root, use_analysis)
   root.mainloop()
 
 
 
-class menu_GUI:
-  def __init__(self, app):
+class time_history_GUI:
+  def __init__(self, app, use_analysis):
     self.app = app
-    app.title("A simple GUI") 
+    self.use_analysis = use_analysis
+    app.title("Time history GUI")
     app.geometry('450x200+10+10')
     
     plt.ion()
     plt.close('all')
-  
-    self.istart = 0
-    sdf_num = 10
     
+    self.cs = 1
+    
+    # find sdf files and count
     self.pathname = os.path.abspath(os.getcwd())
     runs = glob.glob1(self.pathname,"*.sdf")
-    RunCounter = len(runs)-1
-
-    self.use_analysis = True
+    RunCounter = len(runs)
+    run_array = np.zeros(RunCounter)
+    for ir in range(0, RunCounter-1):
+      run_name = runs[ir]
+      run_num = int(run_name[:-4])
+      run_array[ir] = run_num
+    run_array = sorted(run_array)
+    self.istart = int(run_array[0])
+    self.iend = int(run_array[-1])
+    sdf_num = int(run_array[0])
+    
+    # initial data import, needed for variable selection combo box
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
-  
-    self.fig = plt.figure(num=1,figsize=(10,8),facecolor='white')
+    self.dat = isdf.get_data_all(dat, self.istart, self.iend, self.pathname, self.use_analysis, self.cs)
+    
+    # create empty figures
+    self.fig = plt.figure(num=1, figsize=(6,6), facecolor='white')
+    move_figure(self.fig, 700, 10)
     self.ax1 = plt.axes()
     setattr(self.ax1, 'cbar', 'None')
-    move_figure(self.fig, 550, 10)
+
+    self.fig2 = plt.figure(num=2, figsize=(6,6), facecolor='white')
+    move_figure(self.fig2, 10, 1000)
+    self.ax2 = plt.axes()
+    self.ax3 = op.empty_lineout(self.fig2, self.ax2)
     
-    self.reset_grid_variable = tk.BooleanVar(app)
-    self.reset_grid_variable.set(True)
+    # Combo box - variable
+    self.labelTop_combo1 = tk.Label(app, text = "Select variable:")
+    self.labelTop_combo1.grid(column=0, row=1)
+
+    self.combo1 = ttk.Combobox(app, values = dat.variables)
+    self.combo1.grid(column=1, row=1)
+    self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
+    self.combo1.current(0)
+    
+    # Combo box - time variable
+    self.labelTop_combo2 = tk.Label(app, text = "Select time variable:")
+    self.labelTop_combo2.grid(column=0, row=2)
+
+    self.combo2 = ttk.Combobox(app, values = dat.variables_time)
+    self.combo2.grid(column=1, row=2)
+    self.combo2.bind("<<ComboboxSelected>>", self.callbackFunc)
+    self.combo2.current(0)
+    
+    # slider - scale up colour
+    self.label_slider1 = tk.Label(app, text = "Minimum value on colourbar:")
+    self.label_slider1.grid(column=0, row=3)
+
+    self.slider1 = tk.Scale(app, from_ = -10, to = 0, tickinterval=100,
+                            orient=tk.HORIZONTAL, command=self.callbackFunc,
+                            length  = 200, resolution = 0.01)
+    self.slider1.grid(column=1, row=3)
+    self.slider1.set(0)
+    
+  def callbackFunc(self, event):
+    var_name = self.combo1.get()
+    var_name2 = self.combo2.get()
+    cbar_upscale = self.slider1.get()
+      
+    op.time_history(self.dat, self.fig, self.ax1, self.cs, var_name = var_name, cbar_upscale = cbar_upscale)
+      
+    op.time_history_lineout(self.dat, self.fig2, self.ax2, self.ax3, var_name = var_name2,  use_analysis = self.use_analysis)
+
+class snapshot_GUI:
+  def __init__(self, app, use_analysis):
+    self.app = app
+    self.use_analysis = use_analysis
+    app.title("Snapshot GUI")
+    app.geometry('450x200+10+10')
+    
+    plt.ion()
+    plt.close('all')
+    
+    self.cs = 3
+    
+    # find sdf files and count
+    self.pathname = os.path.abspath(os.getcwd())
+    runs = glob.glob1(self.pathname,"*.sdf")
+    RunCounter = len(runs)
+    run_array = np.zeros(RunCounter)
+    for ir in range(0, RunCounter-1):
+      run_name = runs[ir]
+      run_num = int(run_name[:-4])
+      run_array[ir] = run_num
+    run_array = sorted(run_array)
+    self.istart = int(run_array[0])
+    self.iend = int(run_array[-1])
+    sdf_num = int(run_array[0])
+
+    # initial data import, needed for variable selection combo box
+    dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
+    
+    # create empty figures
+    self.fig = plt.figure(num=1, figsize=(6,6), facecolor='white')
+    move_figure(self.fig, 700, 10)
+    self.ax1 = plt.axes()
+    setattr(self.ax1, 'cbar', 'None')
+
+    self.fig2 = plt.figure(num=2, figsize=(6,6), facecolor='white')
+    move_figure(self.fig2, 10, 1000)
+    self.ax2 = plt.axes()
+    self.ax3 = op.empty_lineout(self.fig2, self.ax2)
     
     # slider - time
     self.label_slider1 = tk.Label(app, text = "Select sdf number:")
     self.label_slider1.grid(column=0, row=0)
 
-    self.slider1 = tk.Scale(app, from_ = self.istart, to = RunCounter, tickinterval=100,
+    self.slider1 = tk.Scale(app, from_ = self.istart, to = self.iend, tickinterval=100,
                             orient=tk.HORIZONTAL, command=self.callbackFunc,
                             length  = 300, resolution = 1.0)
     self.slider1.grid(column=1, row=0)
-    self.slider1.set(23)
+    self.slider1.set(self.istart)
 
     # Combo box - variable
     self.labelTop_combo1 = tk.Label(app, text = "Select variable:")
@@ -77,12 +175,12 @@ class menu_GUI:
 
     self.combo1 = ttk.Combobox(app, values = dat.variables)
     self.combo1.grid(column=1, row=1)
-    self.combo1.current(3)
+    self.combo1.current(0)
   
     # check box - grid
-    self.grid_variable = tk.StringVar(app)
+    self.grid_variable = tk.BooleanVar(app)
     self.grid_button = tk.Checkbutton(app, text="grid", variable = self.grid_variable,
-                                      onvalue="black", offvalue="None")
+                                      onvalue=True, offvalue=False)
     self.grid_button.deselect()
     self.grid_button.grid(column=0, row=2)
   
@@ -103,12 +201,14 @@ class menu_GUI:
     self.anisotropies_button.grid(column=0, row=4)
   
     # button - save fig as pdf
-    self.print_button = tk.Button(app, text="Save .pdf", command = self.save_pdf())
+    self.print_button = tk.Button(app, text="Save .pdf", command = self.save_pdf)
     self.print_button.grid(column=1, row=2)
     
     # button - reset button
     self.reset_button = tk.Button(app, text="Reset zoom")
     self.reset_button.grid(column=1, row=3)
+    self.reset_axis_variable = tk.BooleanVar(app)
+    self.reset_axis_variable.set(True)
   
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
@@ -119,29 +219,31 @@ class menu_GUI:
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
     
   def callbackFunc1(self, event):
-    self.reset_grid_variable.set(True)
+    self.reset_axis_variable.set(True)
     self.callbackFunc(event)
 
   def callbackFunc(self, event):
-    grid_colour = self.grid_variable.get()
+    grid_boolean = self.grid_variable.get()
     use_polar = self.polar_variable.get()
     sdf_num = self.slider1.get()
     var_name = self.combo1.get()
-    reset_axis = self.reset_grid_variable.get()
+    reset_axis = self.reset_axis_variable.get()
     view_anisotropies = self.anisotropies_variable.get()
 
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
-    op.snapshot(dat, self.ax1, var_name = var_name,
-        grid_colour = grid_colour, use_polar = use_polar,
+    op.snapshot(dat, self.fig, self.ax1, var_name = var_name,
+        grid_boolean = grid_boolean, use_polar = use_polar,
         reset_axis = reset_axis, view_anisotropies = view_anisotropies)
 
-    self.reset_grid_variable.set(False)
+    op.lineout(dat, self.cs, self.fig2, self.ax2, self.ax3, var_name,
+        grid_boolean = grid_boolean, reset_axis = reset_axis)
+
+    self.reset_axis_variable.set(False)
 
   def save_pdf(self):
     filename1 = 'test.pdf'
     self.fig.savefig(filename1)
   
-  # slider key bindings
   def leftKey(self, event):
     sdf_num = self.slider1.get()
     self.slider1.set(sdf_num - 1)
