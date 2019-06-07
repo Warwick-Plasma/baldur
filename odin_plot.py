@@ -45,7 +45,8 @@ def time_history(dat, fig, ax1, cs, *args, **kwargs):
   if cbar == 'None':
     cbar = fig.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
-  cbar.set_clim(np.min(c_data), cbar_max)
+  cmesh.set_clim(np.min(c_data), np.max(c_data))
+  cbar.set_clim(np.min(c_data), np.max(c_data))
   
   x_label = dat.Times.name + ' (' + getattr(dat.Times, 'units_new') + ')'
   y_label = 'Radius (' + grid_units + ')'
@@ -196,6 +197,7 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   if cbar == 'None':
     cbar = fig.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
+  cmesh.set_clim(np.min(c_data), np.max(c_data))
   cbar.set_clim(np.min(c_data), np.max(c_data))
   
   ax1.set_xlabel(x_label, fontsize = fs)

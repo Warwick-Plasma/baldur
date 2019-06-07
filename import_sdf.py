@@ -1,5 +1,6 @@
 # Duncan Barlow, Odin project, Warwick University, 01/19
 import sdf_helper as sh
+import sdf
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -27,70 +28,71 @@ def add_label(dat):
   #print("Warning: User defined units will overwrite original")
   #print("and the conversion might only be true from SI.")
   
-  # User defined
-  var = getattr(dat, "Fluid_Temperature_electron")
-  name = 'Electron Temperature'
-  setattr(var, "name", name)
-  unit_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
-  setattr(var, "unit_conversion", unit_conversion)
-  units_new = "KeV"
-  setattr(var, "units_new", units_new)
-  
-  var = getattr(dat, "Fluid_Temperature_ion")
-  name = 'Ion Temperature'
-  setattr(var, "name", name)
-  unit_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
-  setattr(var, "unit_conversion", unit_conversion)
-  units_new = "KeV"
-  setattr(var, "units_new", units_new)
-  
-  var = getattr(dat, "Grid_Grid_mid")
-  name = 'Distance, cell centred'
-  setattr(var, "name", name)
-  unit_conversion = 1.0e6 # from m
-  setattr(var, "unit_conversion", unit_conversion)
-  units_new = "$\mu m$"
-  setattr(var, "units_new", units_new)
-  
-  var = getattr(dat, "Grid_Grid")
-  name = 'Distance, node centred'
-  setattr(var, "name", name)
-  unit_conversion = 1.0e6 # from m
-  setattr(var, "unit_conversion", unit_conversion)
-  units_new = "$\mu m$"
-  setattr(var, "units_new", units_new)
-  
-  var = getattr(dat, "Fluid_Rho")
-  name = 'Density'
-  setattr(var, "name", name)
-  unit_conversion = 1.0 / 1000.0 # from kg to g
-  setattr(var, "unit_conversion", unit_conversion)
-  units_new = "g/cm$^3$"
-  setattr(var, "units_new", units_new)
-  
-  var = getattr(dat, "Fluid_Pressure_ion")
-  name = 'Ion Pressure'
-  setattr(var, "name", name)
-  unit_conversion = 1.0e-11 # from Pascal to Mbar
-  setattr(var, "unit_conversion", unit_conversion)
-  units_new = "Mbar"
-  setattr(var, "units_new", units_new)
-  
-  var = getattr(dat, "Fluid_Pressure_electron")
-  name = 'Electron Pressure'
-  setattr(var, "name", name)
-  unit_conversion = 1.0e-11 # from Pascal to Mbar
-  setattr(var, "unit_conversion", unit_conversion)
-  units_new = "Mbar"
-  setattr(var, "units_new", units_new)
-  
-  var = getattr(dat, "Fluid_Pressure")
-  name = 'Total Pressure'
-  setattr(var, "name", name)
-  unit_conversion = 1.0e-11 # from Pascal to Mbar
-  setattr(var, "unit_conversion", unit_conversion)
-  units_new = "Mbar"
-  setattr(var, "units_new", units_new)
+  if (dat.Header['code_name'] == 'Odin2D'):
+    # User defined
+    var = getattr(dat, "Fluid_Temperature_electron")
+    name = 'Electron Temperature'
+    setattr(var, "name", name)
+    unit_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
+    setattr(var, "unit_conversion", unit_conversion)
+    units_new = "KeV"
+    setattr(var, "units_new", units_new)
+    
+    var = getattr(dat, "Fluid_Temperature_ion")
+    name = 'Ion Temperature'
+    setattr(var, "name", name)
+    unit_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
+    setattr(var, "unit_conversion", unit_conversion)
+    units_new = "KeV"
+    setattr(var, "units_new", units_new)
+    
+    var = getattr(dat, "Grid_Grid_mid")
+    name = 'Distance, cell centred'
+    setattr(var, "name", name)
+    unit_conversion = 1.0e6 # from m
+    setattr(var, "unit_conversion", unit_conversion)
+    units_new = "$\mu m$"
+    setattr(var, "units_new", units_new)
+    
+    var = getattr(dat, "Grid_Grid")
+    name = 'Distance, node centred'
+    setattr(var, "name", name)
+    unit_conversion = 1.0e6 # from m
+    setattr(var, "unit_conversion", unit_conversion)
+    units_new = "$\mu m$"
+    setattr(var, "units_new", units_new)
+    
+    var = getattr(dat, "Fluid_Rho")
+    name = 'Density'
+    setattr(var, "name", name)
+    unit_conversion = 1.0 / 1000.0 # from kg to g
+    setattr(var, "unit_conversion", unit_conversion)
+    units_new = "g/cm$^3$"
+    setattr(var, "units_new", units_new)
+    
+    var = getattr(dat, "Fluid_Pressure_ion")
+    name = 'Ion Pressure'
+    setattr(var, "name", name)
+    unit_conversion = 1.0e-11 # from Pascal to Mbar
+    setattr(var, "unit_conversion", unit_conversion)
+    units_new = "Mbar"
+    setattr(var, "units_new", units_new)
+    
+    var = getattr(dat, "Fluid_Pressure_electron")
+    name = 'Electron Pressure'
+    setattr(var, "name", name)
+    unit_conversion = 1.0e-11 # from Pascal to Mbar
+    setattr(var, "unit_conversion", unit_conversion)
+    units_new = "Mbar"
+    setattr(var, "units_new", units_new)
+    
+    var = getattr(dat, "Fluid_Pressure")
+    name = 'Total Pressure'
+    setattr(var, "name", name)
+    unit_conversion = 1.0e-11 # from Pascal to Mbar
+    setattr(var, "unit_conversion", unit_conversion)
+    units_new = "Mbar"
+    setattr(var, "units_new", units_new)
   
   return dat
 
@@ -135,8 +137,8 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   dat = sh.getdata(SDFName,verbose=False)
   
   dat_names = list(dat.__dict__.keys())
-  variable_type = type(dat.Fluid_Rho)
-  grid_type = type(dat.Grid_Grid)
+  variable_type = sdf.BlockPlainVariable
+  grid_type = sdf.BlockLagrangianMesh
   
   dat_variable_names = []
   dat_grid_names = []
