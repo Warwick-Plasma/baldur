@@ -285,8 +285,6 @@ def energy(dat, *args, **kwargs):
   
   setattr(dat, "variables_time", var_list)
   
-  print(tot_energy, tot_IE, tot_KE, tot_LE)
-  
   return dat
 
 
