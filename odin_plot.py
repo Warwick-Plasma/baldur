@@ -19,9 +19,8 @@ def time_history(dat, fig, ax1, *args, **kwargs):
   
   var_name = kwargs.get('var_name', "Fluid_Rho")
   cbar_upscale = kwargs.get('cbar_upscale', -10.0)
+  reset_axis = kwargs.get('reset_axis', True)
   grid_choice = kwargs.get('grid', 'default')
-  
-  ax1.clear() # This is nessasary for speed
   
   var = getattr(dat, var_name)
   unit_conv = getattr(var, "unit_conversion")
@@ -54,6 +53,14 @@ def time_history(dat, fig, ax1, *args, **kwargs):
   cbar_range = np.max(c_data) - np.min(c_data)
   cbar_max = np.min(c_data) + np.exp(np.log(cbar_range) + cbar_upscale)
   
+  if reset_axis:
+    zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
+                             np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
+  else:
+    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
+                             ax1.get_ylim()[0], ax1.get_ylim()[1]])
+  ax1.clear() # This is nessasary for speed
+  
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
   
   cbar = getattr(ax1, 'cbar')
@@ -75,6 +82,8 @@ def time_history(dat, fig, ax1, *args, **kwargs):
   ax1.xaxis.get_offset_text().set_size(fs)
   ax1.yaxis.get_offset_text().set_size(fs)
   
+  ax1.set_xlim(zoomed_axis1[:2])
+  ax1.set_ylim(zoomed_axis1[2:])
   cbar.draw_all()
   plt.show()
 

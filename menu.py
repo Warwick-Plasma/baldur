@@ -107,7 +107,7 @@ class time_history_GUI:
 
     self.combo3 = ttk.Combobox(app, values = grid_list)
     self.combo3.grid(column=1, row=3)
-    self.combo3.bind("<<ComboboxSelected>>", self.callbackFunc)
+    self.combo3.bind("<<ComboboxSelected>>", self.callbackFunc1)
     self.combo3.current(0)
     
     # slider - scale up colour
@@ -120,15 +120,30 @@ class time_history_GUI:
     self.slider1.grid(column=1, row=4)
     self.slider1.set(0)
     
+    # button - reset button
+    self.reset_button = tk.Button(app, text="Reset zoom")
+    self.reset_button.grid(column=0, row=5)
+    self.reset_axis_variable = tk.BooleanVar(app)
+    self.reset_axis_variable.set(True)
+    
+    self.reset_button.bind("<Button-1>", self.callbackFunc1)
+  
+  def callbackFunc1(self, event):
+    self.reset_axis_variable.set(True)
+    self.callbackFunc(event)
+  
   def callbackFunc(self, event):
     var_name = self.combo1.get()
     var_name2 = self.combo2.get()
     grid_choice = self.combo3.get()
     cbar_upscale = self.slider1.get()
+    reset_axis = self.reset_axis_variable.get()
       
-    op.time_history(self.dat, self.fig, self.ax1, var_name = var_name, cbar_upscale = cbar_upscale, grid = grid_choice)
+    op.time_history(self.dat, self.fig, self.ax1, var_name = var_name, cbar_upscale = cbar_upscale, grid = grid_choice, reset_axis = reset_axis)
       
     op.time_history_lineout(self.dat, self.fig2, self.ax2, self.ax3, var_name = var_name2,  use_analysis = self.use_analysis)
+
+    self.reset_axis_variable.set(False)
 
 class snapshot_GUI:
   def __init__(self, app, use_analysis):
@@ -220,7 +235,11 @@ class snapshot_GUI:
     self.reset_button.grid(column=1, row=3)
     self.reset_axis_variable = tk.BooleanVar(app)
     self.reset_axis_variable.set(True)
-  
+    
+    # button - exit
+    self.exit_button = tk.Button(app, text="Exit", command = self.exit_gui)
+    self.exit_button.grid(column=1, row=4)
+    
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
     self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
@@ -254,6 +273,13 @@ class snapshot_GUI:
   def save_pdf(self):
     filename1 = 'test.pdf'
     self.fig.savefig(filename1)
+    
+  def exit_gui(self):
+    print("GUI exit from button press")
+    plt.close(self.fig)
+    plt.close(self.fig2)
+    self.app.destroy()
+    sys.exit()
   
   def leftKey(self, event):
     sdf_num = self.slider1.get()
