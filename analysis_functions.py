@@ -103,8 +103,11 @@ def basic(dat):
                                       name = "Speed of Cell"))
   var_name = "Rho_r"
   var_list.append(var_name)
+  dr = np.zeros(np.shape(radius))
+  for i in range(len(radius)-1):
+      dr[i, :] = radius[i+1] - radius[i]
   rho = dat.Fluid_Rho.data[:,:]
-  rhor = rho * radius
+  rhor = rho * dr
   rhor_cumulative = np.cumsum(rhor, axis=0)
   setattr(dat, var_name, new_variable(data = rhor_cumulative,
                                       grid = dat.Grid_Grid,
