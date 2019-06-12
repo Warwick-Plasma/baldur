@@ -197,8 +197,8 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
         
-  x_data = getattr(var_grid, 'data')[0]
-  y_data = getattr(var_grid, 'data')[1]
+  x_data = getattr(var_grid, 'data')[0] * getattr(var_grid, 'unit_conversion')
+  y_data = getattr(var_grid, 'data')[1] * getattr(var_grid, 'unit_conversion')
   x_label = 'R (' + getattr(var_grid, 'units_new') + ')'
   y_label = 'Z (' + getattr(var_grid, 'units_new') + ')'
   if use_polar: x_data, y_data, y_label = polar_coordinates(x_data, y_data)
