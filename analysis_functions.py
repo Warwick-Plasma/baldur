@@ -101,6 +101,14 @@ def basic(dat):
                                       units_new = "m/s$^1$",
                                       unit_conversion = 1,
                                       name = "Speed of Cell"))
+  var_name = "Rho_r"
+  var_list.append(var_name)
+  rhor = dat.Fluid_Rho.data[:,:] * radius
+  setattr(dat, var_name, new_variable(data = rhor,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "g/cm$^2$",
+                                      unit_conversion = 0.1,
+                                      name = "Areal Density"))
 
   setattr(dat, "variables", var_list)
   

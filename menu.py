@@ -273,6 +273,10 @@ class snapshot_GUI:
   def save_pdf(self):
     filename1 = 'test.pdf'
     self.fig.savefig(filename1)
+
+ # def save_video(self):
+ #     for i in runs:
+ #         filename = 
     
   def exit_gui(self):
     print("GUI exit from button press")
@@ -288,8 +292,6 @@ class snapshot_GUI:
   def rightKey(self, event):
     sdf_num = self.slider1.get()
     self.slider1.set(sdf_num + 1)
-
-
 
 def main():
 	"""
