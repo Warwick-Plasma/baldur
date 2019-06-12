@@ -145,6 +145,8 @@ class time_history_GUI:
 
     self.reset_axis_variable.set(False)
 
+
+
 class snapshot_GUI:
   def __init__(self, app, use_analysis):
     self.app = app
@@ -273,10 +275,6 @@ class snapshot_GUI:
   def save_pdf(self):
     filename1 = 'test.pdf'
     self.fig.savefig(filename1)
-
- # def save_video(self):
- #     for i in runs:
- #         filename = 
     
   def exit_gui(self):
     print("GUI exit from button press")
@@ -293,9 +291,12 @@ class snapshot_GUI:
     sdf_num = self.slider1.get()
     self.slider1.set(sdf_num + 1)
 
+
+
 def main():
 	"""
 	"""
+
 
 
 if __name__ == "__main__":
