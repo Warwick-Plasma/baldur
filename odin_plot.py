@@ -69,10 +69,6 @@ def time_history(dat, fig, ax1, *args, **kwargs):
     setattr(ax1, 'cbar', cbar)
   cmesh.set_clim(np.min(c_data), cbar_max)
   cbar.set_clim(np.min(c_data), cbar_max)
-  
-  Lawson = np.ones((np.size(x_data)))*2.0
-  if (var == 'Rho_r'):
-    plt.plot(x_data, Lawson)
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
