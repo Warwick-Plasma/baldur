@@ -157,7 +157,8 @@ class snapshot_GUI:
     plt.ion()
     plt.close('all')
     
-    self.cs = 3
+    self.cs = 1
+    self.cell_track = 100
     
     # find sdf files and count
     self.pathname = os.path.abspath(os.getcwd())
@@ -265,7 +266,7 @@ class snapshot_GUI:
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
     op.snapshot(dat, self.fig, self.ax1, var_name = var_name,
         grid_boolean = grid_boolean, use_polar = use_polar,
-        reset_axis = reset_axis, view_anisotropies = view_anisotropies)
+        reset_axis = reset_axis, view_anisotropies = view_anisotropies, cell_track = self.cell_track)
 
     op.lineout(dat, self.cs, self.fig2, self.ax2, self.ax3, var_name,
         grid_boolean = grid_boolean, reset_axis = reset_axis)

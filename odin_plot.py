@@ -189,6 +189,7 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   use_polar = kwargs.get('use_polar', False)
   reset_axis = kwargs.get('reset_axis', True)
   view_anisotropies = kwargs.get('view_anisotropies', False)
+  cell_track = kwargs.get('cell_track', 100)
   
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
@@ -203,12 +204,23 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
   if view_anisotropies: c_data, c_label = mean_subtract(c_data, c_label)
   
+  cs = int(np.round(np.shape(c_data)[1] / 2.0))
+  loc_cell_track = np.array([x_data[cell_track, cs], y_data[cell_track, cs]])
+  
   if reset_axis:
+    old_loc_cell_track = loc_cell_track
+    
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
                              np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
   else:
+    old_loc_cell_track = getattr(ax1, "loc_cell_track")
+    
     zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
                              ax1.get_ylim()[0], ax1.get_ylim()[1]])
+  
+  setattr(ax1, "loc_cell_track", loc_cell_track)
+  track_change = loc_cell_track - old_loc_cell_track
+  
   ax1.clear() # This is nessasary for speed
   
   cbar = getattr(ax1, 'cbar')
@@ -237,8 +249,10 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   t_label = getattr(time, "name") + ' = {0:5.3f}'.format(t_data) + getattr(time, "units_new")
   ax1.set_title(t_label, fontsize = fs)
   
-  ax1.set_xlim(zoomed_axis1[:2])
-  ax1.set_ylim(zoomed_axis1[2:])
+  new_xlim = zoomed_axis1[:2] + track_change[0]
+  ax1.set_xlim(new_xlim)
+  new_ylim = zoomed_axis1[2:] + track_change[1]
+  ax1.set_ylim(new_ylim)
   cbar.draw_all()
   plt.show()
 
