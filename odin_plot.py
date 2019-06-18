@@ -176,6 +176,19 @@ def check_analysis(use_analysis):
 
 
 
+def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
+  
+  dat = isdf.use_sdf(parameters.sdf_num, parameters.pathname, use_analysis = parameters.use_analysis, istart = parameters.istart)
+  
+  snapshot(dat, fig, ax1, var_name = parameters.var_name,
+      grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
+      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, cell_track = parameters.cell_track)
+
+  lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
+      grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis)
+
+
+
 def snapshot(dat, fig, ax1, *args, **kwargs):
   """
   """

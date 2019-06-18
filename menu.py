@@ -150,19 +150,20 @@ class time_history_GUI:
 class snapshot_GUI:
   def __init__(self, app, use_analysis):
     self.app = app
-    self.use_analysis = use_analysis
+    self.parameters = plot_parameters()
+    self.parameters.use_analysis = use_analysis
     app.title("Snapshot GUI")
     app.geometry('450x200+10+10')
     
     plt.ion()
     plt.close('all')
     
-    self.cs = 1
-    self.cell_track = 100
+    self.parameters.cs = 1
+    self.parameters.cell_track = 100
     
     # find sdf files and count
-    self.pathname = os.path.abspath(os.getcwd())
-    runs = glob.glob1(self.pathname,"*.sdf")
+    self.parameters.pathname = os.path.abspath(os.getcwd())
+    runs = glob.glob1(self.parameters.pathname,"*.sdf")
     RunCounter = len(runs)
     run_array = np.zeros(RunCounter)
     for ir in range(0, RunCounter-1):
@@ -170,12 +171,14 @@ class snapshot_GUI:
       run_num = int(run_name[:-4])
       run_array[ir] = run_num
     run_array = sorted(run_array)
-    self.istart = int(run_array[0])
-    self.iend = int(run_array[-1])
-    sdf_num = int(run_array[0])
+    self.parameters.istart = int(run_array[0])
+    self.parameters.iend = int(run_array[-1])
+    self.parameters.sdf_num = self.parameters.istart
 
     # initial data import, needed for variable selection combo box
-    dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
+    dat = isdf.use_sdf(self.parameters.sdf_num, self.parameters.pathname,
+        use_analysis = self.parameters.use_analysis,
+        istart = self.parameters.istart)
     
     # create empty figures
     self.fig = plt.figure(num=1, figsize=(6,6), facecolor='white')
@@ -192,11 +195,11 @@ class snapshot_GUI:
     self.label_slider1 = tk.Label(app, text = "Select sdf number:")
     self.label_slider1.grid(column=0, row=0)
 
-    self.slider1 = tk.Scale(app, from_ = self.istart, to = self.iend, tickinterval=100,
+    self.slider1 = tk.Scale(app, from_ = self.parameters.istart, to = self.parameters.iend, tickinterval=100,
                             orient=tk.HORIZONTAL, command=self.callbackFunc,
                             length  = 300, resolution = 1.0)
     self.slider1.grid(column=1, row=0)
-    self.slider1.set(self.istart)
+    self.slider1.set(self.parameters.istart)
 
     # Combo box - variable
     self.labelTop_combo1 = tk.Label(app, text = "Select variable:")
@@ -256,20 +259,14 @@ class snapshot_GUI:
     self.callbackFunc(event)
 
   def callbackFunc(self, event):
-    grid_boolean = self.grid_variable.get()
-    use_polar = self.polar_variable.get()
-    sdf_num = self.slider1.get()
-    var_name = self.combo1.get()
-    reset_axis = self.reset_axis_variable.get()
-    view_anisotropies = self.anisotropies_variable.get()
-
-    dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
-    op.snapshot(dat, self.fig, self.ax1, var_name = var_name,
-        grid_boolean = grid_boolean, use_polar = use_polar,
-        reset_axis = reset_axis, view_anisotropies = view_anisotropies, cell_track = self.cell_track)
-
-    op.lineout(dat, self.cs, self.fig2, self.ax2, self.ax3, var_name,
-        grid_boolean = grid_boolean, reset_axis = reset_axis)
+    self.parameters.grid_boolean = self.grid_variable.get()
+    self.parameters.use_polar = self.polar_variable.get()
+    self.parameters.sdf_num = self.slider1.get()
+    self.parameters.var_name = self.combo1.get()
+    self.parameters.reset_axis = self.reset_axis_variable.get()
+    self.parameters.view_anisotropies = self.anisotropies_variable.get()
+    
+    op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters)
 
     self.reset_axis_variable.set(False)
 
@@ -291,6 +288,27 @@ class snapshot_GUI:
   def rightKey(self, event):
     sdf_num = self.slider1.get()
     self.slider1.set(sdf_num + 1)
+
+
+
+class plot_parameters:
+  def __init__(self):
+    self.sdf_num = 0
+    self.use_analysis = False
+    self.cs = 0
+    self.pathname = 'None'
+    self.cell_track = 0
+    self.istart = 0
+    self.iend = 0
+    self.grid_boolean = False
+    self.use_polar = False
+    self.var_name = 'None'
+    self.reset_axis = False
+    self.view_anisotropies = False
+
+
+
+# Make a figure class
 
 
 
