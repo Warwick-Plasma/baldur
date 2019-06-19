@@ -177,8 +177,6 @@ def check_analysis(use_analysis):
 
 
 def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
-
-  print(sdf_num)
   
   dat = isdf.use_sdf(sdf_num, parameters.pathname, use_analysis = parameters.use_analysis, istart = parameters.istart)
   
