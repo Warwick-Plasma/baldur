@@ -359,7 +359,10 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   l2 = getattr(ax1, 'line1')
   l3 = getattr(ax1, 'line2')
   
-  var = dat.Fluid_Rho
+  if (dat.Header['code_name'] == 'Odin2D'):
+    var = dat.Fluid_Rho
+  else:
+    var = getattr(dat, dat.variables[0])
   y_data = var.data[:,cs] * var.unit_conversion
   name = var.name
   units = var.units_new
