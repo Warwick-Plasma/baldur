@@ -177,6 +177,10 @@ def check_analysis(use_analysis):
 
 
 def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
+
+  print_string = 'Processing file {:4d}'.format(sdf_num) + ' of {:4d}'.format(parameters.iend)
+  sys.stdout.write('\r' + print_string)
+  sys.stdout.flush()
   
   dat = isdf.use_sdf(sdf_num, parameters.pathname, use_analysis = parameters.use_analysis, istart = parameters.istart)
   
