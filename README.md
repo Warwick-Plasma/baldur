@@ -20,3 +20,6 @@ In [2]: mu.options(use_analysis=True)
 In order for the code to run: 
 -plotting must be active, you must have an sdf file (*.sdf) in your current working directory, and you need an up-to-date sdf_helper. 
 When running with Odin certain dump masks are required to set use_analysis = True.
+
+To save videos ffmpeg must be installed, try:
+sudo apt  install ffmpeg
