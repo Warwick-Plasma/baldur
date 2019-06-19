@@ -29,7 +29,7 @@ def add_label(dat):
   #print("and the conversion might only be true from SI.")
   
   if (dat.Header['code_name'] == 'Epoch2d'):
-    for var_name in ['Grid_Grid', 'Grid_Grid_mid']:
+    for var_name in dat.grids:
       var = getattr(dat, var_name)
       data_x = getattr(var, "data")[0]
       data_y = getattr(var, "data")[1]
@@ -163,6 +163,18 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
     elif type(var) == grid_type2:
       dat_grid_names.append(dat_names[n])
   
+  bad_var_list = []
+  if (dat.Header['code_name'] == 'Epoch2d'):
+    dat_grid_names = ['Grid_Grid', 'Grid_Grid_mid']
+    for var in dat_variable_names:
+      if ('CPU' in var):
+        bad_var_list.append(var)
+      if ('dist' in var):
+        bad_var_list.append(var)
+  
+    for var in bad_var_list:
+      dat_variable_names.remove(var)
+  
   setattr(dat, "grids", dat_grid_names)
   setattr(dat, "variables", dat_variable_names)
   setattr(dat, "variables_time", dat_variable_time_names)
@@ -199,8 +211,7 @@ def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
   
   for n in range(istart+1, irange):     
     dat = use_sdf(n, pathname, use_analysis = use_analysis)
-    
-    # grid for this data is either radius or X depending on rz t/f
+      
     for var_name in dat.grids:
     	array = getattr(getattr(dat1, var_name), "all_time_data")
     	data = getattr(getattr(dat, var_name), "data")
