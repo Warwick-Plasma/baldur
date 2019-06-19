@@ -233,6 +233,14 @@ class snapshot_GUI:
                                        onvalue=True, offvalue=False)
     self.anisotropies_button.deselect()
     self.anisotropies_button.grid(column=0, row=4)
+    
+    # check box - Logarithm
+    self.log_variable = tk.BooleanVar(app)
+    self.log_button = tk.Checkbutton(app, text="Take log_10",
+                                       variable = self.log_variable,
+                                       onvalue=True, offvalue=False)
+    self.log_button.deselect()
+    self.log_button.grid(column=0, row=5)
   
     # button - save fig as pdf
     self.print_button = tk.Button(app, text="Save .pdf", command = self.save_pdf)
@@ -258,6 +266,7 @@ class snapshot_GUI:
     self.grid_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.polar_button.bind("<ButtonRelease-1>", self.callbackFunc1)
     self.anisotropies_button.bind("<ButtonRelease-1>", self.callbackFunc)
+    self.log_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
     
   def callbackFunc1(self, event):
@@ -271,6 +280,7 @@ class snapshot_GUI:
     self.parameters.var_name = self.combo1.get()
     self.parameters.reset_axis = self.reset_axis_variable.get()
     self.parameters.view_anisotropies = self.anisotropies_variable.get()
+    self.parameters.use_log = self.log_variable.get()
     
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters)
 
@@ -320,6 +330,7 @@ class plot_parameters:
     self.var_name = 'None'
     self.reset_axis = False
     self.view_anisotropies = False
+    self.use_log = False
 
 
 

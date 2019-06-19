@@ -188,7 +188,7 @@ def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
   
   snapshot(dat, fig, ax1, var_name = parameters.var_name,
       grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
-      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, cell_track = parameters.cell_track)
+      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, cell_track = parameters.cell_track, use_log = parameters.use_log)
 
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
       grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis)
@@ -209,6 +209,7 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   reset_axis = kwargs.get('reset_axis', True)
   view_anisotropies = kwargs.get('view_anisotropies', False)
   cell_track = kwargs.get('cell_track', 0)
+  use_log = kwargs.get('use_log', False)
   
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
@@ -242,13 +243,23 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   ax1.clear() # This is nessasary for speed
   
   cbar = getattr(ax1, 'cbar')
+  
+  if use_log:
+    cmin = np.log10(np.mean(c_data) / 100.0)
+    cmax = np.log10(np.max(c_data))
+    c_data = np.log10(c_data)
+    c_label = 'log10(' + c_label + ')'
+  else:
+    cmin = np.min(c_data)
+    cmax = np.max(c_data)
+  
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
   cmesh.set_edgecolor(grid_colour)
   if cbar == 'None':
     cbar = fig.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
-  cmesh.set_clim(np.min(c_data), np.max(c_data))
-  cbar.set_clim(np.min(c_data), np.max(c_data))
+  cmesh.set_clim(cmin, cmax)
+  cbar.set_clim(cmin, cmax)
   
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
