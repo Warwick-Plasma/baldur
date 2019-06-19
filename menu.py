@@ -291,11 +291,10 @@ class snapshot_GUI:
     ani.save(filename1, writer=writer)
   
   def exit_gui(self):
-    print("GUI exit from button press")
     plt.close(self.fig)
     plt.close(self.fig2)
     self.app.destroy()
-    sys.exit()
+    sys.exit('GUI exit from button press')
   
   def leftKey(self, event):
     sdf_num = self.slider1.get()
