@@ -245,6 +245,8 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   cbar = getattr(ax1, 'cbar')
   
   if use_log:
+    small_num = 1e-100
+    c_data = abs(c_data) + small_num
     cmin = np.log10(np.mean(c_data) / 100.0)
     cmax = np.log10(np.max(c_data))
     c_data = np.log10(c_data)
@@ -405,6 +407,9 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   y_label1 = name + " (" + units + ")"
   
   if use_log:
+    small_num = 1e-100
+    y_data = abs(y_data) + small_num
+    y_data1 = abs(y_data1) + small_num
     ymin = np.log10(np.mean(y_data[:-1] / 100))
     ymax = np.log10(np.max(y_data[:-1]) * 2)
     ymin1 = np.log10(np.mean(y_data1[:-1] / 100))
