@@ -28,6 +28,15 @@ def add_label(dat):
   #print("Warning: User defined units will overwrite original")
   #print("and the conversion might only be true from SI.")
   
+  if (dat.Header['code_name'] == 'Epoch2d'):
+    for var_name in dat.grids:
+      var = getattr(dat, var_name)
+      data_x = getattr(var, "data")[0]
+      data_y = getattr(var, "data")[1]
+      data_X, data_Y = np.meshgrid(data_x, data_y, indexing='ij')
+      data = np.array([data_X, data_Y])
+      setattr(var, "data", data)
+  
   if (dat.Header['code_name'] == 'Odin2D'):
     # User defined
     var = getattr(dat, "Fluid_Temperature_electron")
@@ -139,6 +148,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   dat_names = list(dat.__dict__.keys())
   variable_type = sdf.BlockPlainVariable
   grid_type = sdf.BlockLagrangianMesh
+  grid_type2 = sdf.BlockPlainMesh
   
   dat_variable_names = []
   dat_grid_names = []
@@ -148,6 +158,8 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
     if type(var) == variable_type:
       dat_variable_names.append(dat_names[n])
     elif type(var) == grid_type:
+      dat_grid_names.append(dat_names[n])
+    elif type(var) == grid_type2:
       dat_grid_names.append(dat_names[n])
   
   setattr(dat, "grids", dat_grid_names)
