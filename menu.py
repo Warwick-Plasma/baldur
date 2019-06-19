@@ -3,6 +3,8 @@ import sdf_helper as sh
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, RadioButtons
+from matplotlib.animation import FuncAnimation
+from matplotlib.animation import FFMpegWriter
 import numpy as np
 import glob
 import sys, os
@@ -166,7 +168,7 @@ class snapshot_GUI:
     runs = glob.glob1(self.parameters.pathname,"*.sdf")
     RunCounter = len(runs)
     run_array = np.zeros(RunCounter)
-    for ir in range(0, RunCounter-1):
+    for ir in range(0, RunCounter):
       run_name = runs[ir]
       run_num = int(run_name[:-4])
       run_array[ir] = run_num
@@ -246,6 +248,10 @@ class snapshot_GUI:
     self.exit_button = tk.Button(app, text="Exit", command = self.exit_gui)
     self.exit_button.grid(column=1, row=4)
     
+    # button - save video
+    self.video_button = tk.Button(app, text="Save video", command = self.save_video)
+    self.video_button.grid(column=1, row=5)
+    
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
     self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
@@ -273,7 +279,21 @@ class snapshot_GUI:
   def save_pdf(self):
     filename1 = 'test.pdf'
     self.fig.savefig(filename1)
+  
+  def save_video(self):
+    self.parameters.grid_boolean = self.grid_variable.get()
+    self.parameters.use_polar = self.polar_variable.get()
+    self.parameters.var_name = self.combo1.get()
+    self.parameters.reset_axis = self.reset_axis_variable.get()
+    self.parameters.view_anisotropies = self.anisotropies_variable.get()
+    self.parameters.visible = False
     
+    filename1 = 'vid.mp4'
+    ani = FuncAnimation(self.fig, op.data_and_plot, frames = range(self.parameters.istart, self.parameters.iend), fargs = (self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters), repeat=False)
+
+    writer = FFMpegWriter(fps=24, bitrate=2e6)		
+    ani.save(filename1, writer=writer)
+  
   def exit_gui(self):
     print("GUI exit from button press")
     plt.close(self.fig)
@@ -305,6 +325,7 @@ class plot_parameters:
     self.var_name = 'None'
     self.reset_axis = False
     self.view_anisotropies = False
+    self.visible = True
 
 
 

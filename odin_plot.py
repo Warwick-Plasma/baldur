@@ -177,15 +177,17 @@ def check_analysis(use_analysis):
 
 
 def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
+
+  print(sdf_num)
   
-  dat = isdf.use_sdf(parameters.sdf_num, parameters.pathname, use_analysis = parameters.use_analysis, istart = parameters.istart)
+  dat = isdf.use_sdf(sdf_num, parameters.pathname, use_analysis = parameters.use_analysis, istart = parameters.istart)
   
   snapshot(dat, fig, ax1, var_name = parameters.var_name,
       grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
-      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, cell_track = parameters.cell_track)
+      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, cell_track = parameters.cell_track, visible = parameters.visible)
 
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
-      grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis)
+      grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, visible = parameters.visible)
 
 
 
@@ -202,7 +204,8 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   use_polar = kwargs.get('use_polar', False)
   reset_axis = kwargs.get('reset_axis', True)
   view_anisotropies = kwargs.get('view_anisotropies', False)
-  cell_track = kwargs.get('cell_track', 100)
+  cell_track = kwargs.get('cell_track', 0)
+  visible = kwargs.get('visible', True)
   
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
@@ -219,10 +222,9 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   
   cs = int(np.round(np.shape(c_data)[1] / 2.0))
   loc_cell_track = np.array([x_data[cell_track, cs], y_data[cell_track, cs]])
+  old_loc_cell_track = loc_cell_track
   
   if reset_axis:
-    old_loc_cell_track = loc_cell_track
-    
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
                              np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
   else:
@@ -261,14 +263,15 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   t_data = getattr(time, "data") * getattr(time, 'unit_conversion')
   t_label = getattr(time, "name") + ' = {0:5.3f}'.format(t_data) + getattr(time, "units_new")
   ax1.set_title(t_label, fontsize = fs)
-  
+
   new_xlim = zoomed_axis1[:2] + track_change[0]
   ax1.set_xlim(new_xlim)
   new_ylim = zoomed_axis1[2:] + track_change[1]
   ax1.set_ylim(new_ylim)
-  cbar.draw_all()
-  plt.show()
-
+  
+  if visible:
+    cbar.draw_all()
+    plt.show()
 
 
 def mean_subtract(cc, cl):
@@ -348,6 +351,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     grid_style = 'None'
   else:
     grid_style = 'x'
+  visible = kwargs.get('visible', True)
   
   l1 = getattr(ax, 'line1')
   l2 = getattr(ax1, 'line1')
@@ -419,7 +423,8 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
       + ' = {0:5.3f}'.format(dat.Times.data
       * dat.Times.unit_conversion), fontsize = fs)
 
-  plt.show()
+  if visible:
+    plt.show()
 
 
 def one_dim_grid(grid, grid_conv, x_data, y_data):
