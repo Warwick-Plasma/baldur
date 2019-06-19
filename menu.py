@@ -288,7 +288,7 @@ class snapshot_GUI:
     self.parameters.view_anisotropies = self.anisotropies_variable.get()
     self.parameters.visible = False
     
-    filename1 = 'vid.mp4'
+    filename1 = self.parameters.var_name + '.mp4'
     ani = FuncAnimation(self.fig, op.data_and_plot, frames = range(self.parameters.istart, self.parameters.iend), fargs = (self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters), repeat=False)
 
     writer = FFMpegWriter(fps=24, bitrate=2e6)		
