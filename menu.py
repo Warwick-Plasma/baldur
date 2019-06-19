@@ -277,8 +277,9 @@ class snapshot_GUI:
     self.reset_axis_variable.set(False)
 
   def save_pdf(self):
-    filename1 = 'test.pdf'
-    self.fig.savefig(filename1)
+    self.parameters.var_name = self.combo1.get()
+    pdf_name = self.parameters.var_name + '_' + 'SDF_ {0:04d}'.format(self.parameters.sdf_num) + '.pdf'
+    self.fig.savefig(pdf_name)
   
   def save_video(self):
     self.parameters.grid_boolean = self.grid_variable.get()
