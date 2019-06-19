@@ -4,7 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, RadioButtons
 from matplotlib.animation import FuncAnimation
-from matplotlib.animation import FFMpegWriter
+import matplotlib.animation as ani
 import numpy as np
 import glob
 import sys, os
@@ -197,23 +197,23 @@ class snapshot_GUI:
     self.label_slider1 = tk.Label(app, text = "Select sdf number:")
     self.label_slider1.grid(column=0, row=0)
 
-    self.slider1 = tk.Scale(app, from_ = self.parameters.istart, to = self.parameters.iend, tickinterval=100,
+    self.slider1 = tk.Scale(app, from_=self.parameters.istart, to=self.parameters.iend, tickinterval=100,
                             orient=tk.HORIZONTAL, command=self.callbackFunc,
                             length  = 300, resolution = 1.0)
     self.slider1.grid(column=1, row=0)
     self.slider1.set(self.parameters.istart)
 
     # Combo box - variable
-    self.labelTop_combo1 = tk.Label(app, text = "Select variable:")
+    self.labelTop_combo1 = tk.Label(app, text="Select variable:")
     self.labelTop_combo1.grid(column=0, row=1)
 
-    self.combo1 = ttk.Combobox(app, values = dat.variables)
+    self.combo1 = ttk.Combobox(app, values=dat.variables)
     self.combo1.grid(column=1, row=1)
     self.combo1.current(0)
   
     # check box - grid
     self.grid_variable = tk.BooleanVar(app)
-    self.grid_button = tk.Checkbutton(app, text="grid", variable = self.grid_variable,
+    self.grid_button = tk.Checkbutton(app, text="grid", variable=self.grid_variable,
                                       onvalue=True, offvalue=False)
     self.grid_button.deselect()
     self.grid_button.grid(column=0, row=2)
@@ -229,7 +229,7 @@ class snapshot_GUI:
     # check box - anisotropies
     self.anisotropies_variable = tk.BooleanVar(app)
     self.anisotropies_button = tk.Checkbutton(app, text="View anisotropies",
-                                       variable = self.anisotropies_variable,
+                                       variable=self.anisotropies_variable,
                                        onvalue=True, offvalue=False)
     self.anisotropies_button.deselect()
     self.anisotropies_button.grid(column=0, row=4)
@@ -237,13 +237,13 @@ class snapshot_GUI:
     # check box - Logarithm
     self.log_variable = tk.BooleanVar(app)
     self.log_button = tk.Checkbutton(app, text="Take log_10",
-                                       variable = self.log_variable,
+                                       variable=self.log_variable,
                                        onvalue=True, offvalue=False)
     self.log_button.deselect()
     self.log_button.grid(column=0, row=5)
   
     # button - save fig as pdf
-    self.print_button = tk.Button(app, text="Save .pdf", command = self.save_pdf)
+    self.print_button = tk.Button(app, text="Save .pdf", command=self.save_pdf)
     self.print_button.grid(column=1, row=2)
     
     # button - reset button
@@ -253,11 +253,11 @@ class snapshot_GUI:
     self.reset_axis_variable.set(True)
     
     # button - exit
-    self.exit_button = tk.Button(app, text="Exit", command = self.exit_gui)
+    self.exit_button = tk.Button(app, text="Exit", command=self.exit_gui)
     self.exit_button.grid(column=1, row=4)
     
     # button - save video
-    self.video_button = tk.Button(app, text="Save video", command = self.save_video)
+    self.video_button = tk.Button(app, text="Save video", command=self.save_video)
     self.video_button.grid(column=1, row=5)
     
     self.app.bind('<Left>', self.leftKey)
@@ -294,11 +294,14 @@ class snapshot_GUI:
   def save_video(self):
     self.parameters.reset_axis = self.reset_axis_variable.get()
     
+    self.fig.set_figheight(6)
+    self.fig.set_figwidth(10)
+    
     filename1 = self.parameters.var_name + '.mp4'
-    ani = FuncAnimation(self.fig, op.data_and_plot, frames = range(self.parameters.istart, self.parameters.iend), fargs = (self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters), repeat=False)
+    animation = ani.FuncAnimation(self.fig, op.data_and_plot, frames=range(self.parameters.istart, self.parameters.iend), fargs=(self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters), repeat=False)
 
-    writer = FFMpegWriter(fps=24, bitrate=2e6)		
-    ani.save(filename1, writer=writer)
+    writer = ani.FFMpegWriter(fps=24, bitrate=2e6)
+    animation.save(filename1, writer=writer)
   
   def exit_gui(self):
     plt.close(self.fig)
