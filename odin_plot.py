@@ -85,7 +85,9 @@ def time_history(dat, fig, ax1, *args, **kwargs):
   ax1.set_xlim(zoomed_axis1[:2])
   ax1.set_ylim(zoomed_axis1[2:])
   cbar.draw_all()
+  
   plt.show()
+
 
 
 def two_dim_grid(dat, data):
@@ -186,10 +188,10 @@ def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
   
   snapshot(dat, fig, ax1, var_name = parameters.var_name,
       grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
-      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, cell_track = parameters.cell_track, visible = parameters.visible)
+      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, cell_track = parameters.cell_track)
 
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
-      grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, visible = parameters.visible)
+      grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis)
 
 
 
@@ -207,7 +209,6 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   reset_axis = kwargs.get('reset_axis', True)
   view_anisotropies = kwargs.get('view_anisotropies', False)
   cell_track = kwargs.get('cell_track', 0)
-  visible = kwargs.get('visible', True)
   
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
@@ -270,10 +271,10 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   ax1.set_xlim(new_xlim)
   new_ylim = zoomed_axis1[2:] + track_change[1]
   ax1.set_ylim(new_ylim)
+  cbar.draw_all()
   
-  if visible:
-    cbar.draw_all()
-    plt.show()
+  plt.show()
+
 
 
 def mean_subtract(cc, cl):
@@ -353,7 +354,6 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     grid_style = 'None'
   else:
     grid_style = 'x'
-  visible = kwargs.get('visible', True)
   
   l1 = getattr(ax, 'line1')
   l2 = getattr(ax1, 'line1')
@@ -425,8 +425,8 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
       + ' = {0:5.3f}'.format(dat.Times.data
       * dat.Times.unit_conversion), fontsize = fs)
 
-  if visible:
-    plt.show()
+  plt.show()
+
 
 
 def one_dim_grid(grid, grid_conv, x_data, y_data):
