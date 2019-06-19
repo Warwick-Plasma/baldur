@@ -266,7 +266,7 @@ class snapshot_GUI:
     self.grid_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.polar_button.bind("<ButtonRelease-1>", self.callbackFunc1)
     self.anisotropies_button.bind("<ButtonRelease-1>", self.callbackFunc)
-    self.log_button.bind("<ButtonRelease-1>", self.callbackFunc)
+    self.log_button.bind("<ButtonRelease-1>", self.callbackFunc1)
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
     
   def callbackFunc1(self, event):

@@ -191,7 +191,7 @@ def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
       reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, cell_track = parameters.cell_track, use_log = parameters.use_log)
 
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
-      grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis)
+      grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log)
 
 
 
@@ -365,6 +365,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     grid_style = 'None'
   else:
     grid_style = 'x'
+  use_log = kwargs.get('use_log', False)
   
   l1 = getattr(ax, 'line1')
   l2 = getattr(ax1, 'line1')
@@ -378,9 +379,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   name = var.name
   units = var.units_new
   
-  l1.set_ydata(y_data)
   y_label = name + ' (' + units + ')'
-  ax.set_ylabel(y_label, fontsize = fs)
     
   ax.xaxis.get_offset_text().set_size(fs)
   ax.yaxis.get_offset_text().set_size(fs)
@@ -402,34 +401,52 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   
   y_data1 = one_dim_grid(np.array(grid_data)[:,:,cs], grid_conv, x_data, y_data1)
   
+  x_label = grid_name + " (" + grid_units + ")"
+  y_label1 = name + " (" + units + ")"
+  
+  if use_log:
+    ymin = np.log10(np.mean(y_data[:-1] / 100))
+    ymax = np.log10(np.max(y_data[:-1]) * 2)
+    ymin1 = np.log10(np.mean(y_data1[:-1] / 100))
+    ymax1 =  np.log10(np.max(y_data1[:-1]) * 2)
+    y_data = np.log10(y_data)
+    y_data1 = np.log10(y_data1)
+    y_label = 'log10(' + y_label + ')'
+    y_label1 = 'log10(' + y_label1 + ')'
+  else:
+    ymin = np.min(y_data[:-1])
+    ymax = 1.3 * np.max(y_data[:-1])
+    ymin1 = np.min(y_data1[:-1])
+    ymax1 = 1.3 * np.max(y_data1[:-1])
+  
+  if reset_axis:
+    zoomed_axis = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
+                            ymin, ymax])
+    zoomed_axis1 = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
+                             ymin1, ymax1])
+  else:
+    zoomed_axis = np.array([ax.get_xlim()[0], ax.get_xlim()[1], 
+                             ax.get_ylim()[0], ax.get_ylim()[1]])
+    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
+                             ymin1, ymax1])
+  
   l1.set_xdata(x_data)
+  l1.set_ydata(y_data)
   l2.set_xdata(x_data)
   l3.set_xdata(x_data)
   l3.set_ydata(y_data1)
   
   l1.set_marker(grid_style)
-  
-  x_label = grid_name + " (" + grid_units + ")"
-  y_label = name + " (" + units + ")"
 
   ax.set_xlabel(x_label, fontsize = fs)
-  ax1.set_ylabel(y_label, color='tab:red', fontsize = fs)
+  ax.set_ylabel(y_label, fontsize = fs)
+  ax1.set_ylabel(y_label1, color='tab:red', fontsize = fs)
 
   ax.tick_params(axis='x', labelsize = fs)
   ax.tick_params(axis='y', labelsize = fs)
   ax1.tick_params(axis='y', labelsize = fs)
   ax1.yaxis.get_offset_text().set_size(fs)
   
-  if reset_axis:
-    zoomed_axis = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
-                             np.min(y_data[:-1]), 1.3 * np.max(y_data[:-1])])
-    zoomed_axis1 = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
-                             np.min(y_data1[:-1]), 1.3 * np.max(y_data1[:-1])])
-  else:
-    zoomed_axis = np.array([ax.get_xlim()[0], ax.get_xlim()[1], 
-                             ax.get_ylim()[0], ax.get_ylim()[1]])
-    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
-                             np.min(y_data1[:-1]), 1.3 * np.max(y_data1[:-1])])
   ax.set_xlim(zoomed_axis[:2])
   ax.set_ylim(zoomed_axis[2:])
   ax1.set_xlim(zoomed_axis1[:2])
