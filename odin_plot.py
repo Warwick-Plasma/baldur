@@ -9,7 +9,9 @@ from matplotlib.widgets import Slider, RadioButtons
 
 # This sets a global fontsize
 global fs
+global small_num
 fs = 12
+small_num = 1e-100
 
 
 
@@ -50,7 +52,7 @@ def time_history(dat, fig, ax1, *args, **kwargs):
     _, y_data = np.meshgrid(dat.Times.all_time_data, pos, indexing='ij')
     y_label = 'Cell Number'
 
-  cbar_range = np.max(c_data) - np.min(c_data)
+  cbar_range = np.max(c_data) - np.min(c_data) + small_num
   cbar_max = np.min(c_data) + np.exp(np.log(cbar_range) + cbar_upscale)
   
   if reset_axis:
@@ -407,7 +409,6 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   y_label1 = name + " (" + units + ")"
   
   if use_log:
-    small_num = 1e-100
     y_data = abs(y_data) + small_num
     y_data1 = abs(y_data1) + small_num
     ymin = np.log10(np.mean(y_data[:-1] / 100))

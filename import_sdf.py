@@ -121,7 +121,6 @@ def preallocate_dat(dat, iend, cs):
     setattr(var, "all_time_data_polar", array)
   
   for var_name in dat.variables:
-    print(var_name)
     var = getattr(dat, var_name)
     data = getattr(var, "data")
     len_x = np.shape(data)[0]
