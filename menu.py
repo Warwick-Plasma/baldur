@@ -282,12 +282,7 @@ class snapshot_GUI:
     self.fig.savefig(pdf_name)
   
   def save_video(self):
-    self.parameters.grid_boolean = self.grid_variable.get()
-    self.parameters.use_polar = self.polar_variable.get()
-    self.parameters.var_name = self.combo1.get()
     self.parameters.reset_axis = self.reset_axis_variable.get()
-    self.parameters.view_anisotropies = self.anisotropies_variable.get()
-    self.parameters.visible = False
     
     filename1 = self.parameters.var_name + '.mp4'
     ani = FuncAnimation(self.fig, op.data_and_plot, frames = range(self.parameters.istart, self.parameters.iend), fargs = (self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters), repeat=False)
@@ -326,7 +321,6 @@ class plot_parameters:
     self.var_name = 'None'
     self.reset_axis = False
     self.view_anisotropies = False
-    self.visible = True
 
 
 
