@@ -7,7 +7,7 @@ import glob
 import sys, os
 from matplotlib.widgets import Slider, RadioButtons
 import analysis_functions as afunc
-
+import time
 
 
 def add_label(dat):
@@ -33,9 +33,10 @@ def add_label(dat):
       var = getattr(dat, var_name)
       data_x = getattr(var, "data")[0]
       data_y = getattr(var, "data")[1]
-      data_X, data_Y = np.meshgrid(data_x, data_y, indexing='ij')
-      data = np.array([data_X, data_Y])
-      setattr(var, "data", data)
+      if (len(np.shape(data_x)) == 1):
+        data_X, data_Y = np.meshgrid(data_x, data_y, indexing='ij')
+        data = np.array([data_X, data_Y])
+        setattr(var, "data", data)
   
   if (dat.Header['code_name'] == 'Odin2D'):
     # User defined
