@@ -29,7 +29,7 @@ def add_label(dat):
   #print("and the conversion might only be true from SI.")
   
   if (dat.Header['code_name'] == 'Epoch2d'):
-    for var_name in dat.grids:
+    for var_name in ['Grid_Grid', 'Grid_Grid_mid']:
       var = getattr(dat, var_name)
       data_x = getattr(var, "data")[0]
       data_y = getattr(var, "data")[1]
@@ -37,7 +37,7 @@ def add_label(dat):
         data_X, data_Y = np.meshgrid(data_x, data_y, indexing='ij')
         data = np.array([data_X, data_Y])
         setattr(var, "data", data)
-  
+
   if (dat.Header['code_name'] == 'Odin2D'):
     # User defined
     var = getattr(dat, "Fluid_Temperature_electron")
