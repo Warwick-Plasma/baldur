@@ -288,6 +288,8 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   ax1.set_ylim(new_ylim)
   cbar.draw_all()
   
+  ax1.set_aspect('equal')
+  
   plt.show()
 
 

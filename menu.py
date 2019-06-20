@@ -294,9 +294,6 @@ class snapshot_GUI:
   def save_video(self):
     self.parameters.reset_axis = self.reset_axis_variable.get()
     
-    self.fig.set_figheight(6)
-    self.fig.set_figwidth(10)
-    
     filename1 = self.parameters.var_name + '.mp4'
     animation = ani.FuncAnimation(self.fig, op.data_and_plot, frames=range(self.parameters.istart, self.parameters.iend), fargs=(self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters), repeat=False)
 
