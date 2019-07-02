@@ -190,7 +190,7 @@ def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
   
   snapshot(dat, fig, ax1, var_name = parameters.var_name,
       grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
-      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, cell_track = parameters.cell_track, use_log = parameters.use_log)
+      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log)
 
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
       grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log)
@@ -210,7 +210,6 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   use_polar = kwargs.get('use_polar', False)
   reset_axis = kwargs.get('reset_axis', True)
   view_anisotropies = kwargs.get('view_anisotropies', False)
-  cell_track = kwargs.get('cell_track', 0)
   use_log = kwargs.get('use_log', False)
   
   var = getattr(dat, var_name)
@@ -227,20 +226,13 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   if view_anisotropies: c_data, c_label = mean_subtract(c_data, c_label)
   
   cs = int(np.round(np.shape(c_data)[1] / 2.0))
-  loc_cell_track = np.array([x_data[cell_track, cs], y_data[cell_track, cs]])
-  old_loc_cell_track = loc_cell_track
   
   if reset_axis:
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
                              np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
   else:
-    old_loc_cell_track = getattr(ax1, "loc_cell_track")
-    
     zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
                              ax1.get_ylim()[0], ax1.get_ylim()[1]])
-  
-  setattr(ax1, "loc_cell_track", loc_cell_track)
-  track_change = loc_cell_track - old_loc_cell_track
   
   ax1.clear() # This is nessasary for speed
   
@@ -282,9 +274,9 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   t_label = getattr(time, "name") + ' = {0:5.3f}'.format(t_data) + getattr(time, "units_new")
   ax1.set_title(t_label, fontsize = fs)
 
-  new_xlim = zoomed_axis1[:2] + track_change[0]
+  new_xlim = zoomed_axis1[:2]
   ax1.set_xlim(new_xlim)
-  new_ylim = zoomed_axis1[2:] + track_change[1]
+  new_ylim = zoomed_axis1[2:]
   ax1.set_ylim(new_ylim)
   cbar.draw_all()
   
