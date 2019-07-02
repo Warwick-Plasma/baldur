@@ -161,7 +161,6 @@ class snapshot_GUI:
     plt.close('all')
     
     self.parameters.cs = 1
-    self.parameters.cell_track = 100
     
     # find sdf files and count
     self.parameters.pathname = os.path.abspath(os.getcwd())
@@ -173,6 +172,7 @@ class snapshot_GUI:
       run_num = int(run_name[:-4])
       run_array[ir] = run_num
     run_array = sorted(run_array)
+    print(run_array, RunCounter)
     self.parameters.istart = int(run_array[0])
     self.parameters.iend = int(run_array[-1])
     self.parameters.sdf_num = self.parameters.istart
@@ -183,9 +183,10 @@ class snapshot_GUI:
         istart = self.parameters.istart)
     
     # create empty figures
-    self.fig = plt.figure(num=1, figsize=(6,6), facecolor='white')
+    self.fig = plt.figure(num=1, figsize=(7.3,6), facecolor='white')
     move_figure(self.fig, 700, 10)
     self.ax1 = plt.axes()
+    #self.ax1.set_aspect('equal', 'box')
     setattr(self.ax1, 'cbar', 'None')
 
     self.fig2 = plt.figure(num=2, figsize=(6,6), facecolor='white')
@@ -322,7 +323,6 @@ class plot_parameters:
     self.use_analysis = False
     self.cs = 0
     self.pathname = 'None'
-    self.cell_track = 0
     self.istart = 0
     self.iend = 0
     self.grid_boolean = False
