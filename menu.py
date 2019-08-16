@@ -172,7 +172,6 @@ class snapshot_GUI:
       run_num = int(run_name[:-4])
       run_array[ir] = run_num
     run_array = sorted(run_array)
-    print(run_array, RunCounter)
     self.parameters.istart = int(run_array[0])
     self.parameters.iend = int(run_array[-1])
     self.parameters.sdf_num = self.parameters.istart
@@ -296,7 +295,7 @@ class snapshot_GUI:
     self.parameters.reset_axis = self.reset_axis_variable.get()
     
     filename1 = self.parameters.var_name + '.mp4'
-    animation = ani.FuncAnimation(self.fig, op.data_and_plot, frames=range(self.parameters.istart, self.parameters.iend), fargs=(self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters), repeat=False)
+    animation = ani.FuncAnimation(self.fig, op.data_and_plot, frames=range(self.parameters.istart, self.parameters.iend+1), fargs=(self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters), repeat=False)
 
     writer = ani.FFMpegWriter(fps=24, bitrate=2e6)
     animation.save(filename1, writer=writer)
