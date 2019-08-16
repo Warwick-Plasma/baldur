@@ -181,7 +181,10 @@ def check_analysis(use_analysis):
 
 
 def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
-
+  """ This routine is called from Tkinter and calls all the plotting routines.
+  The dat file is created with all the data from the sdf file indicated in
+  parameters.
+  """
   print_string = 'Processing file {:4d}'.format(sdf_num) + ' of {:4d}'.format(parameters.iend)
   sys.stdout.write('\r' + print_string)
   sys.stdout.flush()
@@ -342,11 +345,11 @@ def empty_lineout(fig, ax):
   
   l1, = ax.plot(1, lw = 2.5, color='black')
   setattr(ax, 'line1', l1)
+  l2 = ax.axvline(0, lw = 1, color = 'tab:blue', linestyle = '--')
+  setattr(ax, 'line2', l2)
   
-  l2, = ax1.plot(0, lw = 2, color = 'tab:blue')
-  setattr(ax1, 'line1', l2)
   l3, = ax1.plot(0, lw = 2, color = 'tab:red')
-  setattr(ax1, 'line2', l3)
+  setattr(ax1, 'line1', l3)
   ax1.tick_params(axis='y', labelcolor = 'tab:red')
   return ax1
 
@@ -364,8 +367,8 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   use_log = kwargs.get('use_log', False)
   
   l1 = getattr(ax, 'line1')
-  l2 = getattr(ax1, 'line1')
-  l3 = getattr(ax1, 'line2')
+  l2 = getattr(ax, 'line2')
+  l3 = getattr(ax1, 'line1')
   
   if (dat.Header['code_name'] == 'Odin2D'):
     var = dat.Fluid_Rho
@@ -430,7 +433,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   
   l1.set_xdata(x_data)
   l1.set_ydata(y_data)
-  l2.set_xdata(x_data)
+  l2.set_xdata(dat.Critical_Surface.data[cs] * dat.Grid_Grid_mid.unit_conversion)
   l3.set_xdata(x_data)
   l3.set_ydata(y_data1)
   

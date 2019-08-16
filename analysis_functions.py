@@ -13,7 +13,7 @@ class new_variable:
   """
   def __init__(self, *args, **kwargs):
     self.data = kwargs.get('data', 1)
-    self.indices = kwargs.get('indices', 1)
+    self.index = kwargs.get('indices', 1)
     self.all_time_data = kwargs.get('all_time_data', 1)
     self.grid =  kwargs.get('grid', 1)
     self.units = kwargs.get('units', 'Not set')
@@ -204,7 +204,7 @@ def laser(dat, *args, **kwargs):
     crit_surf_ind[iy] = int(zero_crossings[laser_dir])
     crit_rad[iy] = radius[crit_surf_ind[iy],iy]
   setattr(dat, var_name, new_variable(data = crit_rad,
-                                      indices = crit_surf_ind,
+                                      index = crit_surf_ind,
                                       name = "Location of critical surface"))
   
   setattr(dat, "track_surfaces", var_list)
