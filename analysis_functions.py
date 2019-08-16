@@ -43,6 +43,9 @@ def basic(dat):
   grid = dat.Grid_Grid.data
   x = grid[0]
   y = grid[1]
+  
+  nmat = dat.Integer_flags.nmat
+  amu = 1.66053904e-27
 
   # Grids, all grids need to be 3D arrays so we stack radius
   var_list = dat.grids
@@ -105,7 +108,7 @@ def basic(dat):
   var_list.append(var_name)
   dr = np.zeros(np.shape(radius))
   for i in range(len(radius)-1):
-      dr[i, :] = radius[i+1] - radius[i]
+    dr[i, :] = radius[i+1] - radius[i]
   rho = dat.Fluid_Rho.data[:,:]
   rhor = rho * dr
   rhor_cumulative = np.cumsum(rhor, axis=0)
@@ -114,6 +117,31 @@ def basic(dat):
                                       units_new = "g/cm$^2$",
                                       unit_conversion = 0.1,
                                       name = "Areal Density"))
+                                      
+  var_name = "Number_Density_ion"
+  var_list.append(var_name)
+  ni_density = 0.0
+  for imat in range(1,nmat+1):
+    mat_name = getattr(getattr(dat, "material_string_flags_"+str(imat).zfill(3)), "data")['name']
+    a_bar = getattr(getattr(dat, "material_real_flags_"+str(imat).zfill(3)), "a_bar")
+    mat_den = getattr(getattr(dat, "Fluid_Rho_"+mat_name), "data")
+    ni_density = ni_density + mat_den / a_bar / amu
+    
+  setattr(dat, var_name, new_variable(data = ni_density,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "#/m$^3$",
+                                      unit_conversion = 1,
+                                      name = "Number density of ions"))
+  
+  var_name = "Number_Density_electron"
+  var_list.append(var_name)
+  Z = dat.Fluid_Charge_State.data
+  ne_density = Z * ni_density
+  setattr(dat, var_name, new_variable(data = ne_density,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "#/m$^3$",
+                                      unit_conversion = 1,
+                                      name = "Number density of electrons"))
 
   setattr(dat, "variables", var_list)
   
@@ -143,6 +171,15 @@ def laser(dat, *args, **kwargs):
   
   if call_basic:
     dat = basic(dat)
+  
+  laser_wavelength = 351.0e-9
+  laser_k = 2 * np.pi / laser_wavelength
+  n_crit = 8.8e14 / laser_wavelength**2
+  
+  setattr(dat, var_name, new_variable(data = n_crit,
+                                      units_new = "#/m^3",
+                                      unit_conversion = 1,
+                                      name = "Critical density"))
   
   laser_dep = dat.Fluid_Energy_deposited_laser.data
   
