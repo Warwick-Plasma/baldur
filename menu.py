@@ -155,7 +155,7 @@ class snapshot_GUI:
     self.parameters = plot_parameters()
     self.parameters.use_analysis = use_analysis
     app.title("Snapshot GUI")
-    app.geometry('450x200+10+10')
+    app.geometry('500x400+10+10')
     
     plt.ion()
     plt.close('all')
@@ -189,7 +189,7 @@ class snapshot_GUI:
     setattr(self.ax1, 'cbar', 'None')
 
     self.fig2 = plt.figure(num=2, figsize=(6,6), facecolor='white')
-    move_figure(self.fig2, 10, 1000)
+    move_figure(self.fig2, 10, 1050)
     self.ax2 = plt.axes()
     self.ax3 = op.empty_lineout(self.fig2, self.ax2)
     
