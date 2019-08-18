@@ -151,9 +151,10 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   grid_type = sdf.BlockLagrangianMesh
   grid_type2 = sdf.BlockPlainMesh
   
-  dat_variable_names = []
   dat_grid_names = []
+  dat_variable_names = []
   dat_variable_time_names = []
+  dat_track_surfaces = []
   for n in range(0, len(dat_names)):
     var = getattr(dat, dat_names[n])
     if type(var) == variable_type:
@@ -176,6 +177,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
       dat_variable_names.remove(var)
   
   setattr(dat, "grids", dat_grid_names)
+  setattr(dat, "track_surfaces", dat_track_surfaces)
   setattr(dat, "variables", dat_variable_names)
   setattr(dat, "variables_time", dat_variable_time_names)
 		
