@@ -120,8 +120,8 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
   var_name = kwargs.get('var_name', "Laser_Energy_Total_Deposited")
 
   l1 = getattr(ax, 'line1')
-  l2 = getattr(ax1, 'line1')
-  l3 = getattr(ax1, 'line2')
+  l2 = getattr(ax, 'line2')
+  l3 = getattr(ax1, 'line1')
 
   if use_analysis:
     var = dat.Laser_Power_Total_Deposited
@@ -144,7 +144,7 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
 
     x_data = dat.Times.all_time_data
     l1.set_xdata(x_data)
-    l2.set_xdata(x_data)
+    l2.set_xdata(0)
     l3.set_xdata(x_data)
     l3.set_ydata(y_data1)
 

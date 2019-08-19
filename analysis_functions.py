@@ -7,6 +7,9 @@ import sys, os
 from matplotlib.widgets import Slider, RadioButtons
 
 
+global small_number
+small_number = 1e-100
+
 
 class new_variable:
   """
@@ -110,7 +113,7 @@ def basic(dat):
   dr = np.zeros(np.shape(radius))
   for i in range(len(radius)-1):
     dr[i, :] = radius[i+1] - radius[i]
-  rho = dat.Fluid_Rho.data[:,:]
+  rho = dat.Fluid_Rho.data
   rhor = rho * dr
   rhor_cumulative = np.cumsum(rhor, axis=0)
   setattr(dat, var_name, new_variable(data = rhor_cumulative,
@@ -119,7 +122,7 @@ def basic(dat):
                                       unit_conversion = 0.1,
                                       name = "Areal Density"))
                                       
-  var_name = "Fluid_Number_Density_ion"
+  var_name = "Fluid_Number_density_ion"
   var_list.append(var_name)
   ni_density = 0.0
   for imat in range(1,nmat+1):
@@ -134,7 +137,7 @@ def basic(dat):
                                       unit_conversion = 1,
                                       name = "Number density of ions"))
   
-  var_name = "Fluid_Number_Density_electron"
+  var_name = "Fluid_Number_density_electron"
   var_list.append(var_name)
   Z = dat.Fluid_Charge_State.data
   ne_density = Z * ni_density
@@ -192,7 +195,7 @@ def laser(dat, *args, **kwargs):
   
   var_name = "Critical_Surface"
   var_list.append(var_name)
-  ne_density = dat.Fluid_Number_Density_electron.data
+  ne_density = dat.Fluid_Number_density_electron.data
   search_for_crossing = ne_density - n_crit
   nx, ny = ne_density.shape
   crit_surf_ind = [0] * ny
@@ -209,28 +212,51 @@ def laser(dat, *args, **kwargs):
   
   setattr(dat, "track_surfaces", var_list)
   
-  if laser_change:
-    # Variables that change in time and space
-    var_list = dat.variables
-	  
-    var_name = "Laser_Energy_per_step"
-    var_list.append(var_name)
-    if sdf_num == istart:
-      las_dep_step = laser_dep
-    elif sdf_num >= istart:
-      SDFName=pathname+'/'+str(sdf_num-1).zfill(4)+'.sdf'
-      dat2 = sh.getdata(SDFName,verbose=False)
-      las_dep_step = laser_dep - dat2.Fluid_Energy_deposited_laser.data
-    else:
-      print('Error with laser change calculation')
-      print('sdf_num = ', sdf_num, ' and the minimum = ', istart)
-    setattr(dat, var_name, new_variable(data = las_dep_step,
-                                        grid = dat.Grid_Grid,
-                                        units_new = "J/kg",
-                                        unit_conversion = 1,
-                                        name = "Laser Energy Deposited"))
+  # Variables that change in time and space 
+  var_list = dat.variables
+
+  var_name = "Laser_Energy_per_step"
+  var_list.append(var_name)
+  if sdf_num == istart:
+    las_dep_step = laser_dep
+  elif sdf_num >= istart:
+    SDFName=pathname+'/'+str(sdf_num-1).zfill(4)+'.sdf'
+    dat2 = sh.getdata(SDFName,verbose=False)
+    las_dep_step = laser_dep - dat2.Fluid_Energy_deposited_laser.data
+  else:
+    print('Error with laser change calculation')
+    print('sdf_num = ', sdf_num, ' and the minimum = ', istart)
+  setattr(dat, var_name, new_variable(data = las_dep_step,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "J/kg",
+                                      unit_conversion = 1,
+                                      name = "Laser Energy Deposited"))
   
-    setattr(dat, "variables", var_list)
+  var_name = "Fluid_Number_density_electron_per_critical"
+  var_list.append(var_name)
+  ne_per_crit = ne_density / n_crit
+  setattr(dat, var_name, new_variable(data = ne_per_crit,
+                                      grid = dat.Grid_Grid,
+                                      units_new = '$n_{crit}$',
+                                      unit_conversion = 1,
+                                      name = "Electron number density"))
+  
+  var_name = "Fluid_Density_scale_length"
+  var_list.append(var_name)
+  grad_ne_density = gradient_function(ne_density, dat.Grid_Grid_mid.data)
+  density_scale_length = np.zeros(dat.Grid_Grid_mid.data[0].shape)
+  density_scale_length[1:-1,1:-1] = abs(ne_density[1:-1,1:-1] / (grad_ne_density[1:-1,1:-1] + small_number))
+  # Remeber unit conversions are applied after!!
+  max_val = 1e-2
+  density_scale_length = np.where(density_scale_length < max_val, density_scale_length, 0.0)
+  setattr(dat, var_name, new_variable(data = density_scale_length,
+                                      grid = dat.Grid_Grid,
+                                      units_new = dat.Grid_Grid.units_new,
+                                      unit_conversion = dat.Grid_Grid.unit_conversion,
+                                      name = "Density Scale length $l_n$"))
+  
+  
+  setattr(dat, "variables", var_list)
   
   # variables that only change in time
   var_list = dat.variables_time
@@ -259,8 +285,6 @@ def adiabat(dat, *args, **kwargs):
   if dat.Logical_flags.use_rz:
     fac = 2*np.pi
 
-  small_number = 1e-100
-
   rho = dat.Fluid_Rho.data
   pressure = dat.Fluid_Pressure.data
   
@@ -285,10 +309,7 @@ def adiabat(dat, *args, **kwargs):
   # As used by Craxton et al 2015 the inverse pressure scale length
   # makes the discontinous shock clear. Requires similar spatial and
   # temporal resolution
-  dx = dat.Radius_mid.data[0][:-1,:-1] - dat.Radius_mid.data[0][1:,:-1]
-  dlnp = np.log(pressure[:-1,:-1] + small_number) - np.log(pressure[1:,:-1] + small_number)
-  pressure_ls = np.zeros(dat.Radius_mid.data[0].shape)
-  pressure_ls[1:,1:] = np.abs(dlnp / dx)
+  pressure_ls = gradient_function(np.log(pressure + small_number), dat.Grid_Grid_mid.data)
   setattr(dat, var_name, new_variable(data = pressure_ls,
                                       grid = dat.Grid_Grid,
                                       units_new = "unitless",
@@ -389,7 +410,21 @@ def time_variables(dat, *args, **kwargs):
   
   setattr(dat, "variables_time", var_list)
 
-
+def gradient_function(param, grid):
+  
+  xc = grid[0]
+  yc = grid[1]
+  
+  dx = ((xc[:-2,1:-1] - xc[2:,1:-1])**2 +
+        (yc[:-2,1:-1] - yc[2:,1:-1])**2)**0.5
+  dy = ((xc[1:-1,:-2] - xc[1:-1,2:])**2 +
+        (yc[1:-1,:-2] - yc[1:-1,2:])**2)**0.5
+  dlnpx = param[:-2,1:-1] - param[2:,1:-1]
+  dlnpy = param[1:-1,:-2] - param[1:-1,2:]
+  grad_param = np.zeros(grid[0].shape)
+  grad_param[1:-1,1:-1] = np.abs(dlnpx / dx) + np.abs(dlnpy / dy)
+  
+  return grad_param
 
 def main():
 	"""
