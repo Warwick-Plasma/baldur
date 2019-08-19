@@ -433,7 +433,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   
   l1.set_xdata(x_data)
   l1.set_ydata(y_data)
-  l2.set_xdata(dat.Critical_Surface.data[cs] * dat.Grid_Grid_mid.unit_conversion)
+  l2.set_xdata(dat.Critical_Surface_quarter.data[cs] * dat.Critical_Surface_quarter.unit_conversion)
   l3.set_xdata(x_data)
   l3.set_ydata(y_data1)
   

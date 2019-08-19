@@ -183,32 +183,51 @@ def laser(dat, *args, **kwargs):
   n_crit = 8.8e14 / laser_wavelength**2
   laser_dir = -1
   
+  laser_dep = dat.Fluid_Energy_deposited_laser.data
+  
   var_name = "Critical_Density"
   setattr(dat, var_name, new_variable(data = n_crit,
                                       units_new = "#/m^3",
                                       unit_conversion = 1,
                                       name = "Critical density"))
-  
-  laser_dep = dat.Fluid_Energy_deposited_laser.data
+
+  ne_density = dat.Fluid_Number_density_electron.data
+  crit_crossing = ne_density - n_crit
+  quart_crit_crossing = ne_density - n_crit / 4.0
+  nx, ny = ne_density.shape
+  crit_surf_ind = [0] * ny
+  crit_rad = np.zeros(ny)
+  quart_crit_surf_ind = [0] * ny
+  quart_crit_rad = np.zeros(ny)
+  # 1 critical surface is chosen based on direction of laser propagation
+  for iy in range(0,ny):
+    zero_crossings = np.where(np.diff(np.sign(crit_crossing[:,iy])))[0]
+    zero_crossings = np.append(0, zero_crossings)
+    crit_surf_ind[iy] = int(zero_crossings[laser_dir])
+    crit_rad[iy] = radius[crit_surf_ind[iy],iy]
+    
+    zero_crossings = np.where(np.diff(np.sign(quart_crit_crossing[:,iy])))[0]
+    zero_crossings = np.append(0, zero_crossings)
+    quart_crit_surf_ind[iy] = int(zero_crossings[laser_dir])
+    quart_crit_rad[iy] = radius[quart_crit_surf_ind[iy],iy]
   
   var_list = dat.track_surfaces
   
   var_name = "Critical_Surface"
   var_list.append(var_name)
-  ne_density = dat.Fluid_Number_density_electron.data
-  search_for_crossing = ne_density - n_crit
-  nx, ny = ne_density.shape
-  crit_surf_ind = [0] * ny
-  crit_rad = np.zeros(ny)
-  # 1 critical surface is chosen based on direction of laser propagation
-  for iy in range(0,ny):
-    zero_crossings = np.where(np.diff(np.sign(search_for_crossing[:,iy])))[0]
-    zero_crossings = np.append(0, zero_crossings)
-    crit_surf_ind[iy] = int(zero_crossings[laser_dir])
-    crit_rad[iy] = radius[crit_surf_ind[iy],iy]
   setattr(dat, var_name, new_variable(data = crit_rad,
                                       index = crit_surf_ind,
+                                      units_new = dat.Grid_Grid.units_new,
+                                      unit_conversion = dat.Grid_Grid.unit_conversion,
                                       name = "Location of critical surface"))
+    
+  var_name = "Critical_Surface_quarter"
+  var_list.append(var_name)
+  setattr(dat, var_name, new_variable(data = quart_crit_rad,
+                                      index = quart_crit_surf_ind,
+                                      units_new = dat.Grid_Grid.units_new,
+                                      unit_conversion = dat.Grid_Grid.unit_conversion,
+                                      name = "Location of quarter critical surface"))
   
   setattr(dat, "track_surfaces", var_list)
   
