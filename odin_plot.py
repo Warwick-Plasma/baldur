@@ -196,7 +196,7 @@ def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
       reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log)
 
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
-      grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log)
+      grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log, surface_name = parameters.surface_name)
 
 
 
@@ -365,6 +365,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   else:
     grid_style = 'x'
   use_log = kwargs.get('use_log', False)
+  surface_name = kwargs.get('surface_name', 'None')
   
   l1 = getattr(ax, 'line1')
   l2 = getattr(ax, 'line2')
@@ -433,9 +434,14 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   
   l1.set_xdata(x_data)
   l1.set_ydata(y_data)
-  l2.set_xdata(dat.Critical_Surface_quarter.data[cs] * dat.Critical_Surface_quarter.unit_conversion)
   l3.set_xdata(x_data)
   l3.set_ydata(y_data1)
+  
+  if surface_name == 'None':
+    l2.set_xdata(0.0)
+  else:
+    surface = getattr(dat, surface_name)
+    l2.set_xdata(surface.data[cs] * surface.unit_conversion)
   
   l1.set_marker(grid_style)
 
