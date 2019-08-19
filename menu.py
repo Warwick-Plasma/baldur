@@ -192,6 +192,7 @@ class snapshot_GUI:
     move_figure(self.fig2, 10, 1050)
     self.ax2 = plt.axes()
     self.ax3 = op.empty_lineout(self.fig2, self.ax2)
+    setattr(self.ax2 , "loc_cell_track", 0)
     
     # slider - time
     self.label_slider1 = tk.Label(app, text = "Select sdf number:")

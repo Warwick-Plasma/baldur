@@ -194,7 +194,7 @@ def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
   snapshot(dat, fig, ax1, var_name = parameters.var_name,
       grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
       reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log)
-
+  
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
       grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log, surface_name = parameters.surface_name)
 
@@ -439,9 +439,19 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   
   if surface_name == 'None':
     l2.set_xdata(0.0)
+    surface_location = 'None'
+    surface_move = 0.0
   else:
+    old_surface_location = getattr(ax, "loc_cell_track")
     surface = getattr(dat, surface_name)
-    l2.set_xdata(surface.data[cs] * surface.unit_conversion)
+    surface_location = surface.data[cs] * surface.unit_conversion
+    if old_surface_location == 'None':
+      surface_move = 0.0
+    else:
+      surface_move = surface_location - old_surface_location
+    l2.set_xdata(surface_location)
+    
+  setattr(ax, "loc_cell_track", surface_location)
   
   l1.set_marker(grid_style)
 
@@ -454,9 +464,9 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax1.tick_params(axis='y', labelsize = fs)
   ax1.yaxis.get_offset_text().set_size(fs)
   
-  ax.set_xlim(zoomed_axis[:2])
+  ax.set_xlim(zoomed_axis[:2] + surface_move)
   ax.set_ylim(zoomed_axis[2:])
-  ax1.set_xlim(zoomed_axis1[:2])
+  ax1.set_xlim(zoomed_axis1[:2] + surface_move)
   ax1.set_ylim(zoomed_axis1[2:])
   
   ax.set_title(dat.Times.name
