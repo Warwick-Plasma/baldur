@@ -120,8 +120,8 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
   var_name = kwargs.get('var_name', "Laser_Energy_Total_Deposited")
 
   l1 = getattr(ax, 'line1')
-  l2 = getattr(ax1, 'line1')
-  l3 = getattr(ax1, 'line2')
+  l2 = getattr(ax, 'line2')
+  l3 = getattr(ax1, 'line1')
 
   if use_analysis:
     var = dat.Laser_Power_Total_Deposited
@@ -144,7 +144,7 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
 
     x_data = dat.Times.all_time_data
     l1.set_xdata(x_data)
-    l2.set_xdata(x_data)
+    l2.set_xdata(0)
     l3.set_xdata(x_data)
     l3.set_ydata(y_data1)
 
@@ -194,9 +194,9 @@ def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
   snapshot(dat, fig, ax1, var_name = parameters.var_name,
       grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
       reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log)
-
+  
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
-      grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log)
+      grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log, surface_name = parameters.surface_name)
 
 
 
@@ -365,6 +365,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   else:
     grid_style = 'x'
   use_log = kwargs.get('use_log', False)
+  surface_name = kwargs.get('surface_name', 'None')
   
   l1 = getattr(ax, 'line1')
   l2 = getattr(ax, 'line2')
@@ -433,9 +434,24 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   
   l1.set_xdata(x_data)
   l1.set_ydata(y_data)
-  l2.set_xdata(dat.Critical_Surface.data[cs] * dat.Grid_Grid_mid.unit_conversion)
   l3.set_xdata(x_data)
   l3.set_ydata(y_data1)
+  
+  if surface_name == 'None':
+    l2.set_xdata(0.0)
+    surface_location = 'None'
+    surface_move = 0.0
+  else:
+    old_surface_location = getattr(ax, "loc_cell_track")
+    surface = getattr(dat, surface_name)
+    surface_location = surface.data[cs] * surface.unit_conversion
+    if old_surface_location == 'None':
+      surface_move = 0.0
+    else:
+      surface_move = surface_location - old_surface_location
+    l2.set_xdata(surface_location)
+    
+  setattr(ax, "loc_cell_track", surface_location)
   
   l1.set_marker(grid_style)
 
@@ -448,9 +464,9 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax1.tick_params(axis='y', labelsize = fs)
   ax1.yaxis.get_offset_text().set_size(fs)
   
-  ax.set_xlim(zoomed_axis[:2])
+  ax.set_xlim(zoomed_axis[:2] + surface_move)
   ax.set_ylim(zoomed_axis[2:])
-  ax1.set_xlim(zoomed_axis1[:2])
+  ax1.set_xlim(zoomed_axis1[:2] + surface_move)
   ax1.set_ylim(zoomed_axis1[2:])
   
   ax.set_title(dat.Times.name

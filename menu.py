@@ -192,6 +192,7 @@ class snapshot_GUI:
     move_figure(self.fig2, 10, 1050)
     self.ax2 = plt.axes()
     self.ax3 = op.empty_lineout(self.fig2, self.ax2)
+    setattr(self.ax2 , "loc_cell_track", 0)
     
     # slider - time
     self.label_slider1 = tk.Label(app, text = "Select sdf number:")
@@ -259,6 +260,15 @@ class snapshot_GUI:
     # button - save video
     self.video_button = tk.Button(app, text="Save video", command=self.save_video)
     self.video_button.grid(column=1, row=5)
+
+    # Combo box - surface tracking
+    self.label_combo_surf = tk.Label(app, text="Select a surface to track:")
+    self.label_combo_surf.grid(column=0, row=6)
+
+    dat.track_surfaces.insert(0,'None')
+    self.combo_surf = ttk.Combobox(app, values=dat.track_surfaces)
+    self.combo_surf.grid(column=1, row=6)
+    self.combo_surf.current(0)
     
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
@@ -268,8 +278,11 @@ class snapshot_GUI:
     self.anisotropies_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.log_button.bind("<ButtonRelease-1>", self.callbackFunc1)
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
+    self.combo_surf.bind("<<ComboboxSelected>>", self.callbackFunc)
     
   def callbackFunc1(self, event):
+    """This function resets the grid before calling other functions
+    """
     self.reset_axis_variable.set(True)
     self.callbackFunc(event)
 
@@ -281,6 +294,7 @@ class snapshot_GUI:
     self.parameters.reset_axis = self.reset_axis_variable.get()
     self.parameters.view_anisotropies = self.anisotropies_variable.get()
     self.parameters.use_log = self.log_variable.get()
+    self.parameters.surface_name = self.combo_surf.get()
     
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters)
 
@@ -330,6 +344,7 @@ class plot_parameters:
     self.reset_axis = False
     self.view_anisotropies = False
     self.use_log = False
+    self.surface_name = 'None'
 
 
 
