@@ -70,8 +70,8 @@ def time_history(dat, fig, ax1, *args, **kwargs):
   if cbar == 'None':
     cbar = fig.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
-  #cmesh.set_clim(np.min(c_data), cbar_max)
-  #cbar.set_clim(np.min(c_data), cbar_max)
+  cmesh.set_clim(np.min(c_data), cbar_max)
+  cbar.set_clim(np.min(c_data), cbar_max)
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
@@ -258,8 +258,8 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   if cbar == 'None':
     cbar = fig.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
-  #cmesh.set_clim(cmin, cmax)
-  #cbar.set_clim(cmin, cmax)
+  cmesh.set_clim(cmin, cmax)
+  cbar.set_clim(cmin, cmax)
   
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
