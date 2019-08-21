@@ -4,6 +4,31 @@ git clone git@cfsa-pmw.warwick.ac.uk:SDF/baldur.git
 
 add to your .bashrc :
 export PYTHONPATH="${PYTHONPATH}:/home/duncan/baldur"
+export PYTHONSTARTUP=~/.pythonrc 
+
+create a file called .pythonrc with this inside:
+# modules
+import sdf_helper as sh
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider, RadioButtons
+import numpy as np
+import glob
+import sys, os
+import tkinter as tk
+from tkinter import ttk
+import odin_plot as op
+import import_sdf as isdf
+import menu as mu
+print('Modules and constants loaded')
+
+you will need SDF installed to proceed any further:
+cd SDF/C
+make
+cd ../FORTRAN
+make
+cd ../utilities
+./build
 
 Now in start ipython with:
 ipython
