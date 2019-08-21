@@ -12,6 +12,7 @@ import tkinter as tk
 from tkinter import ttk
 import odin_plot as op
 import import_sdf as isdf
+plt.switch_backend('TkAgg')
 
 
 

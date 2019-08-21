@@ -8,6 +8,7 @@ import sys, os
 from matplotlib.widgets import Slider, RadioButtons
 import analysis_functions as afunc
 import time
+plt.switch_backend('TkAgg')
 
 
 def add_label(dat):

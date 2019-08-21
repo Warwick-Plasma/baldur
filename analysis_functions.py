@@ -5,6 +5,7 @@ import numpy as np
 import glob
 import sys, os
 from matplotlib.widgets import Slider, RadioButtons
+plt.switch_backend('TkAgg')
 
 
 global small_number
