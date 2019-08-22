@@ -63,7 +63,7 @@ class time_history_GUI:
     runs = glob.glob1(self.pathname,"*.sdf")
     RunCounter = len(runs)
     run_array = np.zeros(RunCounter)
-    for ir in range(0, RunCounter-1):
+    for ir in range(0, RunCounter):
       run_name = runs[ir]
       run_num = int(run_name[:-4])
       run_array[ir] = run_num

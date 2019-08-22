@@ -212,9 +212,9 @@ def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
   irange = iend - istart + 1
   dat1 = preallocate_dat(dat1, irange, cs)
   
-  for n in range(istart+1, irange):     
-    dat = use_sdf(n, pathname, use_analysis = use_analysis)
-      
+  for n in range(1, irange):     
+    dat = use_sdf(istart+n, pathname, use_analysis = use_analysis)
+    
     for var_name in dat.grids:
     	array = getattr(getattr(dat1, var_name), "all_time_data")
     	data = getattr(getattr(dat, var_name), "data")
