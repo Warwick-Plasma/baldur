@@ -34,18 +34,20 @@ def move_figure(f, x, y): # cxrodgers
 
 def options(*args, **kwargs):
   use_analysis = kwargs.get('use_analysis', False)
+  istart = kwargs.get('istart', False)
+  iend = kwargs.get('iend', False)
   op.check_analysis(use_analysis)
   root = tk.Tk()
-  my_gui = snapshot_GUI(root, use_analysis)
+  my_gui = snapshot_GUI(root, use_analysis, istart, iend)
   root.mainloop()
   root = tk.Tk()
-  my_gui = time_history_GUI(root, use_analysis)
+  my_gui = time_history_GUI(root, use_analysis, istart, iend)
   root.mainloop()
 
 
 
 class time_history_GUI:
-  def __init__(self, app, use_analysis):
+  def __init__(self, app, use_analysis, istart, iend):
     self.app = app
     self.use_analysis = use_analysis
     app.title("Time history GUI")
@@ -66,9 +68,15 @@ class time_history_GUI:
       run_num = int(run_name[:-4])
       run_array[ir] = run_num
     run_array = sorted(run_array)
-    self.istart = int(run_array[0])
-    self.iend = int(run_array[-1])
-    sdf_num = int(run_array[0])
+    if istart==False:
+      self.istart = int(run_array[0])
+    else:
+      self.istart = istart
+    if iend==False:
+      self.iend = int(run_array[-1])
+    else:
+      self.iend = iend
+    sdf_num = self.istart
     
     # initial data import, needed for variable selection combo box
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
@@ -151,7 +159,7 @@ class time_history_GUI:
 
 
 class snapshot_GUI:
-  def __init__(self, app, use_analysis):
+  def __init__(self, app, use_analysis, istart, iend):
     self.app = app
     self.parameters = plot_parameters()
     self.parameters.use_analysis = use_analysis
@@ -173,8 +181,14 @@ class snapshot_GUI:
       run_num = int(run_name[:-4])
       run_array[ir] = run_num
     run_array = sorted(run_array)
-    self.parameters.istart = int(run_array[0])
-    self.parameters.iend = int(run_array[-1])
+    if istart==False:
+      self.parameters.istart = int(run_array[0])
+    else:
+      self.parameters.istart = istart
+    if iend==False:
+      self.parameters.iend = int(run_array[-1])
+    else:
+      self.parameters.iend = iend
     self.parameters.sdf_num = self.parameters.istart
 
     # initial data import, needed for variable selection combo box
