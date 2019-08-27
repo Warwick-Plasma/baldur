@@ -196,12 +196,13 @@ class snapshot_GUI:
         use_analysis = self.parameters.use_analysis,
         istart = self.parameters.istart)
     
+    aspc = 1.2
     # create empty figures
-    self.fig = plt.figure(num=1, figsize=(7.3,6), facecolor='white')
+    self.fig = plt.figure(num=1, figsize=(8*aspc,8), facecolor='white')
     move_figure(self.fig, 700, 10)
-    self.ax1 = plt.axes()
+    self.ax1 = self.fig.add_axes([0.15, 0.14, 0.6, 0.6*aspc])
+    self.cax1 = self.fig.add_axes([0.8, 0.14, 0.05, 0.6*aspc])
     #self.ax1.set_aspect('equal', 'box')
-    setattr(self.ax1, 'cbar', 'None')
 
     self.fig2 = plt.figure(num=2, figsize=(6,6), facecolor='white')
     move_figure(self.fig2, 10, 1050)
@@ -311,7 +312,7 @@ class snapshot_GUI:
     self.parameters.use_log = self.log_variable.get()
     self.parameters.surface_name = self.combo_surf.get()
     
-    op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters)
+    op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3, self.parameters)
 
     self.reset_axis_variable.set(False)
 

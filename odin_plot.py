@@ -71,7 +71,7 @@ def time_history(dat, fig, ax1, *args, **kwargs):
     cbar = fig.colorbar(cmesh)
     setattr(ax1, 'cbar', cbar)
   cmesh.set_clim(np.min(c_data), cbar_max)
-  cbar.set_clim(np.min(c_data), cbar_max)
+  #cbar.set_clim(np.min(c_data), cbar_max)
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
@@ -181,7 +181,7 @@ def check_analysis(use_analysis):
 
 
 
-def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
+def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   """ This routine is called from Tkinter and calls all the plotting routines.
   The dat file is created with all the data from the sdf file indicated in
   parameters.
@@ -192,7 +192,7 @@ def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
   
   dat = isdf.use_sdf(sdf_num, parameters.pathname, use_analysis = parameters.use_analysis, istart = parameters.istart)
   
-  snapshot(dat, fig, ax1, var_name = parameters.var_name,
+  snapshot(dat, fig, ax1, cax1, var_name = parameters.var_name,
       grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
       reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log)
   
@@ -201,7 +201,7 @@ def data_and_plot(sdf_num, fig, ax1, fig2, ax2, ax3, parameters):
 
 
 
-def snapshot(dat, fig, ax1, *args, **kwargs):
+def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
   """
   """
   
@@ -239,8 +239,7 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
                              ax1.get_ylim()[0], ax1.get_ylim()[1]])
   
   ax1.clear() # This is nessasary for speed
-  
-  cbar = getattr(ax1, 'cbar')
+  cax1.clear() # This is nessasary for speed
   
   if use_log:
     small_num = 1e-100
@@ -255,11 +254,8 @@ def snapshot(dat, fig, ax1, *args, **kwargs):
   
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
   cmesh.set_edgecolor(grid_colour)
-  if cbar == 'None':
-    cbar = fig.colorbar(cmesh)
-    setattr(ax1, 'cbar', cbar)
   cmesh.set_clim(cmin, cmax)
-  cbar.set_clim(cmin, cmax)
+  cbar = fig.colorbar(cmesh, cax=cax1)
   
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
