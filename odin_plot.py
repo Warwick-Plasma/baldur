@@ -16,7 +16,7 @@ small_num = 1e-100
 
 
 
-def time_history(dat, fig, ax1, *args, **kwargs):
+def time_history(dat, fig, ax1, cax1, *args, **kwargs):
   """A pcolormesh plot of space against time with a variable shown in colour
   """
   
@@ -62,16 +62,14 @@ def time_history(dat, fig, ax1, *args, **kwargs):
   else:
     zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
                              ax1.get_ylim()[0], ax1.get_ylim()[1]])
+  
   ax1.clear() # This is nessasary for speed
+  cax1.clear()
   
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
-  
-  cbar = getattr(ax1, 'cbar')
-  if cbar == 'None':
-    cbar = fig.colorbar(cmesh)
-    setattr(ax1, 'cbar', cbar)
   cmesh.set_clim(np.min(c_data), cbar_max)
-  #cbar.set_clim(np.min(c_data), cbar_max)
+  
+  cbar = fig.colorbar(cmesh, cax=cax1)
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
@@ -239,7 +237,7 @@ def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
                              ax1.get_ylim()[0], ax1.get_ylim()[1]])
   
   ax1.clear() # This is nessasary for speed
-  cax1.clear() # This is nessasary for speed
+  cax1.clear()
   
   if use_log:
     small_num = 1e-100

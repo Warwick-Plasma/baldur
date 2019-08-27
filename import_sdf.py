@@ -212,7 +212,11 @@ def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
   irange = iend - istart + 1
   dat1 = preallocate_dat(dat1, irange, cs)
   
-  for n in range(1, irange):     
+  for n in range(1, irange):
+    print_string = 'Processing file {:4d}'.format(istart+n) + ' of {:4d}'.format(iend)
+    sys.stdout.write('\r' + print_string)
+    sys.stdout.flush()
+    
     dat = use_sdf(istart+n, pathname, use_analysis = use_analysis)
     
     for var_name in dat.grids:

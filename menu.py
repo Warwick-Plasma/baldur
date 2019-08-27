@@ -83,10 +83,11 @@ class time_history_GUI:
     self.dat = isdf.get_data_all(dat, self.istart, self.iend, self.pathname, self.use_analysis, self.cs)
     
     # create empty figures
-    self.fig = plt.figure(num=1, figsize=(6,6), facecolor='white')
+    aspc = 1.2
+    self.fig = plt.figure(num=1, figsize=(8*aspc,8), facecolor='white')
     move_figure(self.fig, 700, 10)
-    self.ax1 = plt.axes()
-    setattr(self.ax1, 'cbar', 'None')
+    self.ax1 = self.fig.add_axes([0.15, 0.14, 0.6, 0.6*aspc])
+    self.cax1 = self.fig.add_axes([0.8, 0.14, 0.05, 0.6*aspc])
 
     self.fig2 = plt.figure(num=2, figsize=(6,6), facecolor='white')
     move_figure(self.fig2, 10, 1000)
@@ -150,7 +151,7 @@ class time_history_GUI:
     cbar_upscale = self.slider1.get()
     reset_axis = self.reset_axis_variable.get()
       
-    op.time_history(self.dat, self.fig, self.ax1, var_name = var_name, cbar_upscale = cbar_upscale, grid = grid_choice, reset_axis = reset_axis)
+    op.time_history(self.dat, self.fig, self.ax1, self.cax1, var_name = var_name, cbar_upscale = cbar_upscale, grid = grid_choice, reset_axis = reset_axis)
       
     op.time_history_lineout(self.dat, self.fig2, self.ax2, self.ax3, var_name = var_name2,  use_analysis = self.use_analysis)
 
@@ -196,8 +197,8 @@ class snapshot_GUI:
         use_analysis = self.parameters.use_analysis,
         istart = self.parameters.istart)
     
-    aspc = 1.2
     # create empty figures
+    aspc = 1.2
     self.fig = plt.figure(num=1, figsize=(8*aspc,8), facecolor='white')
     move_figure(self.fig, 700, 10)
     self.ax1 = self.fig.add_axes([0.15, 0.14, 0.6, 0.6*aspc])
