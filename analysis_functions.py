@@ -106,7 +106,7 @@ def basic(dat):
   speed = np.sqrt(v1**2 + v2**2 + v3**2)
   setattr(dat, var_name, new_variable(data = speed,
                                       grid = dat.Grid_Grid,
-                                      units_new = "m/s$^1$",
+                                      units_new = "m/s",
                                       unit_conversion = 1,
                                       name = "Speed of Cell"))
   var_name = "Rho_r"
