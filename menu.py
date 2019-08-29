@@ -319,7 +319,7 @@ class snapshot_GUI:
 
   def save_pdf(self):
     self.parameters.var_name = self.combo1.get()
-    pdf_name = self.parameters.var_name + '_' + 'SDF_ {0:04d}'.format(self.parameters.sdf_num) + '.pdf'
+    pdf_name = self.parameters.var_name + '_' + 'SDF_{0:04d}'.format(self.parameters.sdf_num) + '.pdf'
     self.fig.savefig(pdf_name)
   
   def save_video(self):
@@ -362,10 +362,6 @@ class plot_parameters:
     self.view_anisotropies = False
     self.use_log = False
     self.surface_name = 'None'
-
-
-
-# Make a figure class
 
 
 
