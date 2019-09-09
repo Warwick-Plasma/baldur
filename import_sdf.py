@@ -164,19 +164,32 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
       dat_grid_names.append(dat_names[n])
     elif type(var) == grid_type2:
       dat_grid_names.append(dat_names[n])
-  
+
   bad_var_list = []
+  for var in dat_grid_names:
+    if ('Ray' in var):
+      bad_var_list.append(var)
+  for var in bad_var_list:
+    dat_grid_names.remove(var)
+
+  bad_var_list = []
+  for var in dat_variable_names:
+    if ('Ray' in var):
+      bad_var_list.append(var)
+  for var in bad_var_list:
+    dat_variable_names.remove(var)
+
   if (dat.Header['code_name'] == 'Epoch2d'):
-    dat_grid_names = ['Grid_Grid', 'Grid_Grid_mid']
+    dat_grid_names = ['Grid_Grid', 'Grid_Grid_mid']    
+    bad_var_list = []
     for var in dat_variable_names:
       if ('CPU' in var):
         bad_var_list.append(var)
       if ('dist' in var):
         bad_var_list.append(var)
-  
     for var in bad_var_list:
       dat_variable_names.remove(var)
-  
+
   setattr(dat, "grids", dat_grid_names)
   setattr(dat, "track_surfaces", dat_track_surfaces)
   setattr(dat, "variables", dat_variable_names)
