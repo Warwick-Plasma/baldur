@@ -285,8 +285,8 @@ def laser(dat, *args, **kwargs):
   var_list.append(var_name)
   tot_laser_dep = np.sum(np.sum(dat.Cell_Mass.data * laser_dep))
   setattr(dat, var_name, new_variable(data = tot_laser_dep,
-                                      units_new = 'J',
-                                      unit_conversion = 1,
+                                      units_new = 'kJ',
+                                      unit_conversion = 1.0e-3,
                                       name = "Total laser energy deposited"))
   
   setattr(dat, "variables_time", var_list)
@@ -424,8 +424,8 @@ def time_variables(dat, *args, **kwargs):
   tot_laser_pwr_dep = np.insert(tot_laser_pwr_dep, 0, 0)
   setattr(dat, var_name, new_variable(data = 0.0,
                                       all_time_data = tot_laser_pwr_dep,
-                                      units_new = 'W',
-                                      unit_conversion = 1,
+                                      units_new = 'TW',
+                                      unit_conversion = 1.0e-12,
                                       name = "Total laser power deposited"))
   
   setattr(dat, "variables_time", var_list)

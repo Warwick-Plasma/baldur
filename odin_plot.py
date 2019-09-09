@@ -37,7 +37,7 @@ def time_history(dat, fig, ax1, cax1, *args, **kwargs):
   
   c_data = getattr(var, "all_time_data") * unit_conv
   y_data, c_data = two_dim_grid(dat, c_data)
-  x_data, y_data1 = np.meshgrid(dat.Times.all_time_data, y_data[0,:], indexing='ij')
+  x_data, y_data1 = np.meshgrid(dat.Times.all_time_data * dat.Times.unit_conversion, y_data[0,:], indexing='ij')
   
   x_label = dat.Times.name + ' (' + getattr(dat.Times, 'units_new') + ')'
   y_label = 'Radius (' + grid_units + ')'
@@ -139,9 +139,9 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
     unit_conv = getattr(var, "unit_conversion")
     units = getattr(var, "units_new")
     name = getattr(var, "name")
-    y_data1 = getattr(var, "all_time_data")
+    y_data1 = getattr(var, "all_time_data") * unit_conv
 
-    x_data = dat.Times.all_time_data
+    x_data = dat.Times.all_time_data * dat.Times.unit_conversion
     l1.set_xdata(x_data)
     l2.set_xdata(0)
     l3.set_xdata(x_data)
