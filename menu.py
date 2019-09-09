@@ -33,15 +33,19 @@ def move_figure(f, x, y): # cxrodgers
 
 
 def options(*args, **kwargs):
+  """This function creates the Tkinter object tk.Tk()
+  """
   use_analysis = kwargs.get('use_analysis', False)
   istart = kwargs.get('istart', False)
   iend = kwargs.get('iend', False)
+  time_history = kwargs.get('time_history', False)
   op.check_analysis(use_analysis)
   root = tk.Tk()
-  my_gui = snapshot_GUI(root, use_analysis, istart, iend)
-  root.mainloop()
-  root = tk.Tk()
-  my_gui = time_history_GUI(root, use_analysis, istart, iend)
+  if (time_history == False):
+    print('Set <time_history = True>?')
+    my_gui = snapshot_GUI(root, use_analysis, istart, iend)
+  else:
+    my_gui = time_history_GUI(root, use_analysis, istart, iend)
   root.mainloop()
 
 
