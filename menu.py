@@ -36,22 +36,49 @@ def options(*args, **kwargs):
   """This function creates the Tkinter object tk.Tk()
   """
   use_analysis = kwargs.get('use_analysis', False)
-  istart = kwargs.get('istart', False)
-  iend = kwargs.get('iend', False)
+  user_istart = kwargs.get('user_istart', False)
+  user_iend = kwargs.get('user_iend', False)
   time_history = kwargs.get('time_history', False)
   op.check_analysis(use_analysis)
   root = tk.Tk()
   if (time_history == False):
     print('Set <time_history = True>?')
-    my_gui = snapshot_GUI(root, use_analysis, istart, iend)
+    my_gui = snapshot_GUI(root, use_analysis, user_istart, user_iend)
   else:
-    my_gui = time_history_GUI(root, use_analysis, istart, iend)
+    my_gui = time_history_GUI(root, use_analysis, user_istart, user_iend)
   root.mainloop()
 
 
 
+def sdf_counter(runs, user_istart, user_iend):
+    RunCounter = len(runs)
+    run_array = np.zeros(RunCounter)
+    for ir in range(0, RunCounter):
+      run_name = runs[ir]
+      run_num = int(run_name[:-4])
+      run_array[ir] = run_num
+    run_array = sorted(run_array)
+    if user_istart==False:
+      istart = int(run_array[0])
+    else:
+      istart = user_istart
+    if user_iend==False:
+      iend = int(run_array[-1])
+    else:
+      iend = user_iend
+    sdf_num = istart
+    
+    return istart, iend, sdf_num
+
+
+
+# Classes are required in these section to store the objects, figures and the
+# various controls defined by tkinter
 class time_history_GUI:
-  def __init__(self, app, use_analysis, istart, iend):
+  """This class creates plots which require data from all of the time
+  snapshot outputs.
+  """
+  def __init__(self, app, use_analysis, user_istart, user_iend):
     self.app = app
     self.use_analysis = use_analysis
     app.title("Time history GUI")
@@ -65,22 +92,7 @@ class time_history_GUI:
     # find sdf files and count
     self.pathname = os.path.abspath(os.getcwd())
     runs = glob.glob1(self.pathname,"*.sdf")
-    RunCounter = len(runs)
-    run_array = np.zeros(RunCounter)
-    for ir in range(0, RunCounter):
-      run_name = runs[ir]
-      run_num = int(run_name[:-4])
-      run_array[ir] = run_num
-    run_array = sorted(run_array)
-    if istart==False:
-      self.istart = int(run_array[0])
-    else:
-      self.istart = istart
-    if iend==False:
-      self.iend = int(run_array[-1])
-    else:
-      self.iend = iend
-    sdf_num = self.istart
+    self.istart, self.iend, sdf_num = sdf_counter(runs, user_istart, user_iend)
     
     # initial data import, needed for variable selection combo box
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
@@ -164,7 +176,7 @@ class time_history_GUI:
 
 
 class snapshot_GUI:
-  def __init__(self, app, use_analysis, istart, iend):
+  def __init__(self, app, use_analysis, user_istart, user_iend):
     self.app = app
     self.parameters = plot_parameters()
     self.parameters.use_analysis = use_analysis
@@ -175,26 +187,10 @@ class snapshot_GUI:
     plt.close('all')
     
     self.parameters.cs = 1
-    
     # find sdf files and count
     self.parameters.pathname = os.path.abspath(os.getcwd())
     runs = glob.glob1(self.parameters.pathname,"*.sdf")
-    RunCounter = len(runs)
-    run_array = np.zeros(RunCounter)
-    for ir in range(0, RunCounter):
-      run_name = runs[ir]
-      run_num = int(run_name[:-4])
-      run_array[ir] = run_num
-    run_array = sorted(run_array)
-    if istart==False:
-      self.parameters.istart = int(run_array[0])
-    else:
-      self.parameters.istart = istart
-    if iend==False:
-      self.parameters.iend = int(run_array[-1])
-    else:
-      self.parameters.iend = iend
-    self.parameters.sdf_num = self.parameters.istart
+    self.parameters.istart, self.parameters.iend, self.parameters.sdf_num = sdf_counter(runs, user_istart, user_iend)
 
     # initial data import, needed for variable selection combo box
     dat = isdf.use_sdf(self.parameters.sdf_num, self.parameters.pathname,
