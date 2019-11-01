@@ -126,11 +126,17 @@ def basic(dat):
   var_name = "Fluid_Number_density_ion"
   var_list.append(var_name)
   ni_density = 0.0
-  for imat in range(1,nmat+1):
-    mat_name = getattr(getattr(dat, "material_string_flags_"+str(imat).zfill(3)), "data")['name']
-    a_bar = getattr(getattr(dat, "material_real_flags_"+str(imat).zfill(3)), "a_bar")
-    mat_den = getattr(getattr(dat, "Fluid_Rho_"+mat_name), "data")
+  if nmat == 1:
+    mat_name = getattr(getattr(dat, "material_string_flags"), "data")['name']
+    a_bar = getattr(getattr(dat, "material_real_flags"), "a_bar")
+    mat_den = getattr(getattr(dat, "Fluid_Rho"), "data")
     ni_density = ni_density + mat_den / a_bar / amu
+  else:
+    for imat in range(1,nmat+1):
+      mat_name = getattr(getattr(dat, "material_string_flags_"+str(imat).zfill(3)), "data")['name']
+      a_bar = getattr(getattr(dat, "material_real_flags_"+str(imat).zfill(3)), "a_bar")
+      mat_den = getattr(getattr(dat, "Fluid_Rho_"+mat_name), "data")
+      ni_density = ni_density + mat_den / a_bar / amu
     
   setattr(dat, var_name, new_variable(data = ni_density,
                                       grid = dat.Grid_Grid,
