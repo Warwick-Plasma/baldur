@@ -98,7 +98,7 @@ def basic(dat):
   mass = dat.Fluid_Rho.data[:,:] * vol[:,:]
   setattr(dat, var_name, new_variable(data = mass,
                                       grid = dat.Grid_Grid,
-                                      units_new = "kg/m$^3$",
+                                      units_new = "kg",
                                       unit_conversion = 1,
                                       name = "Mass"))	
   var_name = "Fluid_Speed"
