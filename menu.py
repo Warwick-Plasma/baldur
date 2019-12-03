@@ -294,6 +294,7 @@ class snapshot_GUI:
     self.scale_max_check.grid(column=0, row=7)
     
     self.entry_scale_max = tk.Entry(app)
+    self.entry_scale_max.insert(0, "1.0")
     self.entry_scale_max.grid(column=1, row=7)
     
     # Bindings
@@ -317,6 +318,7 @@ class snapshot_GUI:
     self.parameters.view_anisotropies = self.anisotropies_variable.get()
     self.parameters.use_log = self.log_variable.get()
     self.parameters.surface_name = self.combo_surf.get()
+    self.parameters.apply_scale_max = self.apply_scale_max.get()
     self.parameters.scale_max = float(self.entry_scale_max.get())
     
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3, self.parameters)

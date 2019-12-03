@@ -192,7 +192,7 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   
   snapshot(dat, fig, ax1, cax1, var_name = parameters.var_name,
       grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
-      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log)
+      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log, apply_scale_max = parameters.apply_scale_max, scale_max = parameters.scale_max)
   
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
       grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log, surface_name = parameters.surface_name)
@@ -213,6 +213,8 @@ def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
   reset_axis = kwargs.get('reset_axis', True)
   view_anisotropies = kwargs.get('view_anisotropies', False)
   use_log = kwargs.get('use_log', False)
+  apply_scale_max = kwargs.get('apply_scale_max', False)
+  scale_max = kwargs.get('scale_max', 1.0)
   
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
@@ -249,6 +251,9 @@ def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
   else:
     cmin = np.min(c_data)
     cmax = np.max(c_data)
+  
+  if apply_scale_max:
+    cmax = scale_max
   
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
   cmesh.set_edgecolor(grid_colour)
