@@ -297,6 +297,16 @@ class snapshot_GUI:
     self.entry_scale_max.insert(0, "1.0")
     self.entry_scale_max.grid(column=1, row=7)
     
+    # Entry - Change cbar scale min
+    self.apply_scale_min = tk.BooleanVar(app)
+    self.scale_min_check = tk.Checkbutton(app, text="Apply min scaling", variable=self.apply_scale_min, onvalue=True, offvalue=False)
+    self.scale_min_check.deselect()
+    self.scale_min_check.grid(column=0, row=8)
+    
+    self.entry_scale_min = tk.Entry(app)
+    self.entry_scale_min.insert(0, "0.0")
+    self.entry_scale_min.grid(column=1, row=8)
+    
     # Bindings
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
@@ -320,6 +330,8 @@ class snapshot_GUI:
     self.parameters.surface_name = self.combo_surf.get()
     self.parameters.apply_scale_max = self.apply_scale_max.get()
     self.parameters.scale_max = float(self.entry_scale_max.get())
+    self.parameters.apply_scale_min = self.apply_scale_min.get()
+    self.parameters.scale_min = float(self.entry_scale_min.get())
     
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3, self.parameters)
 
@@ -378,6 +390,8 @@ class plot_parameters:
     self.surface_name = 'None'
     self.apply_scale_max = False
     self.scale_max = 1.0
+    self.apply_scale_min = False
+    self.scale_min = 0.0
     
 
 

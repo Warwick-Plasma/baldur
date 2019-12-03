@@ -192,7 +192,7 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   
   snapshot(dat, fig, ax1, cax1, var_name = parameters.var_name,
       grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
-      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log, apply_scale_max = parameters.apply_scale_max, scale_max = parameters.scale_max)
+      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log, apply_scale_max = parameters.apply_scale_max, scale_max = parameters.scale_max, apply_scale_min = parameters.apply_scale_min, scale_min = parameters.scale_min)
   
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
       grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log, surface_name = parameters.surface_name)
@@ -215,6 +215,8 @@ def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
   use_log = kwargs.get('use_log', False)
   apply_scale_max = kwargs.get('apply_scale_max', False)
   scale_max = kwargs.get('scale_max', 1.0)
+  apply_scale_min = kwargs.get('apply_scale_min', False)
+  scale_min = kwargs.get('scale_min', 0.0)
   
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
@@ -242,7 +244,6 @@ def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
   cax1.clear()
   
   if use_log:
-    small_num = 1e-100
     c_data = abs(c_data) + small_num
     cmin = np.log10(np.mean(c_data) / 100.0)
     cmax = np.log10(np.max(c_data))
@@ -254,6 +255,8 @@ def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
   
   if apply_scale_max:
     cmax = scale_max
+  if apply_scale_min:
+    cmin = scale_min
   
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
   cmesh.set_edgecolor(grid_colour)
