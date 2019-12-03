@@ -5,6 +5,9 @@ import numpy as np
 import glob
 import import_sdf as isdf
 import sys, os
+from matplotlib import cm
+from matplotlib.collections import LineCollection
+from matplotlib.colors import ListedColormap, BoundaryNorm
 from matplotlib.widgets import Slider, RadioButtons
 plt.switch_backend('TkAgg')
 
@@ -196,6 +199,53 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
       grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log, surface_name = parameters.surface_name)
+
+
+
+def plot_colourline(fig1, ax1, x, y, c, cnorm):
+  # Create a set of line segments so that we can color them individually
+  # This creates the points as a N x 1 x 2 array so that we can stack points
+  # together easily to get the segments. The segments array for line collection
+  # needs to be (numlines) x (points per line) x 2 (for x and y)
+  points = np.array([x, y]).T.reshape(-1, 1, 2)
+  segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+  # Create a continuous norm to map from data points to colors
+  lc = LineCollection(segments, cmap='viridis', norm=cnorm)
+  # Set the values used for colormapping
+  lc.set_array(c)
+  lc.set_linewidth(2)
+  ax1.add_collection(lc)
+
+
+
+def plot_rays(sdf_num):
+  pathname = os.path.abspath(os.getcwd())
+  SDFName = pathname + '/' + str(sdf_num).zfill(4) + '.sdf'
+  dat = sh.getdata(SDFName,verbose=False)
+  
+  fig1 = plt.figure()
+  ax1 = plt.axes()
+  
+  nrays = len(dat.Beam1.data)
+  cmax = max(max(dat.Beam1_Energy.data, key=lambda x: max(x.data)).data)
+  cmin = min(min(dat.Beam1_Energy.data, key=lambda x: min(x.data)).data)
+  cnorm = plt.Normalize(cmin, cmax)
+  for iray in range(nrays):
+    print_string = 'Processing ray {:4d}'.format(iray+1) + ' of {:4d}'.format(nrays)
+    sys.stdout.write('\r' + print_string)
+    sys.stdout.flush()
+    
+    x_ray = dat.Beam1.data[iray].data[0]
+    y_ray = dat.Beam1.data[iray].data[1]
+    c_ray = dat.Beam1_Energy.data[iray].data
+    
+    plot_colourline(fig1, ax1, x_ray, y_ray, c_ray, cnorm)
+  smap = cm.ScalarMappable(norm=cnorm, cmap='viridis')
+  smap.set_array([])
+  fig1.colorbar(smap)
+    
+  plt.show()
 
 
 
