@@ -326,7 +326,7 @@ class snapshot_GUI:
     self.parameters.reset_axis = self.reset_axis_variable.get()
     
     filename1 = self.parameters.var_name + '.mp4'
-    animation = ani.FuncAnimation(self.fig, op.data_and_plot, frames=range(self.parameters.istart, self.parameters.iend+1), fargs=(self.fig, self.ax1, self.fig2, self.ax2, self.ax3, self.parameters), repeat=False)
+    animation = ani.FuncAnimation(self.fig, op.data_and_plot, frames=range(self.parameters.istart, self.parameters.iend+1), fargs=(self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3, self.parameters), repeat=False)
 
     writer = ani.FFMpegWriter(fps=24, bitrate=2e6)
     animation.save(filename1, writer=writer)
