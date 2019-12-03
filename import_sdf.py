@@ -169,12 +169,16 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   for var in dat_grid_names:
     if ('Ray' in var):
       bad_var_list.append(var)
+    if ('Electrons_Electron' in var):
+      bad_var_list.append(var)
   for var in bad_var_list:
     dat_grid_names.remove(var)
 
   bad_var_list = []
   for var in dat_variable_names:
     if ('Ray' in var):
+      bad_var_list.append(var)
+    if ('Electrons_Electron' in var):
       bad_var_list.append(var)
   for var in bad_var_list:
     dat_variable_names.remove(var)
