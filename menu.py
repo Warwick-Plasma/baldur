@@ -287,6 +287,16 @@ class snapshot_GUI:
     self.combo_surf.grid(column=1, row=6)
     self.combo_surf.current(0)
     
+    # Entry - Change cbar scale max
+    self.apply_scale_max = tk.BooleanVar(app)
+    self.scale_max_check = tk.Checkbutton(app, text="Apply max scaling", variable=self.apply_scale_max, onvalue=True, offvalue=False)
+    self.scale_max_check.deselect()
+    self.scale_max_check.grid(column=0, row=7)
+    
+    self.entry_scale_max = tk.Entry(app)
+    self.entry_scale_max.grid(column=1, row=7)
+    
+    # Bindings
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
     self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
@@ -296,12 +306,7 @@ class snapshot_GUI:
     self.log_button.bind("<ButtonRelease-1>", self.callbackFunc1)
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
     self.combo_surf.bind("<<ComboboxSelected>>", self.callbackFunc)
-    
-  def callbackFunc1(self, event):
-    """This function resets the grid before calling other functions
-    """
-    self.reset_axis_variable.set(True)
-    self.callbackFunc(event)
+    self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
 
   def callbackFunc(self, event):
     self.parameters.grid_boolean = self.grid_variable.get()
@@ -312,10 +317,17 @@ class snapshot_GUI:
     self.parameters.view_anisotropies = self.anisotropies_variable.get()
     self.parameters.use_log = self.log_variable.get()
     self.parameters.surface_name = self.combo_surf.get()
+    self.parameters.scale_max = float(self.entry_scale_max.get())
     
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3, self.parameters)
 
     self.reset_axis_variable.set(False)
+    
+  def callbackFunc1(self, event):
+    """This function resets the grid before calling other functions
+    """
+    self.reset_axis_variable.set(True)
+    self.callbackFunc(event)
 
   def save_pdf(self):
     self.parameters.var_name = self.combo1.get()
@@ -362,6 +374,9 @@ class plot_parameters:
     self.view_anisotropies = False
     self.use_log = False
     self.surface_name = 'None'
+    self.apply_scale_max = False
+    self.scale_max = 1.0
+    
 
 
 
