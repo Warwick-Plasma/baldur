@@ -195,7 +195,7 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   
   snapshot(dat, fig, ax1, cax1, var_name = parameters.var_name,
       grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
-      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log, apply_scale_max = parameters.apply_scale_max, scale_max = parameters.scale_max, apply_scale_min = parameters.apply_scale_min, scale_min = parameters.scale_min)
+      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log, apply_scale_max = parameters.apply_scale_max, scale_max = parameters.scale_max, apply_scale_min = parameters.apply_scale_min, scale_min = parameters.scale_min, plot_rays_on = parameters.plot_rays_on)
   
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
       grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log, surface_name = parameters.surface_name)
@@ -219,33 +219,27 @@ def plot_colourline(fig1, ax1, x, y, c, cnorm):
 
 
 
-def plot_rays(sdf_num):
-  pathname = os.path.abspath(os.getcwd())
-  SDFName = pathname + '/' + str(sdf_num).zfill(4) + '.sdf'
-  dat = sh.getdata(SDFName,verbose=False)
-  
-  fig1 = plt.figure()
-  ax1 = plt.axes()
+def plot_rays(dat, fig1, ax1, use_polar, grid_conv):
   
   nrays = len(dat.Beam1.data)
   cmax = max(max(dat.Beam1_Energy.data, key=lambda x: max(x.data)).data)
   cmin = min(min(dat.Beam1_Energy.data, key=lambda x: min(x.data)).data)
   cnorm = plt.Normalize(cmin, cmax)
-  for iray in range(nrays):
+  for iray in range(0, nrays, 10):
     print_string = 'Processing ray {:4d}'.format(iray+1) + ' of {:4d}'.format(nrays)
     sys.stdout.write('\r' + print_string)
     sys.stdout.flush()
     
-    x_ray = dat.Beam1.data[iray].data[0]
-    y_ray = dat.Beam1.data[iray].data[1]
+    x_ray = dat.Beam1.data[iray].data[0] * grid_conv
+    y_ray = dat.Beam1.data[iray].data[1] * grid_conv
     c_ray = dat.Beam1_Energy.data[iray].data
+    
+    if use_polar: x_ray, y_ray, y_label = polar_coordinates(x_ray, y_ray)
     
     plot_colourline(fig1, ax1, x_ray, y_ray, c_ray, cnorm)
   smap = cm.ScalarMappable(norm=cnorm, cmap='viridis')
   smap.set_array([])
-  fig1.colorbar(smap)
-    
-  plt.show()
+  #fig1.colorbar(smap)
 
 
 
@@ -267,12 +261,14 @@ def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
   scale_max = kwargs.get('scale_max', 1.0)
   apply_scale_min = kwargs.get('apply_scale_min', False)
   scale_min = kwargs.get('scale_min', 0.0)
+  plot_rays_on = kwargs.get('plot_rays_on', False)
   
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
-        
-  x_data = getattr(var_grid, 'data')[0] * getattr(var_grid, 'unit_conversion')
-  y_data = getattr(var_grid, 'data')[1] * getattr(var_grid, 'unit_conversion')
+  
+  grid_conv = getattr(var_grid, 'unit_conversion')
+  x_data = getattr(var_grid, 'data')[0] * grid_conv
+  y_data = getattr(var_grid, 'data')[1] * grid_conv
   x_label = 'R (' + getattr(var_grid, 'units_new') + ')'
   y_label = 'Z (' + getattr(var_grid, 'units_new') + ')'
   if use_polar: x_data, y_data, y_label = polar_coordinates(x_data, y_data)
@@ -312,6 +308,9 @@ def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
   cmesh.set_edgecolor(grid_colour)
   cmesh.set_clim(cmin, cmax)
   cbar = fig.colorbar(cmesh, cax=cax1)
+    
+  if plot_rays_on and hasattr(dat, 'Beam1'):	
+    plot_rays(dat, fig, ax1, use_polar, grid_conv)
   
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
