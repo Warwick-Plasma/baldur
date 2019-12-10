@@ -151,11 +151,14 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   variable_type = sdf.BlockPlainVariable
   grid_type = sdf.BlockLagrangianMesh
   grid_type2 = sdf.BlockPlainMesh
+  beam_type = sdf.BlockStitchedPath
   
   dat_grid_names = []
   dat_variable_names = []
   dat_variable_time_names = []
   dat_track_surfaces = []
+  dat_beam_names = []
+  dat_burst_names = []
   for n in range(0, len(dat_names)):
     var = getattr(dat, dat_names[n])
     if type(var) == variable_type:
@@ -164,6 +167,8 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
       dat_grid_names.append(dat_names[n])
     elif type(var) == grid_type2:
       dat_grid_names.append(dat_names[n])
+    elif type(var) == beam_type:
+      dat_beam_names.append(dat_names[n])
 
   bad_var_list = []
   for var in dat_grid_names:
@@ -183,6 +188,17 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   for var in bad_var_list:
     dat_variable_names.remove(var)
 
+  bad_var_list = []
+  for var in dat_beam_names:
+    if ('_' in var):
+      bad_var_list.append(var)
+    else:
+      if ('Burst' in var):
+        dat_burst_names.append(var)
+        bad_var_list.append(var)
+  for var in bad_var_list:
+    dat_beam_names.remove(var)
+
   if (dat.Header['code_name'] == 'Epoch2d'):
     dat_grid_names = ['Grid_Grid', 'Grid_Grid_mid']    
     bad_var_list = []
@@ -198,6 +214,8 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   setattr(dat, "track_surfaces", dat_track_surfaces)
   setattr(dat, "variables", dat_variable_names)
   setattr(dat, "variables_time", dat_variable_time_names)
+  setattr(dat, "beams", dat_beam_names)
+  setattr(dat, "bursts", dat_burst_names)
 		
   # Save time variable
   var_list = dat.variables_time

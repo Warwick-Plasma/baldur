@@ -219,20 +219,22 @@ def plot_colourline(fig1, ax1, x, y, c, cnorm):
 
 
 
-def plot_rays(dat, fig1, ax1, use_polar, grid_conv):
+def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
   
-  nrays = len(dat.Beam1.data)
-  cmax = max(max(dat.Beam1_Energy.data, key=lambda x: max(x.data)).data)
-  cmin = min(min(dat.Beam1_Energy.data, key=lambda x: min(x.data)).data)
+  beam = getattr(dat, name)
+  beam_energy = getattr(dat, name + '_' + name_var)
+  nrays = len(beam.data)
+  cmax = max(max(beam_energy.data, key=lambda x: max(x.data)).data)
+  cmin = min(min(beam_energy.data, key=lambda x: min(x.data)).data)
   cnorm = plt.Normalize(cmin, cmax)
-  for iray in range(0, nrays, 10):
+  for iray in range(0, nrays, skip):
     print_string = 'Processing ray {:4d}'.format(iray+1) + ' of {:4d}'.format(nrays)
     sys.stdout.write('\r' + print_string)
     sys.stdout.flush()
     
-    x_ray = dat.Beam1.data[iray].data[0] * grid_conv
-    y_ray = dat.Beam1.data[iray].data[1] * grid_conv
-    c_ray = dat.Beam1_Energy.data[iray].data
+    x_ray = beam.data[iray].data[0] * grid_conv
+    y_ray = beam.data[iray].data[1] * grid_conv
+    c_ray = beam_energy.data[iray].data
     
     if use_polar: x_ray, y_ray, y_label = polar_coordinates(x_ray, y_ray)
     
@@ -309,8 +311,15 @@ def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
   cmesh.set_clim(cmin, cmax)
   cbar = fig.colorbar(cmesh, cax=cax1)
     
-  if plot_rays_on and hasattr(dat, 'Beam1'):	
-    plot_rays(dat, fig, ax1, use_polar, grid_conv)
+  if plot_rays_on:
+    if hasattr(dat, 'Beam1'):
+      skip = 10
+      plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, use_polar, grid_conv)
+    if hasattr(dat, 'Burst1'):
+      num_burs = len(dat.bursts)
+      for iname in range(0, num_burs, 10):
+        skip = 1
+        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1, use_polar, grid_conv)
   
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
