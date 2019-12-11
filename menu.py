@@ -307,6 +307,14 @@ class snapshot_GUI:
     self.entry_scale_min.insert(0, "0.0")
     self.entry_scale_min.grid(column=1, row=8)
     
+    # check box - plot rays?
+    self.rays_variable = tk.BooleanVar(app)
+    self.rays_button = tk.Checkbutton(app, text="Show rays",
+                                       variable=self.rays_variable,
+                                       onvalue=True, offvalue=False)
+    self.rays_button.deselect()
+    self.rays_button.grid(column=0, row=9)
+    
     # Bindings
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
@@ -318,6 +326,7 @@ class snapshot_GUI:
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
     self.combo_surf.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
+    self.rays_button.bind("<ButtonRelease-1>", self.callbackFunc)
 
   def callbackFunc(self, event):
     self.parameters.grid_boolean = self.grid_variable.get()
@@ -332,6 +341,7 @@ class snapshot_GUI:
     self.parameters.scale_max = float(self.entry_scale_max.get())
     self.parameters.apply_scale_min = self.apply_scale_min.get()
     self.parameters.scale_min = float(self.entry_scale_min.get())
+    self.parameters.plot_rays_on = self.rays_variable.get()
     
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3, self.parameters)
 
@@ -392,6 +402,7 @@ class plot_parameters:
     self.scale_max = 1.0
     self.apply_scale_min = False
     self.scale_min = 0.0
+    self.plot_rays_on = False
     
 
 

@@ -5,6 +5,9 @@ import numpy as np
 import glob
 import import_sdf as isdf
 import sys, os
+from matplotlib import cm
+from matplotlib.collections import LineCollection
+from matplotlib.colors import ListedColormap, BoundaryNorm
 from matplotlib.widgets import Slider, RadioButtons
 plt.switch_backend('TkAgg')
 
@@ -192,10 +195,53 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   
   snapshot(dat, fig, ax1, cax1, var_name = parameters.var_name,
       grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
-      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log, apply_scale_max = parameters.apply_scale_max, scale_max = parameters.scale_max, apply_scale_min = parameters.apply_scale_min, scale_min = parameters.scale_min)
+      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log, apply_scale_max = parameters.apply_scale_max, scale_max = parameters.scale_max, apply_scale_min = parameters.apply_scale_min, scale_min = parameters.scale_min, plot_rays_on = parameters.plot_rays_on)
   
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
       grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log, surface_name = parameters.surface_name)
+
+
+
+def plot_colourline(fig1, ax1, x, y, c, cnorm):
+  # Create a set of line segments so that we can color them individually
+  # This creates the points as a N x 1 x 2 array so that we can stack points
+  # together easily to get the segments. The segments array for line collection
+  # needs to be (numlines) x (points per line) x 2 (for x and y)
+  points = np.array([x, y]).T.reshape(-1, 1, 2)
+  segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+  # Create a continuous norm to map from data points to colors
+  lc = LineCollection(segments, cmap='viridis', norm=cnorm)
+  # Set the values used for colormapping
+  lc.set_array(c)
+  lc.set_linewidth(2)
+  ax1.add_collection(lc)
+
+
+
+def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
+  
+  beam = getattr(dat, name)
+  beam_energy = getattr(dat, name + '_' + name_var)
+  nrays = len(beam.data)
+  cmax = max(max(beam_energy.data, key=lambda x: max(x.data)).data)
+  cmin = min(min(beam_energy.data, key=lambda x: min(x.data)).data)
+  cnorm = plt.Normalize(cmin, cmax)
+  for iray in range(0, nrays, skip):
+    print_string = 'Processing ray {:4d}'.format(iray+1) + ' of {:4d}'.format(nrays)
+    sys.stdout.write('\r' + print_string)
+    sys.stdout.flush()
+    
+    x_ray = beam.data[iray].data[0] * grid_conv
+    y_ray = beam.data[iray].data[1] * grid_conv
+    c_ray = beam_energy.data[iray].data
+    
+    if use_polar: x_ray, y_ray, y_label = polar_coordinates(x_ray, y_ray)
+    
+    plot_colourline(fig1, ax1, x_ray, y_ray, c_ray, cnorm)
+  smap = cm.ScalarMappable(norm=cnorm, cmap='viridis')
+  smap.set_array([])
+  #fig1.colorbar(smap)
 
 
 
@@ -217,12 +263,14 @@ def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
   scale_max = kwargs.get('scale_max', 1.0)
   apply_scale_min = kwargs.get('apply_scale_min', False)
   scale_min = kwargs.get('scale_min', 0.0)
+  plot_rays_on = kwargs.get('plot_rays_on', False)
   
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
-        
-  x_data = getattr(var_grid, 'data')[0] * getattr(var_grid, 'unit_conversion')
-  y_data = getattr(var_grid, 'data')[1] * getattr(var_grid, 'unit_conversion')
+  
+  grid_conv = getattr(var_grid, 'unit_conversion')
+  x_data = getattr(var_grid, 'data')[0] * grid_conv
+  y_data = getattr(var_grid, 'data')[1] * grid_conv
   x_label = 'R (' + getattr(var_grid, 'units_new') + ')'
   y_label = 'Z (' + getattr(var_grid, 'units_new') + ')'
   if use_polar: x_data, y_data, y_label = polar_coordinates(x_data, y_data)
@@ -262,6 +310,16 @@ def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
   cmesh.set_edgecolor(grid_colour)
   cmesh.set_clim(cmin, cmax)
   cbar = fig.colorbar(cmesh, cax=cax1)
+    
+  if plot_rays_on:
+    if hasattr(dat, 'Beam1'):
+      skip = 10
+      plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, use_polar, grid_conv)
+    if hasattr(dat, 'Burst1'):
+      num_burs = len(dat.bursts)
+      for iname in range(0, num_burs, 10):
+        skip = 1
+        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1, use_polar, grid_conv)
   
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
