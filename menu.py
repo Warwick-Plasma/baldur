@@ -345,7 +345,7 @@ class snapshot_GUI:
     self.combo_surf.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
     self.rays_button.bind("<ButtonRelease-1>", self.callbackFunc)
-    self.comparison_check.bind("<ButtonRelease-1>", self.callbackFunc1)
+    self.comparison_check.bind("<ButtonRelease-1>", self.callbackFunc)
 
   def callbackFunc(self, event):
     self.parameters.grid_boolean = self.grid_variable.get()
