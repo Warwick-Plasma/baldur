@@ -316,6 +316,16 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   
   x_data, y_data, c_data, x_label, y_label, c_label = open_var_2d(dat, var_name, parameters)
   
+  if parameters.apply_comparison:
+    x_data1 = np.zeros(np.shape(x_data)) # this might allow plotting of different sized arrays
+    y_data1 = np.zeros(np.shape(y_data))
+    c_data1 = np.zeros((np.shape(c_data)[0],np.shape(c_data)[1]+1))
+    x_data1[0:,0:], y_data1[0:,0:], c_data1[:,:-1], _, _, _ = open_var_2d(parameters.dat1, var_name, parameters)
+    
+    x_data = np.hstack((x_data, np.flip(x_data1,1)))
+    y_data = np.hstack((y_data, np.flip(-y_data1,1)))
+    c_data = np.hstack((c_data, np.flip(c_data1,1)))
+  
   if parameters.reset_axis:
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
                              np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
