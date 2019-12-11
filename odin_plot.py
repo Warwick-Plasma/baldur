@@ -193,11 +193,9 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   
   dat = isdf.use_sdf(sdf_num, parameters.pathname, use_analysis = parameters.use_analysis, istart = parameters.istart)
   
-  snapshot(dat, fig, ax1, cax1, parameters.var_name,
-      parameters = parameters)
+  snapshot(dat, fig, ax1, cax1, parameters.var_name, parameters = parameters)
   
-  lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
-      parameters = parameters)
+  lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name, parameters = parameters)
 
 
 
@@ -276,15 +274,6 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
     grid_colour = 'None'
   else:
     grid_colour = 'k'
-  use_polar = parameters.use_polar
-  reset_axis = parameters.reset_axis
-  view_anisotropies = parameters.view_anisotropies
-  use_log = parameters.use_log
-  apply_scale_max = parameters.apply_scale_max
-  scale_max = parameters.scale_max
-  apply_scale_min = parameters.apply_scale_min
-  scale_min = parameters.scale_min
-  plot_rays_on = parameters.plot_rays_on
   
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
@@ -294,15 +283,15 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   y_data = getattr(var_grid, 'data')[1] * grid_conv
   x_label = 'R (' + getattr(var_grid, 'units_new') + ')'
   y_label = 'Z (' + getattr(var_grid, 'units_new') + ')'
-  if use_polar: x_data, y_data, y_label = polar_coordinates(x_data, y_data)
+  if parameters.use_polar: x_data, y_data, y_label = polar_coordinates(x_data, y_data)
   
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
   c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
-  if view_anisotropies: c_data, c_label = mean_subtract(c_data, c_label)
+  if parameters.view_anisotropies: c_data, c_label = mean_subtract(c_data, c_label)
   
   cs = int(np.round(np.shape(c_data)[1] / 2.0))
   
-  if reset_axis:
+  if parameters.reset_axis:
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
                              np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
   else:
@@ -312,7 +301,7 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   ax1.clear() # This is nessasary for speed
   cax1.clear()
   
-  if use_log:
+  if parameters.use_log:
     c_data = abs(c_data) + small_num
     cmin = np.log10(np.mean(c_data) / 100.0)
     cmax = np.log10(np.max(c_data))
@@ -322,17 +311,17 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
     cmin = np.min(c_data)
     cmax = np.max(c_data)
   
-  if apply_scale_max:
-    cmax = scale_max
-  if apply_scale_min:
-    cmin = scale_min
+  if parameters.apply_scale_max:
+    cmax = parameters.scale_max
+  if parameters.apply_scale_min:
+    cmin = parameters.scale_min
   
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
   cmesh.set_edgecolor(grid_colour)
   cmesh.set_clim(cmin, cmax)
   cbar = fig.colorbar(cmesh, cax=cax1)
     
-  if plot_rays_on:
+  if parameters.plot_rays_on:
     if hasattr(dat, 'Beam1'):
       skip = 10
       plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, use_polar, grid_conv)
@@ -441,14 +430,10 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   """
   """
   parameters = kwargs.get('parameters', plot_parameters())
-  reset_axis = parameters.reset_axis
-  grid_boolean = parameters.grid_boolean
-  if grid_boolean == False:
+  if parameters.grid_boolean == False:
     grid_style = 'None'
   else:
     grid_style = 'x'
-  use_log = parameters.use_log
-  surface_name = parameters.surface_name
   
   l1 = getattr(ax, 'line1')
   l2 = getattr(ax, 'line2')
@@ -487,7 +472,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   x_label = grid_name + " (" + grid_units + ")"
   y_label1 = name + " (" + units + ")"
   
-  if use_log:
+  if parameters.use_log:
     y_data = abs(y_data) + small_num
     y_data1 = abs(y_data1) + small_num
     ymin = np.log10(np.mean(y_data[:-1] / 100))
@@ -504,7 +489,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     ymin1 = np.min(y_data1[:-1])
     ymax1 = 1.3 * np.max(y_data1[:-1])
   
-  if reset_axis:
+  if parameters.reset_axis:
     zoomed_axis = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
                             ymin, ymax])
     zoomed_axis1 = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
@@ -520,13 +505,13 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   l3.set_xdata(x_data)
   l3.set_ydata(y_data1)
   
-  if surface_name == 'None':
+  if parameters.surface_name == 'None':
     l2.set_xdata(0.0)
     surface_location = 'None'
     surface_move = 0.0
   else:
     old_surface_location = getattr(ax, "loc_cell_track")
-    surface = getattr(dat, surface_name)
+    surface = getattr(dat, parameters.surface_name)
     surface_location = surface.data[cs] * surface.unit_conversion
     if old_surface_location == 'None':
       surface_move = 0.0
