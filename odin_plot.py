@@ -191,6 +191,15 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   sys.stdout.write('\r' + print_string)
   sys.stdout.flush()
   
+  if parameters.apply_comparison:
+    if os.path.isdir(parameters.entry_comparison):
+      parameters.dat1 = isdf.use_sdf(sdf_num, parameters.entry_comparison, use_analysis = parameters.use_analysis, istart = parameters.istart)
+    else:
+      parameters.apply_comparison = False
+      print()
+      print("Warning: " + parameters.entry_comparison + " is not a directory")
+   
+  
   dat = isdf.use_sdf(sdf_num, parameters.pathname, use_analysis = parameters.use_analysis, istart = parameters.istart)
   
   snapshot(dat, fig, ax1, cax1, parameters.var_name, parameters = parameters)
@@ -262,6 +271,9 @@ class plot_parameters:
     self.apply_scale_min = False
     self.scale_min = 0.0
     self.plot_rays_on = False
+    self.entry_comparison = os.path.abspath(os.getcwd())
+    self.apply_comparison = False
+    self.dat1 = None
 
 
 
@@ -414,13 +426,17 @@ def empty_lineout(fig, ax):
   
   ax1 = ax.twinx()
   
-  l1, = ax.plot(1, lw = 2.5, color='black')
-  setattr(ax, 'line1', l1)
-  l2 = ax.axvline(0, lw = 1, color = 'tab:blue', linestyle = '--')
-  setattr(ax, 'line2', l2)
+  ax_l1, = ax.plot(1, lw = 2.5, color='black')
+  setattr(ax, 'line1', ax_l1)
+  ax_l2, = ax.plot(1, lw = 2.5, color='black', linestyle = '--')
+  setattr(ax, 'line2', ax_l2)
+  ax_l3 = ax.axvline(0, lw = 1, color = 'tab:blue', linestyle = '--')
+  setattr(ax, 'line3', ax_l3)
   
-  l3, = ax1.plot(0, lw = 2, color = 'tab:red')
-  setattr(ax1, 'line1', l3)
+  ax1_l1, = ax1.plot(1, lw = 2, color = 'tab:red')
+  setattr(ax1, 'line1', ax1_l1)
+  ax1_l2, = ax1.plot(1, lw = 2, color='tab:red', linestyle = '--')
+  setattr(ax1, 'line2', ax1_l2)
   ax1.tick_params(axis='y', labelcolor = 'tab:red')
   return ax1
 
@@ -429,60 +445,49 @@ def empty_lineout(fig, ax):
 def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   """
   """
+  
   parameters = kwargs.get('parameters', plot_parameters())
   if parameters.grid_boolean == False:
     grid_style = 'None'
   else:
     grid_style = 'x'
   
-  l1 = getattr(ax, 'line1')
-  l2 = getattr(ax, 'line2')
-  l3 = getattr(ax1, 'line1')
+  ax_l1 = getattr(ax, 'line1')
+  ax_l2 = getattr(ax, 'line2')
+  ax_l3 = getattr(ax, 'line3')
+  ax1_l1 = getattr(ax1, 'line1')
+  ax1_l2 = getattr(ax1, 'line2')
   
   if (dat.Header['code_name'] == 'Odin2D'):
-    var = dat.Fluid_Rho
+    var_default = "Fluid_Rho"
   else:
-    var = getattr(dat, dat.variables[0])
-  y_data = var.data[:,cs] * var.unit_conversion
-  name = var.name
-  units = var.units_new
-  
-  y_label = name + ' (' + units + ')'
+    var_default = dat.variables[0]
     
+  x_data, y_data, x_label, y_label = open_var_1d(dat, var_default, cs, parameters.use_log)
+  _, y_data1, _, y_label1 = open_var_1d(dat, var_name, cs, parameters.use_log)
+  
+  ax_l1.set_xdata(x_data)
+  ax_l1.set_ydata(y_data)
+  ax1_l1.set_xdata(x_data)
+  ax1_l1.set_ydata(y_data1)
+  
+  if parameters.apply_comparison:
+    x_data_comp, y_data_comp, _, _ = open_var_1d(parameters.dat1, var_default, cs, parameters.use_log)
+    _, y_data1_comp, _, _ = open_var_1d(parameters.dat1, var_name, cs, parameters.use_log)
+  
+    ax_l2.set_xdata(x_data_comp)
+    ax_l2.set_ydata(y_data_comp)
+    ax1_l2.set_xdata(x_data_comp)
+    ax1_l2.set_ydata(y_data1_comp)
+  
   ax.xaxis.get_offset_text().set_size(fs)
   ax.yaxis.get_offset_text().set_size(fs)
   
-  var = getattr(dat, var_name)
-  unit_conv = getattr(var, "unit_conversion")
-  units = getattr(var, "units_new")
-  name = getattr(var, "name")
-  grid = getattr(var, "grid")
-  grid_name = getattr(grid, "name")
-  grid_data = getattr(grid, "data")
-  grid_conv = getattr(grid, "unit_conversion")
-  grid_units = getattr(grid, "units_new")
-  
-  pos1 = dat.Grid_Grid_mid.data[0][:,cs] * dat.Grid_Grid_mid.unit_conversion
-  pos2 = dat.Grid_Grid_mid.data[1][:,cs] * dat.Grid_Grid_mid.unit_conversion
-  x_data = np.sqrt(pos1**2 + pos2**2)
-  y_data1 = getattr(var, "data")[:,cs] * unit_conv
-  
-  y_data1 = one_dim_grid(np.array(grid_data)[:,:,cs], grid_conv, x_data, y_data1)
-  
-  x_label = grid_name + " (" + grid_units + ")"
-  y_label1 = name + " (" + units + ")"
-  
   if parameters.use_log:
-    y_data = abs(y_data) + small_num
-    y_data1 = abs(y_data1) + small_num
-    ymin = np.log10(np.mean(y_data[:-1] / 100))
-    ymax = np.log10(np.max(y_data[:-1]) * 2)
-    ymin1 = np.log10(np.mean(y_data1[:-1] / 100))
-    ymax1 =  np.log10(np.max(y_data1[:-1]) * 2)
-    y_data = np.log10(y_data)
-    y_data1 = np.log10(y_data1)
-    y_label = 'log10(' + y_label + ')'
-    y_label1 = 'log10(' + y_label1 + ')'
+    ymin = np.mean(y_data[:-1]) - 2.0
+    ymax = np.max(y_data[:-1]) + 0.3
+    ymin1 = np.mean(y_data1[:-1]) - 2.0
+    ymax1 =  np.max(y_data1[:-1]) + 0.3
   else:
     ymin = np.min(y_data[:-1])
     ymax = 1.3 * np.max(y_data[:-1])
@@ -500,13 +505,8 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
                              ymin1, ymax1])
   
-  l1.set_xdata(x_data)
-  l1.set_ydata(y_data)
-  l3.set_xdata(x_data)
-  l3.set_ydata(y_data1)
-  
   if parameters.surface_name == 'None':
-    l2.set_xdata(0.0)
+    ax_l3.set_xdata(0.0)
     surface_location = 'None'
     surface_move = 0.0
   else:
@@ -517,11 +517,11 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
       surface_move = 0.0
     else:
       surface_move = surface_location - old_surface_location
-    l2.set_xdata(surface_location)
+    ax_l3.set_xdata(surface_location)
     
   setattr(ax, "loc_cell_track", surface_location)
   
-  l1.set_marker(grid_style)
+  ax_l1.set_marker(grid_style)
 
   ax.set_xlabel(x_label, fontsize = fs)
   ax.set_ylabel(y_label, fontsize = fs)
@@ -545,6 +545,37 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
 
 
 
+def open_var_1d(dat, var_name, cs, use_log):
+  
+  var = getattr(dat, var_name)
+  unit_conv = getattr(var, "unit_conversion")
+  units = getattr(var, "units_new")
+  name = getattr(var, "name")
+  grid = getattr(var, "grid")
+  grid_name = getattr(grid, "name")
+  grid_data = getattr(grid, "data")
+  grid_conv = getattr(grid, "unit_conversion")
+  grid_units = getattr(grid, "units_new")
+  
+  pos1 = dat.Grid_Grid_mid.data[0][:,cs] * dat.Grid_Grid_mid.unit_conversion
+  pos2 = dat.Grid_Grid_mid.data[1][:,cs] * dat.Grid_Grid_mid.unit_conversion
+  x_data = np.sqrt(pos1**2 + pos2**2)
+  y_data = getattr(var, "data")[:,cs] * unit_conv
+  
+  y_data = one_dim_grid(np.array(grid_data)[:,:,cs], grid_conv, x_data, y_data)
+  
+  x_label = grid_name + " (" + grid_units + ")"
+  y_label = name + " (" + units + ")"
+  
+  if use_log:
+    y_data = abs(y_data) + small_num
+    y_data = np.log10(y_data)
+    y_label = 'log10(' + y_label + ')'
+  
+  return x_data, y_data, x_label, y_label
+
+
+
 def one_dim_grid(grid, grid_conv, x_data, y_data):
   
   edge = np.sqrt(grid[0,:]**2 + grid[1,:]**2) * grid_conv
@@ -557,7 +588,7 @@ def one_dim_grid(grid, grid_conv, x_data, y_data):
       XP = XP
     else:
       print("Unknown geometry variable")
-    print("Waring: Linear Interpolation!")
+    print("Warning: Linear Interpolation!")
     y_data = np.interp(x_data, XP, y_data)
   
   return y_data

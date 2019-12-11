@@ -315,6 +315,16 @@ class snapshot_GUI:
     self.rays_button.deselect()
     self.rays_button.grid(column=0, row=9)
     
+    # Entry - Plot second file
+    self.apply_comparison = tk.BooleanVar(app)
+    self.comparison_check = tk.Checkbutton(app, text="Apply Comparison", variable=self.apply_comparison, onvalue=True, offvalue=False)
+    self.comparison_check.deselect()
+    self.comparison_check.grid(column=0, row=10)
+    
+    self.entry_comparison = tk.Entry(app)
+    self.entry_comparison.insert(0, os.path.abspath(os.getcwd()))
+    self.entry_comparison.grid(column=1, row=10)
+    
     # Bindings
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
@@ -327,6 +337,7 @@ class snapshot_GUI:
     self.combo_surf.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
     self.rays_button.bind("<ButtonRelease-1>", self.callbackFunc)
+    self.comparison_check.bind("<ButtonRelease-1>", self.callbackFunc1)
 
   def callbackFunc(self, event):
     self.parameters.grid_boolean = self.grid_variable.get()
@@ -342,6 +353,8 @@ class snapshot_GUI:
     self.parameters.apply_scale_min = self.apply_scale_min.get()
     self.parameters.scale_min = float(self.entry_scale_min.get())
     self.parameters.plot_rays_on = self.rays_variable.get()
+    self.parameters.apply_comparison = self.apply_comparison.get()
+    self.parameters.entry_comparison = self.entry_comparison.get()
     
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3, self.parameters)
 
