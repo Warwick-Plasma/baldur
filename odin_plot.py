@@ -277,6 +277,33 @@ class plot_parameters:
 
 
 
+def open_var_2d(dat, var_name, parameters):
+  
+  var = getattr(dat, var_name)
+  var_grid = getattr(var, 'grid')
+  
+  grid_conv = getattr(var_grid, 'unit_conversion')
+  x_data = getattr(var_grid, 'data')[0] * grid_conv
+  y_data = getattr(var_grid, 'data')[1] * grid_conv
+  x_label = 'R (' + getattr(var_grid, 'units_new') + ')'
+  y_label = 'Z (' + getattr(var_grid, 'units_new') + ')'
+  if parameters.use_polar:
+    x_data, y_data, y_label = polar_coordinates(x_data, y_data)
+  
+  c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
+  c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
+  if parameters.view_anisotropies:
+    c_data, c_label = mean_subtract(c_data, c_label)
+  
+  if parameters.use_log:
+    c_data = abs(c_data) + small_num
+    c_data = np.log10(c_data)
+    c_label = 'log10(' + c_label + ')'
+  
+  return x_data, y_data, c_data, x_label, y_label, c_label
+
+
+
 def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   """
   """
@@ -287,21 +314,7 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   else:
     grid_colour = 'k'
   
-  var = getattr(dat, var_name)
-  var_grid = getattr(var, 'grid')
-  
-  grid_conv = getattr(var_grid, 'unit_conversion')
-  x_data = getattr(var_grid, 'data')[0] * grid_conv
-  y_data = getattr(var_grid, 'data')[1] * grid_conv
-  x_label = 'R (' + getattr(var_grid, 'units_new') + ')'
-  y_label = 'Z (' + getattr(var_grid, 'units_new') + ')'
-  if parameters.use_polar: x_data, y_data, y_label = polar_coordinates(x_data, y_data)
-  
-  c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
-  c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
-  if parameters.view_anisotropies: c_data, c_label = mean_subtract(c_data, c_label)
-  
-  cs = int(np.round(np.shape(c_data)[1] / 2.0))
+  x_data, y_data, c_data, x_label, y_label, c_label = open_var_2d(dat, var_name, parameters)
   
   if parameters.reset_axis:
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
@@ -314,11 +327,8 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   cax1.clear()
   
   if parameters.use_log:
-    c_data = abs(c_data) + small_num
-    cmin = np.log10(np.mean(c_data) / 100.0)
-    cmax = np.log10(np.max(c_data))
-    c_data = np.log10(c_data)
-    c_label = 'log10(' + c_label + ')'
+    cmin = np.mean(c_data) - 2.0
+    cmax = np.max(c_data)
   else:
     cmin = np.min(c_data)
     cmax = np.max(c_data)
