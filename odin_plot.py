@@ -273,6 +273,7 @@ class plot_parameters:
     self.plot_rays_on = False
     self.entry_comparison = os.path.abspath(os.getcwd())
     self.apply_comparison = False
+    self.dat1 = None
 
 
 
@@ -463,7 +464,21 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     var_default = dat.variables[0]
     
   x_data, y_data, x_label, y_label = open_var_1d(dat, var_default, cs, parameters.use_log)
-  x_data1, y_data1, _, y_label1 = open_var_1d(dat, var_name, cs, parameters.use_log)
+  _, y_data1, _, y_label1 = open_var_1d(dat, var_name, cs, parameters.use_log)
+  
+  ax_l1.set_xdata(x_data)
+  ax_l1.set_ydata(y_data)
+  ax1_l1.set_xdata(x_data)
+  ax1_l1.set_ydata(y_data1)
+  
+  if parameters.apply_comparison:
+    x_data_comp, y_data_comp, _, _ = open_var_1d(parameters.dat1, var_default, cs, parameters.use_log)
+    _, y_data1_comp, _, _ = open_var_1d(parameters.dat1, var_name, cs, parameters.use_log)
+  
+    ax_l2.set_xdata(x_data_comp)
+    ax_l2.set_ydata(y_data_comp)
+    ax1_l2.set_xdata(x_data_comp)
+    ax1_l2.set_ydata(y_data1_comp)
   
   ax.xaxis.get_offset_text().set_size(fs)
   ax.yaxis.get_offset_text().set_size(fs)
@@ -489,11 +504,6 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
                              ax.get_ylim()[0], ax.get_ylim()[1]])
     zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
                              ymin1, ymax1])
-  
-  ax_l1.set_xdata(x_data)
-  ax_l1.set_ydata(y_data)
-  ax1_l1.set_xdata(x_data)
-  ax1_l1.set_ydata(y_data1)
   
   if parameters.surface_name == 'None':
     ax_l3.set_xdata(0.0)
