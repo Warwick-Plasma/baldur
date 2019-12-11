@@ -462,24 +462,17 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   else:
     var_default = dat.variables[0]
     
-  x_data, y_data, x_label, y_label = open_var_1d(dat, var_default, cs)
-    
+  x_data, y_data, x_label, y_label = open_var_1d(dat, var_default, cs, parameters.use_log)
+  x_data1, y_data1, _, y_label1 = open_var_1d(dat, var_name, cs, parameters.use_log)
+  
   ax.xaxis.get_offset_text().set_size(fs)
   ax.yaxis.get_offset_text().set_size(fs)
   
-  x_data1, y_data1, _, y_label1 = open_var_1d(dat, var_name, cs)
-  
   if parameters.use_log:
-    y_data = abs(y_data) + small_num
-    y_data1 = abs(y_data1) + small_num
-    ymin = np.log10(np.mean(y_data[:-1] / 100))
-    ymax = np.log10(np.max(y_data[:-1]) * 2)
-    ymin1 = np.log10(np.mean(y_data1[:-1] / 100))
-    ymax1 =  np.log10(np.max(y_data1[:-1]) * 2)
-    y_data = np.log10(y_data)
-    y_data1 = np.log10(y_data1)
-    y_label = 'log10(' + y_label + ')'
-    y_label1 = 'log10(' + y_label1 + ')'
+    ymin = np.mean(y_data[:-1]) - 2.0
+    ymax = np.max(y_data[:-1]) + 0.3
+    ymin1 = np.mean(y_data1[:-1]) - 2.0
+    ymax1 =  np.max(y_data1[:-1]) + 0.3
   else:
     ymin = np.min(y_data[:-1])
     ymax = 1.3 * np.max(y_data[:-1])
@@ -542,7 +535,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
 
 
 
-def open_var_1d(dat, var_name, cs):
+def open_var_1d(dat, var_name, cs, use_log):
   
   var = getattr(dat, var_name)
   unit_conv = getattr(var, "unit_conversion")
@@ -557,13 +550,19 @@ def open_var_1d(dat, var_name, cs):
   pos1 = dat.Grid_Grid_mid.data[0][:,cs] * dat.Grid_Grid_mid.unit_conversion
   pos2 = dat.Grid_Grid_mid.data[1][:,cs] * dat.Grid_Grid_mid.unit_conversion
   x_data = np.sqrt(pos1**2 + pos2**2)
-  y_data1 = getattr(var, "data")[:,cs] * unit_conv
+  y_data = getattr(var, "data")[:,cs] * unit_conv
   
-  y_data1 = one_dim_grid(np.array(grid_data)[:,:,cs], grid_conv, x_data, y_data1)
+  y_data = one_dim_grid(np.array(grid_data)[:,:,cs], grid_conv, x_data, y_data)
   
   x_label = grid_name + " (" + grid_units + ")"
-  y_label1 = name + " (" + units + ")"
-  return x_data, y_data1, x_label, y_label1
+  y_label = name + " (" + units + ")"
+  
+  if use_log:
+    y_data = abs(y_data) + small_num
+    y_data = np.log10(y_data)
+    y_label = 'log10(' + y_label + ')'
+  
+  return x_data, y_data, x_label, y_label
 
 
 
