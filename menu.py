@@ -87,7 +87,7 @@ class time_history_GUI:
     plt.ion()
     plt.close('all')
     
-    self.cs = 1
+    self.cross_section = 1
     
     # find sdf files and count
     self.pathname = os.path.abspath(os.getcwd())
@@ -96,7 +96,7 @@ class time_history_GUI:
     
     # initial data import, needed for variable selection combo box
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
-    self.dat = isdf.get_data_all(dat, self.istart, self.iend, self.pathname, self.use_analysis, self.cs)
+    self.dat = isdf.get_data_all(dat, self.istart, self.iend, self.pathname, self.use_analysis, self.cross_section)
     
     # create empty figures
     aspc = 1.2
@@ -325,6 +325,14 @@ class snapshot_GUI:
     self.entry_comparison.insert(0, os.path.abspath(os.getcwd()))
     self.entry_comparison.grid(column=1, row=10)
     
+    # Entry - Cross section
+    self.labelcs = tk.Label(app, text="Choose lineout cross section:")
+    self.labelcs.grid(column=0, row=11)
+    
+    self.entry_cross_section = tk.Entry(app)
+    self.entry_cross_section.insert(0, "1")
+    self.entry_cross_section.grid(column=1, row=11)
+    
     # Bindings
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
@@ -355,6 +363,7 @@ class snapshot_GUI:
     self.parameters.plot_rays_on = self.rays_variable.get()
     self.parameters.apply_comparison = self.apply_comparison.get()
     self.parameters.entry_comparison = self.entry_comparison.get()
+    self.parameters.cross_section = int(self.entry_cross_section.get())
     
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3, self.parameters)
 

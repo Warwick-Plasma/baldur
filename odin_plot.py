@@ -204,7 +204,7 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   
   snapshot(dat, fig, ax1, cax1, parameters.var_name, parameters = parameters)
   
-  lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name, parameters = parameters)
+  lineout(dat, parameters.cross_section, fig2, ax2, ax3, parameters.var_name, parameters = parameters)
 
 
 
@@ -255,7 +255,6 @@ class plot_parameters:
   def __init__(self):
     self.sdf_num = 0
     self.use_analysis = False
-    self.cs = 0
     self.pathname = 'None'
     self.istart = 0
     self.iend = 0
@@ -274,6 +273,7 @@ class plot_parameters:
     self.entry_comparison = os.path.abspath(os.getcwd())
     self.apply_comparison = False
     self.dat1 = None
+    self.cross_section = 1
 
 
 
