@@ -193,12 +193,11 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   
   dat = isdf.use_sdf(sdf_num, parameters.pathname, use_analysis = parameters.use_analysis, istart = parameters.istart)
   
-  snapshot(dat, fig, ax1, cax1, var_name = parameters.var_name,
-      grid_boolean = parameters.grid_boolean, use_polar = parameters.use_polar,
-      reset_axis = parameters.reset_axis, view_anisotropies = parameters.view_anisotropies, use_log = parameters.use_log, apply_scale_max = parameters.apply_scale_max, scale_max = parameters.scale_max, apply_scale_min = parameters.apply_scale_min, scale_min = parameters.scale_min, plot_rays_on = parameters.plot_rays_on)
+  snapshot(dat, fig, ax1, cax1, parameters.var_name,
+      parameters = parameters)
   
   lineout(dat, parameters.cs, fig2, ax2, ax3, parameters.var_name,
-      grid_boolean = parameters.grid_boolean, reset_axis = parameters.reset_axis, use_log = parameters.use_log, surface_name = parameters.surface_name)
+      parameters = parameters)
 
 
 
@@ -245,25 +244,47 @@ def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
 
 
 
-def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
+class plot_parameters:
+  def __init__(self):
+    self.sdf_num = 0
+    self.use_analysis = False
+    self.cs = 0
+    self.pathname = 'None'
+    self.istart = 0
+    self.iend = 0
+    self.grid_boolean = False
+    self.use_polar = False
+    self.var_name = 'None'
+    self.reset_axis = False
+    self.view_anisotropies = False
+    self.use_log = False
+    self.surface_name = 'None'
+    self.apply_scale_max = False
+    self.scale_max = 1.0
+    self.apply_scale_min = False
+    self.scale_min = 0.0
+    self.plot_rays_on = False
+
+
+
+def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   """
   """
   
-  var_name = kwargs.get('var_name', "Fluid_Rho")
-  grid_boolean = kwargs.get('grid_boolean', False)
-  if grid_boolean == False:
+  parameters = kwargs.get('parameters', plot_parameters())
+  if parameters.grid_boolean == False:
     grid_colour = 'None'
   else:
     grid_colour = 'k'
-  use_polar = kwargs.get('use_polar', False)
-  reset_axis = kwargs.get('reset_axis', True)
-  view_anisotropies = kwargs.get('view_anisotropies', False)
-  use_log = kwargs.get('use_log', False)
-  apply_scale_max = kwargs.get('apply_scale_max', False)
-  scale_max = kwargs.get('scale_max', 1.0)
-  apply_scale_min = kwargs.get('apply_scale_min', False)
-  scale_min = kwargs.get('scale_min', 0.0)
-  plot_rays_on = kwargs.get('plot_rays_on', False)
+  use_polar = parameters.use_polar
+  reset_axis = parameters.reset_axis
+  view_anisotropies = parameters.view_anisotropies
+  use_log = parameters.use_log
+  apply_scale_max = parameters.apply_scale_max
+  scale_max = parameters.scale_max
+  apply_scale_min = parameters.apply_scale_min
+  scale_min = parameters.scale_min
+  plot_rays_on = parameters.plot_rays_on
   
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
@@ -419,14 +440,15 @@ def empty_lineout(fig, ax):
 def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   """
   """
-  reset_axis = kwargs.get('reset_axis', True)
-  grid_boolean = kwargs.get('grid_boolean', False)
+  parameters = kwargs.get('parameters', plot_parameters())
+  reset_axis = parameters.reset_axis
+  grid_boolean = parameters.grid_boolean
   if grid_boolean == False:
     grid_style = 'None'
   else:
     grid_style = 'x'
-  use_log = kwargs.get('use_log', False)
-  surface_name = kwargs.get('surface_name', 'None')
+  use_log = parameters.use_log
+  surface_name = parameters.surface_name
   
   l1 = getattr(ax, 'line1')
   l2 = getattr(ax, 'line2')

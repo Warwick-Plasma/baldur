@@ -178,7 +178,7 @@ class time_history_GUI:
 class snapshot_GUI:
   def __init__(self, app, use_analysis, user_istart, user_iend):
     self.app = app
-    self.parameters = plot_parameters()
+    self.parameters = op.plot_parameters()
     self.parameters.use_analysis = use_analysis
     app.title("Snapshot GUI")
     app.geometry('500x400+10+10')
@@ -380,29 +380,6 @@ class snapshot_GUI:
   def rightKey(self, event):
     sdf_num = self.slider1.get()
     self.slider1.set(sdf_num + 1)
-
-
-
-class plot_parameters:
-  def __init__(self):
-    self.sdf_num = 0
-    self.use_analysis = False
-    self.cs = 0
-    self.pathname = 'None'
-    self.istart = 0
-    self.iend = 0
-    self.grid_boolean = False
-    self.use_polar = False
-    self.var_name = 'None'
-    self.reset_axis = False
-    self.view_anisotropies = False
-    self.use_log = False
-    self.surface_name = 'None'
-    self.apply_scale_max = False
-    self.scale_max = 1.0
-    self.apply_scale_min = False
-    self.scale_min = 0.0
-    self.plot_rays_on = False
 
 
 
