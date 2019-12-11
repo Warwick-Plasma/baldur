@@ -403,7 +403,6 @@ class plot_parameters:
     self.apply_scale_min = False
     self.scale_min = 0.0
     self.plot_rays_on = False
-    
 
 
 
