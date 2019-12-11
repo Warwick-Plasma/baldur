@@ -14,7 +14,7 @@ plt.switch_backend('TkAgg')
 # This sets a global fontsize
 global fs
 global small_num
-fs = 12
+fs = 15
 small_num = 1e-100
 
 
@@ -336,12 +336,12 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   if parameters.plot_rays_on:
     if hasattr(dat, 'Beam1'):
       skip = 10
-      plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, use_polar, grid_conv)
+      plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, parameters.use_polar, grid_conv)
     if hasattr(dat, 'Burst1'):
       num_burs = len(dat.bursts)
       for iname in range(0, num_burs, 10):
         skip = 1
-        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1, use_polar, grid_conv)
+        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1, parameters.use_polar, grid_conv)
   
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
@@ -479,6 +479,11 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     ax_l2.set_ydata(y_data_comp)
     ax1_l2.set_xdata(x_data_comp)
     ax1_l2.set_ydata(y_data1_comp)
+  else:
+    ax_l2.set_xdata(1)
+    ax_l2.set_ydata(1)
+    ax1_l2.set_xdata(1)
+    ax1_l2.set_ydata(1)
   
   ax.xaxis.get_offset_text().set_size(fs)
   ax.yaxis.get_offset_text().set_size(fs)
