@@ -322,7 +322,7 @@ class snapshot_GUI:
     self.comparison_check.grid(column=0, row=10)
     
     self.entry_comparison = tk.Entry(app)
-    self.entry_comparison.insert(0, "Write comparsion path")
+    self.entry_comparison.insert(0, os.path.abspath(os.getcwd()))
     self.entry_comparison.grid(column=1, row=10)
     
     # Bindings
