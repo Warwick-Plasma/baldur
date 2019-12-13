@@ -354,6 +354,9 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   cbar = fig.colorbar(cmesh, cax=cax1)
     
   if parameters.plot_rays_on:
+    var = getattr(dat, var_name)
+    var_grid = getattr(var, 'grid')
+    grid_conv = getattr(var_grid, 'unit_conversion')
     if hasattr(dat, 'Beam1'):
       skip = 10
       plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, parameters.use_polar, grid_conv)
