@@ -14,8 +14,10 @@ plt.switch_backend('TkAgg')
 # This sets a global fontsize
 global fs
 global small_num
+global big_num
 fs = 15
 small_num = 1e-100
+big_num = 1e100
 
 
 
@@ -534,7 +536,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
                              ymin1, ymax1])
   
   if parameters.surface_name == 'None':
-    ax_l3.set_xdata(0.0)
+    ax_l3.set_xdata(-big_num)
     surface_location = 'None'
     surface_move = 0.0
   else:
