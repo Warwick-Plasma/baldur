@@ -360,11 +360,11 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
     var_grid = getattr(var, 'grid')
     grid_conv = getattr(var_grid, 'unit_conversion')
     if hasattr(dat, 'Beam1'):
-      skip = 10
+      skip = 1
       plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, parameters.use_polar, grid_conv)
     if hasattr(dat, 'Burst1'):
       num_burs = len(dat.bursts)
-      for iname in range(0, num_burs, 10):
+      for iname in range(0, num_burs):
         skip = 1
         plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1, parameters.use_polar, grid_conv)
   
