@@ -189,7 +189,7 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   The dat file is created with all the data from the sdf file indicated in
   parameters.
   """
-  print_string = 'Processing file {:4d}'.format(sdf_num) + ' of {:4d}'.format(parameters.iend)
+  print_string = 'Processing file {:4d}'.format(sdf_num) + ' of {:4d}'.format(parameters.iend) + '   '
   sys.stdout.write('\r' + print_string)
   sys.stdout.flush()
   
@@ -236,7 +236,7 @@ def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
   cmin = min(min(beam_energy.data, key=lambda x: min(x.data)).data)
   cnorm = plt.Normalize(cmin, cmax)
   for iray in range(0, nrays, skip):
-    print_string = 'Processing ray {:4d}'.format(iray+1) + ' of {:4d}'.format(nrays)
+    print_string = 'Processing ray {:4d}'.format(iray+1) + ' of {:4d}'.format(nrays) + '   '
     sys.stdout.write('\r' + print_string)
     sys.stdout.flush()
     
