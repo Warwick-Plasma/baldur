@@ -22,7 +22,8 @@ big_num = 1e100
 
 
 
-def plot_laser_profile(name):
+def plot_laser_profile(*args, **kwargs):
+  name = kwargs.get('name', 'laser_profile.csv')
   with open(name) as csvfile:
     readCSV = csv.reader(csvfile, delimiter=',')
     times = []
