@@ -395,6 +395,14 @@ def hot_electron(dat, *args, **kwargs):
                                       units_new = 'TW',
                                       unit_conversion = 1.0e-15,
                                       name = "Total Hot Electron Power Deposited"))
+
+  var_name = "Hot_Electron_Energy_Total_Deposited"
+  var_list.append(var_name)
+  tot_electron_dep = np.sum(np.sum(dat.Cell_Mass.data * electron_dep))
+  setattr(dat, var_name, new_variable(data = tot_electron_dep,
+                                      units_new = 'kJ',
+                                      unit_conversion = 1.0e-3,
+                                      name = "Total laser energy deposited"))
   
   setattr(dat, "variables_time", var_list)
   
@@ -509,11 +517,15 @@ def energy(dat, *args, **kwargs):
 
   var_name = "Total_Energy"
   var_list.append(var_name)
-  if "Laser_Energy_Total_Deposited" in dat.variables:
+  if "Laser_Energy_Total_Deposited" in dat.variables_time:
     tot_LE = dat.Laser_Energy_Total_Deposited.data
   else:
     tot_LE = 0.0
-  tot_energy = tot_IE + tot_KE - tot_LE
+  if "Hot_Electron_Energy_Total_Deposited" in dat.variables_time:
+    tot_HEE = dat.Hot_Electron_Energy_Total_Deposited.data
+  else:
+    tot_HEE = 0.0
+  tot_energy = tot_IE + tot_KE - tot_LE - tot_HEE
   setattr(dat, var_name, new_variable(data = tot_energy,
                                       units_new = 'J',
                                       unit_conversion = 1,
