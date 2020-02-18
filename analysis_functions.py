@@ -106,7 +106,7 @@ def basic(dat):
 
   var_name = "Cell_Mass"
   var_list.append(var_name)
-  mass = dat.Fluid_Rho.data[:,:] * vol[:,:]
+  mass = dat.Fluid_Rho.data * vol
   setattr(dat, var_name, new_variable(data = mass,
                                       grid = dat.Grid_Grid,
                                       units_new = "kg",
