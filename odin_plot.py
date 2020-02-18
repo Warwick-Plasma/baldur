@@ -5,6 +5,7 @@ import numpy as np
 import glob
 import import_sdf as isdf
 import sys, os
+import csv
 from matplotlib import cm
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, BoundaryNorm
@@ -18,6 +19,26 @@ global big_num
 fs = 15
 small_num = 1e-100
 big_num = 1e100
+
+
+
+def plot_laser_profile(*args, **kwargs):
+  name = kwargs.get('name', 'laser_profile.csv')
+  with open(name) as csvfile:
+    readCSV = csv.reader(csvfile, delimiter=',')
+    times = []
+    powers = []
+    for row in readCSV:
+      time = float(row[0]) / 1000.0
+      times.append(time)
+      power = float(row[1])
+      powers.append(power)
+      print(time, power)
+  plt.figure()
+  plt.xlabel('Time (ns)')
+  plt.ylabel('Power (TW)')
+  plt.plot(times, powers)
+  plt.show()
 
 
 
