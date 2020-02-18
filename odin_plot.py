@@ -28,12 +28,14 @@ def plot_laser_profile(name):
     times = []
     powers = []
     for row in readCSV:
-      time = float(row[0])
+      time = float(row[0]) / 1000.0
       times.append(time)
       power = float(row[1])
       powers.append(power)
       print(time, power)
   plt.figure()
+  plt.xlabel('Time (ns)')
+  plt.ylabel('Power (TW)')
   plt.plot(times, powers)
   plt.show()
 
