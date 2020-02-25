@@ -415,6 +415,56 @@ def energy(dat, *args, **kwargs):
 
 
 
+def shell(dat, *args, **kwargs):
+  """
+  """
+  
+  nmat = dat.Integer_flags.nmat
+  gas_region_boolean = False
+  
+  for mat_name in dat.materials:
+    if 'gas' in mat_name:
+      gas_rho = getattr(getattr(dat, 'Fluid_Rho_' + mat_name), 'data')
+      gas_region_boolean = True
+  
+  if gas_region_boolean:
+    gas_rho_mean = np.mean(np.ma.masked_equal(gas_rho, 0).mean(axis=1))
+    rho_max = np.max(dat.Fluid_Rho.data)
+  
+    inshell_den = 0.1 * (rho_max - gas_rho_mean) + gas_rho_mean
+    
+    boolean_shell_mask = (np.array(dat.Fluid_Rho.data) >= inshell_den)
+    shell_mask = boolean_shell_mask + 0.0
+    clean_shell_mask = (shell_mask[2:] + shell_mask[1:-1] + shell_mask[:-2]) + (shell_mask[:-2] - 1)
+    clean_shell_mask = (clean_shell_mask >= 1) + 0.0
+    shell_mask[1:-1] = clean_shell_mask
+    
+    # Variables that change in time and space
+    var_list = dat.variables
+    
+    var_name = "Capsule_Shell"
+    var_list.append(var_name)
+    setattr(dat, var_name, new_variable(data = shell_mask,
+                                        grid = dat.Grid_Grid,
+                                        units_new = "Boolean",
+                                        unit_conversion = 1,
+                                        name = "Mask of Capsule Shell"))
+  
+    setattr(dat, "variables", var_list)
+  
+    # variables that only change in time
+    var_list = dat.variables_time
+  
+    setattr(dat, "variables_time", var_list)
+  
+  else:
+    print("Warning! gas region doesn't exist or name unexpected")
+    print("skipping hotspot analysis")
+  
+  return dat
+
+
+
 def time_variables(dat, *args, **kwargs):
   """
   """
