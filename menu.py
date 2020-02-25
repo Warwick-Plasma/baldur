@@ -51,6 +51,8 @@ def options(*args, **kwargs):
 
 
 def sdf_counter(runs, user_istart, user_iend):
+    """This function counts the total number of sdf files in the current directory to bound the slider.
+    """
     RunCounter = len(runs)
     run_array = np.zeros(RunCounter)
     for ir in range(0, RunCounter):
@@ -75,10 +77,17 @@ def sdf_counter(runs, user_istart, user_iend):
 # Classes are required in these section to store the objects, figures and the
 # various controls defined by tkinter
 class time_history_GUI:
-  """This class creates plots which require data from all of the time
-  snapshot outputs.
+  """This class creates plots which require data from all of the sdf files.
+  
+  __init__ is called on creation of the class and defines when the menu's controls will call the other functions.
+  callbackFunc1 resets the grid and calls the plot update function
+  callbackFunc updates the plot with the new slider values, variable choice etc.
   """
   def __init__(self, app, use_analysis, user_istart, user_iend):
+    """This function is only called on creation of the class and initialises the tkinter menu.
+    
+    First setup is done including importing data needed fo initialising menu controls from sdf files, then the figures are initialised to be populated later, the tkinter objects are setup.
+    """
     self.app = app
     self.use_analysis = use_analysis
     app.title("Time history GUI")
@@ -157,10 +166,14 @@ class time_history_GUI:
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
   
   def callbackFunc1(self, event):
+    """Reset grid and update plot
+    """
     self.reset_axis_variable.set(True)
     self.callbackFunc(event)
   
   def callbackFunc(self, event):
+    """Update 1D and 2d plots with values given by tkinter controls
+    """
     var_name = self.combo1.get()
     var_name2 = self.combo2.get()
     grid_choice = self.combo3.get()
@@ -176,6 +189,19 @@ class time_history_GUI:
 
 
 class snapshot_GUI:
+  """This class creates plots which require data from a single sdf file.
+  
+  __init__ is called on creation of the class and defines when the menu's controls will call the other functions.
+  callbackFunc1 resets the grid and calls the plot update function
+  callbackFunc updates the plot with the new slider values, variable choice etc.
+  leftkey update slider with arrow key
+  rightkey update slider with arrow key
+  
+  title is self explanatory:
+  save_pdf 
+  save_video
+  exit_gui
+  """
   def __init__(self, app, use_analysis, user_istart, user_iend):
     self.app = app
     self.parameters = op.plot_parameters()
@@ -348,6 +374,8 @@ class snapshot_GUI:
     self.comparison_check.bind("<ButtonRelease-1>", self.callbackFunc)
 
   def callbackFunc(self, event):
+    """Update 1D and 2d plots with values given by tkinter controls which are saved in class 'parameters'
+    """
     self.parameters.grid_boolean = self.grid_variable.get()
     self.parameters.use_polar = self.polar_variable.get()
     self.parameters.sdf_num = self.slider1.get()
@@ -370,17 +398,21 @@ class snapshot_GUI:
     self.reset_axis_variable.set(False)
     
   def callbackFunc1(self, event):
-    """This function resets the grid before calling other functions
+    """This function resets the grid before the plot updateing function
     """
     self.reset_axis_variable.set(True)
     self.callbackFunc(event)
 
   def save_pdf(self):
+    """Save pdf of 2d file as default but easily changed by using fig1 instead of fig
+    """
     self.parameters.var_name = self.combo1.get()
     pdf_name = self.parameters.var_name + '_' + 'SDF_{0:04d}'.format(self.parameters.sdf_num) + '.pdf'
     self.fig.savefig(pdf_name)
   
   def save_video(self):
+    """Saves a video of 2d plot as default but can be changed by changing fig
+    """
     self.parameters.reset_axis = self.reset_axis_variable.get()
     
     filename1 = self.parameters.var_name + '.mp4'
@@ -390,16 +422,22 @@ class snapshot_GUI:
     animation.save(filename1, writer=writer)
   
   def exit_gui(self):
+    """Closes all created figure windows and stops code
+    """
     plt.close(self.fig)
     plt.close(self.fig2)
     self.app.destroy()
     sys.exit('GUI exit from button press')
   
   def leftKey(self, event):
+    """hotkey updates slider
+    """
     sdf_num = self.slider1.get()
     self.slider1.set(sdf_num - 1)
 
   def rightKey(self, event):
+    """hotkey updates slider
+    """
     sdf_num = self.slider1.get()
     self.slider1.set(sdf_num + 1)
 
