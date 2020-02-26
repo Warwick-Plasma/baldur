@@ -250,8 +250,7 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
 # © Copyright 2002 - 2012 John Hunter, Darren Dale, Eric Firing, Michael
 # Droettboom and the Matplotlib development team; 2012 - 2018 The Matplotlib
 # development team.
-# https://matplotlib.org/3.1.1/gallery/lines_bars_and_markers/multicolored_line
-# .html
+# https://matplotlib.org/3.1.1/gallery/lines_bars_and_markers/multicolored_line.html
 def plot_colourline(fig1, ax1, x, y, c, cnorm):
   """Modified from matplotlib examples. This plotting routine uses
   LineCollection to plot a line with different segments in different

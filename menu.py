@@ -40,8 +40,7 @@ def options(*args, **kwargs):
 
 def move_figure(f, x, y): # cxrodgers
   """Move figure's upper left corner to pixel (x, y)
-  https://yagisanatode.com/2018/02/23/how-do-i-change-the-size-and-position-of-
-  the-main-window-in-tkinter-and-python-3/
+  https://yagisanatode.com/2018/02/23/how-do-i-change-the-size-and-position-of-the-main-window-in-tkinter-and-python-3/
   """
   backend = matplotlib.get_backend()
   if backend == 'TkAgg':
