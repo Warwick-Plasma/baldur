@@ -7,13 +7,15 @@ import sys, os
 from matplotlib.widgets import Slider, RadioButtons
 plt.switch_backend('TkAgg')
 
-
+# small number stored to avoid divide by zero errors
 global small_number
 small_number = 1e-100
 
 
 class new_variable:
-  """
+  """This class is designed to mimic an SDF variable such that the plotting
+  routine can do either with the same method. It is used for creating new
+  variables after analysis
   """
   def __init__(self, *args, **kwargs):
     self.data = kwargs.get('data', 1)
@@ -28,11 +30,12 @@ class new_variable:
 
 
 def basic(dat):
-	
+  """Basic analysis functions that would be useful for any simulation
+  """
   fac = 1.0
   if dat.Logical_flags.use_rz:
     fac = 2.0 * np.pi
-  
+
   if dat.Logical_flags.use_rz:
     v1 = dat.Velocity_VTheta.data
     v2 = dat.Velocity_Vr.data
@@ -48,27 +51,28 @@ def basic(dat):
   grid = dat.Grid_Grid.data
   x = grid[0]
   y = grid[1]
-  
+
   nmat = dat.Integer_flags.nmat
   amu = 1.66053904e-27
 
-  # Grids, all grids need to be 3D arrays so we stack radius
+  # Add to the list of grids
   var_list = dat.grids
-  
+
   var_name = "Radius_mid"
   var_list.append(var_name)
   radius = np.sqrt(xc**2 + yc**2)
   theta = np.arctan2(yc, xc)
-  setattr(dat, var_name, new_variable(data = np.array([radius, theta]),
-                                      units_new = dat.Grid_Grid_mid.units_new,
-                                      unit_conversion = dat.Grid_Grid_mid.unit_conversion,
-                                      name = "Radius"))
-  
+  setattr(dat, var_name,
+          new_variable(data = np.array([radius, theta]),
+                       units_new = dat.Grid_Grid_mid.units_new,
+                       unit_conversion = dat.Grid_Grid_mid.unit_conversion,
+                       name = "Radius"))
+
   setattr(dat, "grids", var_list)
-  
+
   # Variables that change in time and space
   var_list = dat.variables
-  
+
   var_name = "Fluid_Volume_rz"
   var_list.append(var_name)
   vol = dat.Fluid_Volume.data * fac
@@ -76,23 +80,30 @@ def basic(dat):
                                       grid = dat.Grid_Grid,
                                       units_new = "m$^3$",
                                       unit_conversion = 1,
-                                    name = "Volume"))
-                                    
+                                      name = "Volume"))
+
   var_name = "Area"
   var_list.append(var_name)
+  # I believe this method has been copied from Odin source code
   len_a = np.sqrt((x[:-1,:-1] - x[:-1,1:])**2 + (y[:-1,:-1] - y[:-1,1:])**2)
   len_b = np.sqrt((x[:-1,1:] - x[1:,1:])**2 + (y[:-1,1:] - y[1:,1:])**2)
   len_c = np.sqrt((x[1:,1:] - x[1:,:-1])**2 + (y[1:,1:] - y[1:,:-1])**2)
   len_d = np.sqrt((x[1:,:-1] - x[:-1,:-1])**2 + (y[1:,:-1] - y[:-1,:-1])**2)
-  angle_a = np.arctan2(np.abs(y[:-1,:-1] - y[1:,:-1]), np.abs(x[:-1,:-1] - x[1:,:-1])) + np.arctan2(np.abs(y[:-1,1:] - y[:-1,:-1]),np.abs(x[:-1,1:] - x[:-1,:-1]))
-  angle_c = np.arctan2(np.abs(y[:-1,1:] - y[1:,1:]),np.abs(x[:-1,1:] - x[1:,1:])) + np.arctan2(np.abs(y[1:,1:] - y[1:,:-1]),np.abs(x[1:,1:] - x[1:,:-1]))
-  area = 0.5 * len_a * len_d * np.sin(angle_a) + 0.5 * len_b * len_c * np.sin(angle_c)
+  angle_a = np.arctan2(np.abs(y[:-1,:-1] - y[1:,:-1]), np.abs(x[:-1,:-1] \
+      - x[1:,:-1])) + np.arctan2(np.abs(y[:-1,1:] - y[:-1,:-1]),
+                                 np.abs(x[:-1,1:] - x[:-1,:-1]))
+  angle_c = np.arctan2(np.abs(y[:-1,1:] - y[1:,1:]),
+                       np.abs(x[:-1,1:] - x[1:,1:])) \
+          + np.arctan2(np.abs(y[1:,1:] - y[1:,:-1]),
+                       np.abs(x[1:,1:] - x[1:,:-1]))
+  area = 0.5 * len_a * len_d * np.sin(angle_a) \
+       + 0.5 * len_b * len_c * np.sin(angle_c)
   setattr(dat, var_name, new_variable(data = area,
                                       grid = dat.Grid_Grid,
                                       units_new = "m$^2$",
                                       unit_conversion = 1,
                                       name = "Area"))
-  
+
   var_name = "Cell_Mass"
   var_list.append(var_name)
   mass = dat.Fluid_Rho.data[:,:] * vol[:,:]
@@ -100,7 +111,7 @@ def basic(dat):
                                       grid = dat.Grid_Grid,
                                       units_new = "kg",
                                       unit_conversion = 1,
-                                      name = "Mass"))	
+                                      name = "Mass"))
   var_name = "Fluid_Speed"
   var_list.append(var_name)
   speed = np.sqrt(v1**2 + v2**2 + v3**2)
@@ -122,7 +133,7 @@ def basic(dat):
                                       units_new = "g/cm$^2$",
                                       unit_conversion = 0.1,
                                       name = "Areal Density"))
-                                      
+
   var_name = "Fluid_Number_density_ion"
   var_list.append(var_name)
   ni_density = 0.0
@@ -133,17 +144,19 @@ def basic(dat):
     ni_density = ni_density + mat_den / a_bar / amu
   else:
     for imat in range(1,nmat+1):
-      mat_name = getattr(getattr(dat, "material_string_flags_"+str(imat).zfill(3)), "data")['name']
-      a_bar = getattr(getattr(dat, "material_real_flags_"+str(imat).zfill(3)), "a_bar")
+      mat_name = getattr(getattr(dat, "material_string_flags_" \
+               + str(imat).zfill(3)), "data")['name']
+      a_bar = getattr(getattr(dat, "material_real_flags_" \
+            + str(imat).zfill(3)), "a_bar")
       mat_den = getattr(getattr(dat, "Fluid_Rho_"+mat_name), "data")
       ni_density = ni_density + mat_den / a_bar / amu
-    
+
   setattr(dat, var_name, new_variable(data = ni_density,
                                       grid = dat.Grid_Grid,
                                       units_new = "#/m$^3$",
                                       unit_conversion = 1,
                                       name = "Number density of ions"))
-  
+
   var_name = "Fluid_Number_density_electron"
   var_list.append(var_name)
   Z = dat.Fluid_Charge_State.data
@@ -155,43 +168,46 @@ def basic(dat):
                                       name = "Number density of electrons"))
 
   setattr(dat, "variables", var_list)
-  
+
   # variables that only change in time
   var_list = dat.variables_time
-  
+
   var_name = "Centre_Of_Mass"
   var_list.append(var_name)
   com = np.sum(np.sum(mass * radius)) / np.sum(np.sum(mass))
-  setattr(dat, var_name, new_variable(data = com,
-                                      units_new = dat.Grid_Grid_mid.units_new,
-                                      unit_conversion = dat.Grid_Grid_mid.unit_conversion,
-                                      name = "Centre of Mass"))
-  
+  setattr(dat, var_name,
+          new_variable(data = com,
+                       units_new = dat.Grid_Grid_mid.units_new,
+                       unit_conversion = dat.Grid_Grid_mid.unit_conversion,
+                       name = "Centre of Mass"))
+
   setattr(dat, "variables_time", var_list)
-  
+
   return dat
 
 
 
 def laser(dat, *args, **kwargs):
+  """Analysis of variables that are linked to the laser
+  """
   call_basic = kwargs.get('call_basic', True)
   laser_change = kwargs.get('laser_change', False)
   sdf_num = kwargs.get('sdf_num', 0)
   istart = kwargs.get('istart', 0)
   pathname = kwargs.get('pathname', os.path.abspath(os.getcwd()))
-  
+
   if call_basic:
     dat = basic(dat)
-  
+
   radius = dat.Radius_mid.data[0]
-  
+
   laser_wavelength = 351.0e-9
   laser_k = 2 * np.pi / laser_wavelength
   n_crit = 8.8e14 / laser_wavelength**2
   laser_dir = -1
-  
+
   laser_dep = dat.Fluid_Energy_deposited_laser.data
-  
+
   var_name = "Critical_Density"
   setattr(dat, var_name, new_variable(data = n_crit,
                                       units_new = "#/m^3",
@@ -206,39 +222,42 @@ def laser(dat, *args, **kwargs):
   crit_rad = np.zeros(ny)
   quart_crit_surf_ind = [0] * ny
   quart_crit_rad = np.zeros(ny)
-  # 1 critical surface is chosen based on direction of laser propagation
+  # critical surface is chosen based on direction of laser propagation
+  # This needs upgrading to use the output laser direction.
   for iy in range(0,ny):
     zero_crossings = np.where(np.diff(np.sign(crit_crossing[:,iy])))[0]
     zero_crossings = np.append(0, zero_crossings)
     crit_surf_ind[iy] = int(zero_crossings[laser_dir])
     crit_rad[iy] = radius[crit_surf_ind[iy],iy]
-    
+
     zero_crossings = np.where(np.diff(np.sign(quart_crit_crossing[:,iy])))[0]
     zero_crossings = np.append(0, zero_crossings)
     quart_crit_surf_ind[iy] = int(zero_crossings[laser_dir])
     quart_crit_rad[iy] = radius[quart_crit_surf_ind[iy],iy]
-  
+
   var_list = dat.track_surfaces
-  
+
   var_name = "Critical_Surface"
   var_list.append(var_name)
-  setattr(dat, var_name, new_variable(data = crit_rad,
-                                      index = crit_surf_ind,
-                                      units_new = dat.Grid_Grid.units_new,
-                                      unit_conversion = dat.Grid_Grid.unit_conversion,
-                                      name = "Location of critical surface"))
-    
+  setattr(dat, var_name,
+          new_variable(data = crit_rad,
+                       index = crit_surf_ind,
+                       units_new = dat.Grid_Grid.units_new,
+                       unit_conversion = dat.Grid_Grid.unit_conversion,
+                       name = "Location of critical surface"))
+
   var_name = "Critical_Surface_quarter"
   var_list.append(var_name)
-  setattr(dat, var_name, new_variable(data = quart_crit_rad,
-                                      index = quart_crit_surf_ind,
-                                      units_new = dat.Grid_Grid.units_new,
-                                      unit_conversion = dat.Grid_Grid.unit_conversion,
-                                      name = "Location of quarter critical surface"))
-  
+  setattr(dat, var_name,
+          new_variable(data = quart_crit_rad,
+                       index = quart_crit_surf_ind,
+                       units_new = dat.Grid_Grid.units_new,
+                       unit_conversion = dat.Grid_Grid.unit_conversion,
+                       name = "Location of quarter critical surface"))
+
   setattr(dat, "track_surfaces", var_list)
-  
-  # Variables that change in time and space 
+
+  # Variables that change in time and space
   var_list = dat.variables
 
   var_name = "Laser_Energy_per_step"
@@ -257,7 +276,7 @@ def laser(dat, *args, **kwargs):
                                       units_new = "J/kg",
                                       unit_conversion = 1,
                                       name = "Laser Energy Deposited"))
-  
+
   var_name = "Fluid_Number_density_electron_per_critical"
   var_list.append(var_name)
   ne_per_crit = ne_density / n_crit
@@ -266,27 +285,30 @@ def laser(dat, *args, **kwargs):
                                       units_new = '$n_{crit}$',
                                       unit_conversion = 1,
                                       name = "Electron number density"))
-  
+
   var_name = "Fluid_Density_scale_length"
   var_list.append(var_name)
   grad_ne_density = gradient_function(ne_density, dat.Grid_Grid_mid.data)
   density_scale_length = np.zeros(dat.Grid_Grid_mid.data[0].shape)
-  density_scale_length[1:-1,1:-1] = abs(ne_density[1:-1,1:-1] / (grad_ne_density[1:-1,1:-1] + small_number))
+  density_scale_length[1:-1,1:-1] = abs(ne_density[1:-1,1:-1] \
+                                  / (grad_ne_density[1:-1,1:-1] + small_number))
   # Remeber unit conversions are applied after!!
   max_val = 1e-2
-  density_scale_length = np.where(density_scale_length < max_val, density_scale_length, 0.0)
-  setattr(dat, var_name, new_variable(data = density_scale_length,
-                                      grid = dat.Grid_Grid,
-                                      units_new = dat.Grid_Grid.units_new,
-                                      unit_conversion = dat.Grid_Grid.unit_conversion,
-                                      name = "Density Scale length $l_n$"))
-  
-  
+  density_scale_length = np.where(density_scale_length < max_val,
+                                  density_scale_length, 0.0)
+  setattr(dat, var_name,
+          new_variable(data = density_scale_length,
+                       grid = dat.Grid_Grid,
+                       units_new = dat.Grid_Grid.units_new,
+                       unit_conversion = dat.Grid_Grid.unit_conversion,
+                       name = "Density Scale length $l_n$"))
+
+
   setattr(dat, "variables", var_list)
-  
+
   # variables that only change in time
   var_list = dat.variables_time
-  
+
   var_name = "Laser_Energy_Total_Deposited"
   var_list.append(var_name)
   tot_laser_dep = np.sum(np.sum(dat.Cell_Mass.data * laser_dep))
@@ -294,18 +316,21 @@ def laser(dat, *args, **kwargs):
                                       units_new = 'kJ',
                                       unit_conversion = 1.0e-3,
                                       name = "Total laser energy deposited"))
-  
+
   setattr(dat, "variables_time", var_list)
-  
-  
-  
+
+
+
   return dat
 
 
 
 def adiabat(dat, *args, **kwargs):
+  """Calculate paramaters pertaining to shocks: the fluid adiabat and inverse
+  pressure length scale.
+  """
   call_basic = kwargs.get('call_basic', True)
-  
+
   # Volume must be times by 2*pi in RZ
   fac = 1.0
   if dat.Logical_flags.use_rz:
@@ -313,13 +338,15 @@ def adiabat(dat, *args, **kwargs):
 
   rho = dat.Fluid_Rho.data
   pressure = dat.Fluid_Pressure.data
-  
+
   # Variables that change in time and space
   var_list = dat.variables
 
   var_name = "Fluid_Adiabat"
   var_list.append(var_name)
   # The conversion to electron degeneracy pressure is only true for DT
+  # See "The Physics of Inertial Fusion" by Atzeni and Meyer-ter-Vehn
+  # page number pending (sorry!)
   deg_pressure = 2.17e12 * (rho / 1000)**(5.0/3.0) / 10 + small_number
   adiabat = pressure / deg_pressure
   max_val = 100.0
@@ -335,13 +362,14 @@ def adiabat(dat, *args, **kwargs):
   # As used by Craxton et al 2015 the inverse pressure scale length
   # makes the discontinous shock clear. Requires similar spatial and
   # temporal resolution
-  pressure_ls = gradient_function(np.log(pressure + small_number), dat.Grid_Grid_mid.data)
+  pressure_ls = gradient_function(np.log(pressure + small_number),
+                                  dat.Grid_Grid_mid.data)
   setattr(dat, var_name, new_variable(data = pressure_ls,
                                       grid = dat.Grid_Grid,
                                       units_new = "unitless",
                                       unit_conversion = 1,
                                       name = "Inverse Pressure Length Scale"))
-  
+
   setattr(dat, "variables", var_list)
 
   return dat
@@ -349,6 +377,8 @@ def adiabat(dat, *args, **kwargs):
 
 
 def energy(dat, *args, **kwargs):
+  """Energy calculations that are not already accounted for by Odin
+  """
   call_basic = kwargs.get('call_basic', True)
 
   # Volume must be times by 2*pi in RZ
@@ -378,10 +408,10 @@ def energy(dat, *args, **kwargs):
                                       name = "Kinetic Energy"))
 
   setattr(dat, "variables", var_list)
-  
+
   # variables that only change in time
   var_list = dat.variables_time
-  
+
   var_name = "Total_Kinetic_Energy"
   var_list.append(var_name)
   tot_KE = np.sum(np.sum(KE))
@@ -389,7 +419,7 @@ def energy(dat, *args, **kwargs):
                                       units_new = 'J',
                                       unit_conversion = 1,
                                       name = "Total Kinetic Energy"))
-                                      
+
   var_name = "Total_Internal_Energy"
   var_list.append(var_name)
   tot_Ei = np.sum(np.sum(Ei))
@@ -399,7 +429,7 @@ def energy(dat, *args, **kwargs):
                                       units_new = 'J',
                                       unit_conversion = 1,
                                       name = "Total Internal Energy"))
-  
+
   var_name = "Total_Energy"
   var_list.append(var_name)
   tot_LE = dat.Laser_Energy_Total_Deposited.data
@@ -408,20 +438,21 @@ def energy(dat, *args, **kwargs):
                                       units_new = 'J',
                                       unit_conversion = 1,
                                       name = "Total Energy"))
-  
+
   setattr(dat, "variables_time", var_list)
-  
+
   return dat
 
 
 
 def time_variables(dat, *args, **kwargs):
-  """
+  """This routine calculates variables that have no spatial dependance but
+  do change in time.
   """
 
   # variables that only change in time
   var_list = dat.variables_time
-  
+
   var_name = "Laser_Power_Total_Deposited"
   var_list.append(var_name)
   dt = dat.Times.all_time_data[1:] - dat.Times.all_time_data[:-1]
@@ -433,14 +464,16 @@ def time_variables(dat, *args, **kwargs):
                                       units_new = 'TW',
                                       unit_conversion = 1.0e-12,
                                       name = "Total laser power deposited"))
-  
+
   setattr(dat, "variables_time", var_list)
 
 def gradient_function(param, grid):
-  
+  """ This function calculates the 2D gradient of the [param] relative
+  to the [grid]
+  """
   xc = grid[0]
   yc = grid[1]
-  
+
   dx = ((xc[:-2,1:-1] - xc[2:,1:-1])**2 +
         (yc[:-2,1:-1] - yc[2:,1:-1])**2)**0.5
   dy = ((xc[1:-1,:-2] - xc[1:-1,2:])**2 +
@@ -449,7 +482,7 @@ def gradient_function(param, grid):
   dlnpy = param[1:-1,:-2] - param[1:-1,2:]
   grad_param = np.zeros(grid[0].shape)
   grad_param[1:-1,1:-1] = np.abs(dlnpx / dx) + np.abs(dlnpy / dy)
-  
+
   return grad_param
 
 def main():
