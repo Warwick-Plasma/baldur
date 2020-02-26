@@ -7,13 +7,15 @@ import sys, os
 from matplotlib.widgets import Slider, RadioButtons
 plt.switch_backend('TkAgg')
 
-
+# small number stored to avoid divide by zero errors
 global small_number
 small_number = 1e-100
 
 
 class new_variable:
-  """
+  """This class is designed to mimic an SDF variable such that the plotting
+  routine can do either with the same method. It is used for creating new
+  variables after analysis
   """
   def __init__(self, *args, **kwargs):
     self.data = kwargs.get('data', 1)
@@ -28,7 +30,8 @@ class new_variable:
 
 
 def basic(dat):
-	
+  """Basic analysis functions that would be useful for any simulation
+  """
   fac = 1.0
   if dat.Logical_flags.use_rz:
     fac = 2.0 * np.pi
@@ -52,7 +55,7 @@ def basic(dat):
   nmat = dat.Integer_flags.nmat
   amu = 1.66053904e-27
 
-  # Grids, all grids need to be 3D arrays so we stack radius
+  # Add to the list of grids
   var_list = dat.grids
   
   var_name = "Radius_mid"
@@ -174,6 +177,8 @@ def basic(dat):
 
 
 def laser(dat, *args, **kwargs):
+  """Analysis of variables that are linked to the laser
+  """
   call_basic = kwargs.get('call_basic', True)
   laser_change = kwargs.get('laser_change', False)
   sdf_num = kwargs.get('sdf_num', 0)
@@ -206,7 +211,8 @@ def laser(dat, *args, **kwargs):
   crit_rad = np.zeros(ny)
   quart_crit_surf_ind = [0] * ny
   quart_crit_rad = np.zeros(ny)
-  # 1 critical surface is chosen based on direction of laser propagation
+  # critical surface is chosen based on direction of laser propagation
+  # This needs upgrading to use the output laser direction.
   for iy in range(0,ny):
     zero_crossings = np.where(np.diff(np.sign(crit_crossing[:,iy])))[0]
     zero_crossings = np.append(0, zero_crossings)
@@ -304,6 +310,9 @@ def laser(dat, *args, **kwargs):
 
 
 def adiabat(dat, *args, **kwargs):
+  """Calculate paramaters pertaining to shocks: the fluid adiabat and inverse
+  pressure length scale.
+  """
   call_basic = kwargs.get('call_basic', True)
   
   # Volume must be times by 2*pi in RZ
@@ -320,6 +329,8 @@ def adiabat(dat, *args, **kwargs):
   var_name = "Fluid_Adiabat"
   var_list.append(var_name)
   # The conversion to electron degeneracy pressure is only true for DT
+  # See "The Physics of Inertial Fusion" by Atzeni and Meyer-ter-Vehn
+  # page number pending (sorry!)
   deg_pressure = 2.17e12 * (rho / 1000)**(5.0/3.0) / 10 + small_number
   adiabat = pressure / deg_pressure
   max_val = 100.0
@@ -349,6 +360,8 @@ def adiabat(dat, *args, **kwargs):
 
 
 def energy(dat, *args, **kwargs):
+  """Energy calculations that are not already accounted for by Odin
+  """
   call_basic = kwargs.get('call_basic', True)
 
   # Volume must be times by 2*pi in RZ
@@ -416,7 +429,8 @@ def energy(dat, *args, **kwargs):
 
 
 def time_variables(dat, *args, **kwargs):
-  """
+  """This routine calculates variables that have no spatial dependance but
+  do change in time.
   """
 
   # variables that only change in time
@@ -437,7 +451,9 @@ def time_variables(dat, *args, **kwargs):
   setattr(dat, "variables_time", var_list)
 
 def gradient_function(param, grid):
-  
+  """ This function calculates the 2D gradient of the [param] relative
+  to the [grid]
+  """
   xc = grid[0]
   yc = grid[1]
   
