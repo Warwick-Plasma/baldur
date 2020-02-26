@@ -269,7 +269,8 @@ def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
 
   # loop over sdf files in range [istart] to [iend].
   for n in range(1, irange):
-    print_string = 'Processing file {:4d}'.format(istart+n) + ' of {:4d}'.format(iend)
+    print_string = 'Processing file {:4d}'.format(istart+n) + \
+        ' of {:4d}'.format(iend)
     sys.stdout.write('\r' + print_string)
     sys.stdout.flush()
 

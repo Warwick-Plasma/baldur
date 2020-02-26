@@ -62,10 +62,11 @@ def basic(dat):
   var_list.append(var_name)
   radius = np.sqrt(xc**2 + yc**2)
   theta = np.arctan2(yc, xc)
-  setattr(dat, var_name, new_variable(data = np.array([radius, theta]),
-                                      units_new = dat.Grid_Grid_mid.units_new,
-                                      unit_conversion = dat.Grid_Grid_mid.unit_conversion,
-                                      name = "Radius"))
+  setattr(dat, var_name,
+          new_variable(data = np.array([radius, theta]),
+                       units_new = dat.Grid_Grid_mid.units_new,
+                       unit_conversion = dat.Grid_Grid_mid.unit_conversion,
+                       name = "Radius"))
 
   setattr(dat, "grids", var_list)
 
@@ -79,17 +80,24 @@ def basic(dat):
                                       grid = dat.Grid_Grid,
                                       units_new = "m$^3$",
                                       unit_conversion = 1,
-                                    name = "Volume"))
+                                      name = "Volume"))
 
   var_name = "Area"
   var_list.append(var_name)
+  # I believe this method has been copied from Odin source code
   len_a = np.sqrt((x[:-1,:-1] - x[:-1,1:])**2 + (y[:-1,:-1] - y[:-1,1:])**2)
   len_b = np.sqrt((x[:-1,1:] - x[1:,1:])**2 + (y[:-1,1:] - y[1:,1:])**2)
   len_c = np.sqrt((x[1:,1:] - x[1:,:-1])**2 + (y[1:,1:] - y[1:,:-1])**2)
   len_d = np.sqrt((x[1:,:-1] - x[:-1,:-1])**2 + (y[1:,:-1] - y[:-1,:-1])**2)
-  angle_a = np.arctan2(np.abs(y[:-1,:-1] - y[1:,:-1]), np.abs(x[:-1,:-1] - x[1:,:-1])) + np.arctan2(np.abs(y[:-1,1:] - y[:-1,:-1]),np.abs(x[:-1,1:] - x[:-1,:-1]))
-  angle_c = np.arctan2(np.abs(y[:-1,1:] - y[1:,1:]),np.abs(x[:-1,1:] - x[1:,1:])) + np.arctan2(np.abs(y[1:,1:] - y[1:,:-1]),np.abs(x[1:,1:] - x[1:,:-1]))
-  area = 0.5 * len_a * len_d * np.sin(angle_a) + 0.5 * len_b * len_c * np.sin(angle_c)
+  angle_a = np.arctan2(np.abs(y[:-1,:-1] - y[1:,:-1]), np.abs(x[:-1,:-1] \
+      - x[1:,:-1])) + np.arctan2(np.abs(y[:-1,1:] - y[:-1,:-1]),
+                                 np.abs(x[:-1,1:] - x[:-1,:-1]))
+  angle_c = np.arctan2(np.abs(y[:-1,1:] - y[1:,1:]),
+                       np.abs(x[:-1,1:] - x[1:,1:])) \
+          + np.arctan2(np.abs(y[1:,1:] - y[1:,:-1]),
+                       np.abs(x[1:,1:] - x[1:,:-1]))
+  area = 0.5 * len_a * len_d * np.sin(angle_a) \
+       + 0.5 * len_b * len_c * np.sin(angle_c)
   setattr(dat, var_name, new_variable(data = area,
                                       grid = dat.Grid_Grid,
                                       units_new = "m$^2$",
@@ -136,8 +144,10 @@ def basic(dat):
     ni_density = ni_density + mat_den / a_bar / amu
   else:
     for imat in range(1,nmat+1):
-      mat_name = getattr(getattr(dat, "material_string_flags_"+str(imat).zfill(3)), "data")['name']
-      a_bar = getattr(getattr(dat, "material_real_flags_"+str(imat).zfill(3)), "a_bar")
+      mat_name = getattr(getattr(dat, "material_string_flags_" \
+               + str(imat).zfill(3)), "data")['name']
+      a_bar = getattr(getattr(dat, "material_real_flags_" \
+            + str(imat).zfill(3)), "a_bar")
       mat_den = getattr(getattr(dat, "Fluid_Rho_"+mat_name), "data")
       ni_density = ni_density + mat_den / a_bar / amu
 
@@ -165,10 +175,11 @@ def basic(dat):
   var_name = "Centre_Of_Mass"
   var_list.append(var_name)
   com = np.sum(np.sum(mass * radius)) / np.sum(np.sum(mass))
-  setattr(dat, var_name, new_variable(data = com,
-                                      units_new = dat.Grid_Grid_mid.units_new,
-                                      unit_conversion = dat.Grid_Grid_mid.unit_conversion,
-                                      name = "Centre of Mass"))
+  setattr(dat, var_name,
+          new_variable(data = com,
+                       units_new = dat.Grid_Grid_mid.units_new,
+                       unit_conversion = dat.Grid_Grid_mid.unit_conversion,
+                       name = "Centre of Mass"))
 
   setattr(dat, "variables_time", var_list)
 
@@ -228,19 +239,21 @@ def laser(dat, *args, **kwargs):
 
   var_name = "Critical_Surface"
   var_list.append(var_name)
-  setattr(dat, var_name, new_variable(data = crit_rad,
-                                      index = crit_surf_ind,
-                                      units_new = dat.Grid_Grid.units_new,
-                                      unit_conversion = dat.Grid_Grid.unit_conversion,
-                                      name = "Location of critical surface"))
+  setattr(dat, var_name,
+          new_variable(data = crit_rad,
+                       index = crit_surf_ind,
+                       units_new = dat.Grid_Grid.units_new,
+                       unit_conversion = dat.Grid_Grid.unit_conversion,
+                       name = "Location of critical surface"))
 
   var_name = "Critical_Surface_quarter"
   var_list.append(var_name)
-  setattr(dat, var_name, new_variable(data = quart_crit_rad,
-                                      index = quart_crit_surf_ind,
-                                      units_new = dat.Grid_Grid.units_new,
-                                      unit_conversion = dat.Grid_Grid.unit_conversion,
-                                      name = "Location of quarter critical surface"))
+  setattr(dat, var_name,
+          new_variable(data = quart_crit_rad,
+                       index = quart_crit_surf_ind,
+                       units_new = dat.Grid_Grid.units_new,
+                       unit_conversion = dat.Grid_Grid.unit_conversion,
+                       name = "Location of quarter critical surface"))
 
   setattr(dat, "track_surfaces", var_list)
 
@@ -277,15 +290,18 @@ def laser(dat, *args, **kwargs):
   var_list.append(var_name)
   grad_ne_density = gradient_function(ne_density, dat.Grid_Grid_mid.data)
   density_scale_length = np.zeros(dat.Grid_Grid_mid.data[0].shape)
-  density_scale_length[1:-1,1:-1] = abs(ne_density[1:-1,1:-1] / (grad_ne_density[1:-1,1:-1] + small_number))
+  density_scale_length[1:-1,1:-1] = abs(ne_density[1:-1,1:-1] \
+                                  / (grad_ne_density[1:-1,1:-1] + small_number))
   # Remeber unit conversions are applied after!!
   max_val = 1e-2
-  density_scale_length = np.where(density_scale_length < max_val, density_scale_length, 0.0)
-  setattr(dat, var_name, new_variable(data = density_scale_length,
-                                      grid = dat.Grid_Grid,
-                                      units_new = dat.Grid_Grid.units_new,
-                                      unit_conversion = dat.Grid_Grid.unit_conversion,
-                                      name = "Density Scale length $l_n$"))
+  density_scale_length = np.where(density_scale_length < max_val,
+                                  density_scale_length, 0.0)
+  setattr(dat, var_name,
+          new_variable(data = density_scale_length,
+                       grid = dat.Grid_Grid,
+                       units_new = dat.Grid_Grid.units_new,
+                       unit_conversion = dat.Grid_Grid.unit_conversion,
+                       name = "Density Scale length $l_n$"))
 
 
   setattr(dat, "variables", var_list)
@@ -346,7 +362,8 @@ def adiabat(dat, *args, **kwargs):
   # As used by Craxton et al 2015 the inverse pressure scale length
   # makes the discontinous shock clear. Requires similar spatial and
   # temporal resolution
-  pressure_ls = gradient_function(np.log(pressure + small_number), dat.Grid_Grid_mid.data)
+  pressure_ls = gradient_function(np.log(pressure + small_number),
+                                  dat.Grid_Grid_mid.data)
   setattr(dat, var_name, new_variable(data = pressure_ls,
                                       grid = dat.Grid_Grid,
                                       units_new = "unitless",

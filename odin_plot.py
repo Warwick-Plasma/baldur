@@ -66,7 +66,8 @@ def time_history(dat, fig, ax1, cax1, *args, **kwargs):
 
   c_data = getattr(var, "all_time_data") * unit_conv
   y_data, c_data = two_dim_grid(dat, c_data)
-  x_data, y_data1 = np.meshgrid(dat.Times.all_time_data * dat.Times.unit_conversion, y_data[0,:], indexing='ij')
+  x_data, y_data1 = np.meshgrid(dat.Times.all_time_data \
+                  * dat.Times.unit_conversion, y_data[0,:], indexing='ij')
 
   x_label = dat.Times.name + ' (' + getattr(dat.Times, 'units_new') + ')'
   y_label = 'Radius (' + grid_units + ')'
@@ -221,31 +222,36 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   collection the plotting routines. The dat file is created with all the
   data from the sdf file.
   """
-  print_string = 'Processing file {:4d}'.format(sdf_num) + ' of {:4d}'.format(parameters.iend) + '   '
+  print_string = 'Processing file {:4d}'.format(sdf_num) \
+               + ' of {:4d}'.format(parameters.iend) + '   '
   sys.stdout.write('\r' + print_string)
   sys.stdout.flush()
 
   if parameters.apply_comparison:
     if os.path.isdir(parameters.entry_comparison):
-      parameters.dat1 = isdf.use_sdf(sdf_num, parameters.entry_comparison, use_analysis = parameters.use_analysis, istart = parameters.istart)
+      parameters.dat1 = isdf.use_sdf(sdf_num, parameters.entry_comparison,
+                                     use_analysis = parameters.use_analysis,
+                                     istart = parameters.istart)
     else:
       parameters.apply_comparison = False
       print()
       print("Warning: " + parameters.entry_comparison + " is not a directory")
 
 
-  dat = isdf.use_sdf(sdf_num, parameters.pathname, use_analysis = parameters.use_analysis, istart = parameters.istart)
-
+  dat = isdf.use_sdf(sdf_num, parameters.pathname,
+                     use_analysis = parameters.use_analysis,
+                     istart = parameters.istart)
   snapshot(dat, fig, ax1, cax1, parameters.var_name, parameters = parameters)
-
-  lineout(dat, parameters.cross_section, fig2, ax2, ax3, parameters.var_name, parameters = parameters)
+  lineout(dat, parameters.cross_section, fig2, ax2, ax3, parameters.var_name,
+          parameters = parameters)
 
 
 
 # © Copyright 2002 - 2012 John Hunter, Darren Dale, Eric Firing, Michael
 # Droettboom and the Matplotlib development team; 2012 - 2018 The Matplotlib
 # development team.
-# https://matplotlib.org/3.1.1/gallery/lines_bars_and_markers/multicolored_line.html
+# https://matplotlib.org/3.1.1/gallery/lines_bars_and_markers/multicolored_line
+# .html
 def plot_colourline(fig1, ax1, x, y, c, cnorm):
   """Modified from matplotlib examples. This plotting routine uses
   LineCollection to plot a line with different segments in different
@@ -279,7 +285,8 @@ def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
   cmin = min(min(beam_energy.data, key=lambda x: min(x.data)).data)
   cnorm = plt.Normalize(cmin, cmax)
   for iray in range(0, nrays, skip):
-    print_string = 'Processing ray {:4d}'.format(iray+1) + ' of {:4d}'.format(nrays) + '   '
+    print_string = 'Processing ray {:4d}'.format(iray+1) \
+                 + ' of {:4d}'.format(nrays) + '   '
     sys.stdout.write('\r' + print_string)
     sys.stdout.flush()
 
@@ -365,13 +372,16 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   else:
     grid_colour = 'k'
 
-  x_data, y_data, c_data, x_label, y_label, c_label = open_var_2d(dat, var_name, parameters)
+  x_data, y_data, c_data, x_label, y_label, c_label = \
+      open_var_2d(dat, var_name, parameters)
 
   if parameters.apply_comparison:
-    x_data1 = np.zeros(np.shape(x_data)) # this might allow plotting of different sized arrays
+    # this might allow plotting of different sized arrays
+    x_data1 = np.zeros(np.shape(x_data))
     y_data1 = np.zeros(np.shape(y_data))
     c_data1 = np.zeros((np.shape(c_data)[0],np.shape(c_data)[1]+1))
-    x_data1[0:,0:], y_data1[0:,0:], c_data1[:,:-1], _, _, _ = open_var_2d(parameters.dat1, var_name, parameters)
+    x_data1[0:,0:], y_data1[0:,0:], c_data1[:,:-1], _, _, _ \
+        = open_var_2d(parameters.dat1, var_name, parameters)
 
     x_data = np.hstack((x_data, np.flip(x_data1,1)))
     y_data = np.hstack((y_data, np.flip(-y_data1,1)))
@@ -410,12 +420,14 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
     grid_conv = getattr(var_grid, 'unit_conversion')
     if hasattr(dat, 'Beam1'):
       skip = 1
-      plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, parameters.use_polar, grid_conv)
+      plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, parameters.use_polar,
+                grid_conv)
     if hasattr(dat, 'Burst1'):
       num_burs = len(dat.bursts)
       for iname in range(0, num_burs):
         skip = 1
-        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1, parameters.use_polar, grid_conv)
+        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
+                  parameters.use_polar, grid_conv)
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
@@ -431,7 +443,8 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
 
   time = getattr(dat, "Times")
   t_data = getattr(time, "data") * getattr(time, 'unit_conversion')
-  t_label = getattr(time, "name") + ' = {0:5.3f}'.format(t_data) + getattr(time, "units_new")
+  t_label = getattr(time, "name") + ' = {0:5.3f}'.format(t_data) \
+          + getattr(time, "units_new")
   ax1.set_title(t_label, fontsize = fs)
 
   new_xlim = zoomed_axis1[:2]
@@ -447,7 +460,8 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
 def mean_subtract(cc, cl):
   """Mean subtracts the input data [cc] and updates the label [cl].
   """
-  c_data = (cc - np.mean(cc, 1, keepdims = True)) / np.maximum(np.mean(cc, 1, keepdims = True), 1e-17)
+  c_data = (cc - np.mean(cc, 1, keepdims = True)) \
+         / np.maximum(np.mean(cc, 1, keepdims = True), 1e-17)
   c_label = cl + "[As fraction of average]"
   return c_data, c_label
 
@@ -552,7 +566,8 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   else:
     var_default = dat.variables[0]
 
-  x_data, y_data, x_label, y_label = open_var_1d(dat, var_default, cs, parameters.use_log)
+  x_data, y_data, x_label, y_label = open_var_1d(dat, var_default, cs,
+                                                 parameters.use_log)
   _, y_data1, _, y_label1 = open_var_1d(dat, var_name, cs, parameters.use_log)
 
   ax_l1.set_xdata(x_data)
@@ -561,8 +576,10 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax1_l1.set_ydata(y_data1)
 
   if parameters.apply_comparison:
-    x_data_comp, y_data_comp, _, _ = open_var_1d(parameters.dat1, var_default, cs, parameters.use_log)
-    _, y_data1_comp, _, _ = open_var_1d(parameters.dat1, var_name, cs, parameters.use_log)
+    x_data_comp, y_data_comp, _, _ = open_var_1d(parameters.dat1, var_default,
+                                                 cs, parameters.use_log)
+    _, y_data1_comp, _, _ = open_var_1d(parameters.dat1, var_name, cs,
+                                        parameters.use_log)
 
     ax_l2.set_xdata(x_data_comp)
     ax_l2.set_ydata(y_data_comp)

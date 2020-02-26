@@ -39,7 +39,8 @@ def options(*args, **kwargs):
 
 def move_figure(f, x, y): # cxrodgers
   """Move figure's upper left corner to pixel (x, y)
-  https://yagisanatode.com/2018/02/23/how-do-i-change-the-size-and-position-of-the-main-window-in-tkinter-and-python-3/
+  https://yagisanatode.com/2018/02/23/how-do-i-change-the-size-and-position-of-
+  the-main-window-in-tkinter-and-python-3/
   """
   backend = matplotlib.get_backend()
   if backend == 'TkAgg':
@@ -110,8 +111,10 @@ class time_history_GUI:
     self.istart, self.iend, sdf_num = sdf_counter(runs, user_istart, user_iend)
 
     # initial data import, needed for variable selection combo box
-    dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
-    self.dat = isdf.get_data_all(dat, self.istart, self.iend, self.pathname, self.use_analysis, self.cross_section)
+    dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis =
+                       self.use_analysis, istart = self.istart)
+    self.dat = isdf.get_data_all(dat, self.istart, self.iend, self.pathname,
+                                 self.use_analysis, self.cross_section)
 
     # create empty figures
     aspc = 1.2
@@ -186,9 +189,12 @@ class time_history_GUI:
     cbar_upscale = self.slider1.get()
     reset_axis = self.reset_axis_variable.get()
 
-    op.time_history(self.dat, self.fig, self.ax1, self.cax1, var_name = var_name, cbar_upscale = cbar_upscale, grid = grid_choice, reset_axis = reset_axis)
-
-    op.time_history_lineout(self.dat, self.fig2, self.ax2, self.ax3, var_name = var_name2,  use_analysis = self.use_analysis)
+    op.time_history(self.dat, self.fig, self.ax1, self.cax1,
+                    var_name = var_name, cbar_upscale = cbar_upscale,
+                    grid = grid_choice, reset_axis = reset_axis)
+    op.time_history_lineout(self.dat, self.fig2, self.ax2, self.ax3,
+                            var_name = var_name2,
+                            use_analysis = self.use_analysis)
 
     self.reset_axis_variable.set(False)
 
@@ -224,7 +230,8 @@ class snapshot_GUI:
     # find sdf files and count
     self.parameters.pathname = os.path.abspath(os.getcwd())
     runs = glob.glob1(self.parameters.pathname,"*.sdf")
-    self.parameters.istart, self.parameters.iend, self.parameters.sdf_num = sdf_counter(runs, user_istart, user_iend)
+    self.parameters.istart, self.parameters.iend, self.parameters.sdf_num = \
+        sdf_counter(runs, user_istart, user_iend)
 
     # initial data import, needed for variable selection combo box
     dat = isdf.use_sdf(self.parameters.sdf_num, self.parameters.pathname,
@@ -249,7 +256,8 @@ class snapshot_GUI:
     self.label_slider1 = tk.Label(app, text = "Select sdf number:")
     self.label_slider1.grid(column=0, row=0)
 
-    self.slider1 = tk.Scale(app, from_=self.parameters.istart, to=self.parameters.iend, tickinterval=100,
+    self.slider1 = tk.Scale(app, from_=self.parameters.istart,
+                            to=self.parameters.iend, tickinterval=100,
                             orient=tk.HORIZONTAL, command=self.callbackFunc,
                             length  = 300, resolution = 1.0)
     self.slider1.grid(column=1, row=0)
@@ -265,7 +273,8 @@ class snapshot_GUI:
 
     # check box - grid
     self.grid_variable = tk.BooleanVar(app)
-    self.grid_button = tk.Checkbutton(app, text="grid", variable=self.grid_variable,
+    self.grid_button = tk.Checkbutton(app, text="grid",
+                                      variable=self.grid_variable,
                                       onvalue=True, offvalue=False)
     self.grid_button.deselect()
     self.grid_button.grid(column=0, row=2)
@@ -280,17 +289,18 @@ class snapshot_GUI:
 
     # check box - anisotropies
     self.anisotropies_variable = tk.BooleanVar(app)
-    self.anisotropies_button = tk.Checkbutton(app, text="View anisotropies",
-                                       variable=self.anisotropies_variable,
-                                       onvalue=True, offvalue=False)
+    self.anisotropies_button = \
+        tk.Checkbutton(app, text="View anisotropies",
+                       variable=self.anisotropies_variable,
+                       onvalue=True, offvalue=False)
     self.anisotropies_button.deselect()
     self.anisotropies_button.grid(column=0, row=4)
 
     # check box - Logarithm
     self.log_variable = tk.BooleanVar(app)
     self.log_button = tk.Checkbutton(app, text="Take log_10",
-                                       variable=self.log_variable,
-                                       onvalue=True, offvalue=False)
+                                     variable=self.log_variable,
+                                     onvalue=True, offvalue=False)
     self.log_button.deselect()
     self.log_button.grid(column=0, row=5)
 
@@ -309,7 +319,8 @@ class snapshot_GUI:
     self.exit_button.grid(column=1, row=4)
 
     # button - save video
-    self.video_button = tk.Button(app, text="Save video", command=self.save_video)
+    self.video_button = tk.Button(app, text="Save video",
+                                  command=self.save_video)
     self.video_button.grid(column=1, row=5)
 
     # Combo box - surface tracking
@@ -323,7 +334,9 @@ class snapshot_GUI:
 
     # Entry - Change cbar scale max
     self.apply_scale_max = tk.BooleanVar(app)
-    self.scale_max_check = tk.Checkbutton(app, text="Apply max scaling", variable=self.apply_scale_max, onvalue=True, offvalue=False)
+    self.scale_max_check = tk.Checkbutton(app, text="Apply max scaling",
+                                          variable=self.apply_scale_max,
+                                          onvalue=True, offvalue=False)
     self.scale_max_check.deselect()
     self.scale_max_check.grid(column=0, row=7)
 
@@ -333,7 +346,9 @@ class snapshot_GUI:
 
     # Entry - Change cbar scale min
     self.apply_scale_min = tk.BooleanVar(app)
-    self.scale_min_check = tk.Checkbutton(app, text="Apply min scaling", variable=self.apply_scale_min, onvalue=True, offvalue=False)
+    self.scale_min_check = tk.Checkbutton(app, text="Apply min scaling",
+                                          variable=self.apply_scale_min,
+                                          onvalue=True, offvalue=False)
     self.scale_min_check.deselect()
     self.scale_min_check.grid(column=0, row=8)
 
@@ -344,14 +359,16 @@ class snapshot_GUI:
     # check box - plot rays?
     self.rays_variable = tk.BooleanVar(app)
     self.rays_button = tk.Checkbutton(app, text="Show rays",
-                                       variable=self.rays_variable,
-                                       onvalue=True, offvalue=False)
+                                      variable=self.rays_variable,
+                                      onvalue=True, offvalue=False)
     self.rays_button.deselect()
     self.rays_button.grid(column=0, row=9)
 
     # Entry - Plot second file
     self.apply_comparison = tk.BooleanVar(app)
-    self.comparison_check = tk.Checkbutton(app, text="Apply Comparison", variable=self.apply_comparison, onvalue=True, offvalue=False)
+    self.comparison_check = tk.Checkbutton(app, text="Apply Comparison",
+                                           variable=self.apply_comparison,
+                                           onvalue=True, offvalue=False)
     self.comparison_check.deselect()
     self.comparison_check.grid(column=0, row=10)
 
@@ -402,7 +419,8 @@ class snapshot_GUI:
     self.parameters.entry_comparison = self.entry_comparison.get()
     self.parameters.cross_section = int(self.entry_cross_section.get())
 
-    op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3, self.parameters)
+    op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1,
+                     self.fig2, self.ax2, self.ax3, self.parameters)
 
     self.reset_axis_variable.set(False)
 
@@ -417,7 +435,8 @@ class snapshot_GUI:
     instead of fig
     """
     self.parameters.var_name = self.combo1.get()
-    pdf_name = self.parameters.var_name + '_' + 'SDF_{0:04d}'.format(self.parameters.sdf_num) + '.pdf'
+    pdf_name = self.parameters.var_name + '_' + \
+        'SDF_{0:04d}'.format(self.parameters.sdf_num) + '.pdf'
     self.fig.savefig(pdf_name)
 
   def save_video(self):
@@ -426,7 +445,10 @@ class snapshot_GUI:
     self.parameters.reset_axis = self.reset_axis_variable.get()
 
     filename1 = self.parameters.var_name + '.mp4'
-    animation = ani.FuncAnimation(self.fig, op.data_and_plot, frames=range(self.parameters.istart, self.parameters.iend+1), fargs=(self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3, self.parameters), repeat=False)
+    animation = ani.FuncAnimation(self.fig, op.data_and_plot,
+        frames=range(self.parameters.istart, self.parameters.iend+1),
+        fargs=(self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3,
+        self.parameters), repeat=False)
 
     writer = ani.FFMpegWriter(fps=24, bitrate=2e6)
     animation.save(filename1, writer=writer)
