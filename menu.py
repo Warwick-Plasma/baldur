@@ -72,7 +72,7 @@ def sdf_counter(runs, user_istart, user_iend):
     else:
       iend = user_iend
     sdf_num = istart
-    
+
     return istart, iend, sdf_num
 
 
@@ -81,7 +81,7 @@ def sdf_counter(runs, user_istart, user_iend):
 # various controls defined by tkinter
 class time_history_GUI:
   """This class creates plots which require data from all of the sdf files.
-  
+
   [__init__] is called on creation of the class and defines when the menu's
   controls will call the other functions.
   [callbackFunc1] resets the grid and calls the plot update function
@@ -98,21 +98,21 @@ class time_history_GUI:
     self.use_analysis = use_analysis
     app.title("Time history GUI")
     app.geometry('450x200+10+10')
-    
+
     plt.ion()
     plt.close('all')
-    
+
     self.cross_section = 1
-    
+
     # find sdf files and count
     self.pathname = os.path.abspath(os.getcwd())
     runs = glob.glob1(self.pathname,"*.sdf")
     self.istart, self.iend, sdf_num = sdf_counter(runs, user_istart, user_iend)
-    
+
     # initial data import, needed for variable selection combo box
     dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis = self.use_analysis, istart = self.istart)
     self.dat = isdf.get_data_all(dat, self.istart, self.iend, self.pathname, self.use_analysis, self.cross_section)
-    
+
     # create empty figures
     aspc = 1.2
     self.fig = plt.figure(num=1, figsize=(8*aspc,8), facecolor='white')
@@ -124,7 +124,7 @@ class time_history_GUI:
     move_figure(self.fig2, 10, 1000)
     self.ax2 = plt.axes()
     self.ax3 = op.empty_lineout(self.fig2, self.ax2)
-    
+
     # Combo box - variable
     self.labelTop_combo1 = tk.Label(app, text = "Select variable:")
     self.labelTop_combo1.grid(column=0, row=1)
@@ -133,7 +133,7 @@ class time_history_GUI:
     self.combo1.grid(column=1, row=1)
     self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.combo1.current(0)
-    
+
     # Combo box - time variable
     self.labelTop_combo2 = tk.Label(app, text = "Select time variable:")
     self.labelTop_combo2.grid(column=0, row=2)
@@ -142,7 +142,7 @@ class time_history_GUI:
     self.combo2.grid(column=1, row=2)
     self.combo2.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.combo2.current(0)
-    
+
     # Combo box - grid choice
     grid_list = ['default', 'initial', 'cell number']
     self.labelTop_combo3 = tk.Label(app, text = "Select a grid:")
@@ -152,7 +152,7 @@ class time_history_GUI:
     self.combo3.grid(column=1, row=3)
     self.combo3.bind("<<ComboboxSelected>>", self.callbackFunc1)
     self.combo3.current(0)
-    
+
     # slider - scale up colour
     self.label_slider1 = tk.Label(app, text = "Minimum value on colourbar:")
     self.label_slider1.grid(column=0, row=4)
@@ -162,21 +162,21 @@ class time_history_GUI:
                             length  = 200, resolution = 0.01)
     self.slider1.grid(column=1, row=4)
     self.slider1.set(0)
-    
+
     # button - reset button
     self.reset_button = tk.Button(app, text="Reset zoom")
     self.reset_button.grid(column=0, row=5)
     self.reset_axis_variable = tk.BooleanVar(app)
     self.reset_axis_variable.set(True)
-    
+
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
-  
+
   def callbackFunc1(self, event):
     """Reset grid and update plot
     """
     self.reset_axis_variable.set(True)
     self.callbackFunc(event)
-  
+
   def callbackFunc(self, event):
     """Update 1D and 2d plots with values given by tkinter controls
     """
@@ -185,9 +185,9 @@ class time_history_GUI:
     grid_choice = self.combo3.get()
     cbar_upscale = self.slider1.get()
     reset_axis = self.reset_axis_variable.get()
-      
+
     op.time_history(self.dat, self.fig, self.ax1, self.cax1, var_name = var_name, cbar_upscale = cbar_upscale, grid = grid_choice, reset_axis = reset_axis)
-      
+
     op.time_history_lineout(self.dat, self.fig2, self.ax2, self.ax3, var_name = var_name2,  use_analysis = self.use_analysis)
 
     self.reset_axis_variable.set(False)
@@ -196,7 +196,7 @@ class time_history_GUI:
 
 class snapshot_GUI:
   """This class creates plots which require data from a single sdf file.
-  
+
   [__init__] is called on creation of the class and defines when the menu's
   controls will call the other functions.
   [callbackFunc1] resets the grid and calls the plot update function
@@ -204,7 +204,7 @@ class snapshot_GUI:
   choice etc.
   [leftkey] update slider with arrow key
   [rightkey] update slider with arrow key
-  
+
   title is self explanatory:
   [save_pdf]
   [save_video]
@@ -216,10 +216,10 @@ class snapshot_GUI:
     self.parameters.use_analysis = use_analysis
     app.title("Snapshot GUI")
     app.geometry('500x400+10+10')
-    
+
     plt.ion()
     plt.close('all')
-    
+
     self.parameters.cs = 1
     # find sdf files and count
     self.parameters.pathname = os.path.abspath(os.getcwd())
@@ -230,7 +230,7 @@ class snapshot_GUI:
     dat = isdf.use_sdf(self.parameters.sdf_num, self.parameters.pathname,
         use_analysis = self.parameters.use_analysis,
         istart = self.parameters.istart)
-    
+
     # create empty figures
     aspc = 1.2
     self.fig = plt.figure(num=1, figsize=(8*aspc,8), facecolor='white')
@@ -244,7 +244,7 @@ class snapshot_GUI:
     self.ax2 = plt.axes()
     self.ax3 = op.empty_lineout(self.fig2, self.ax2)
     setattr(self.ax2 , "loc_cell_track", 0)
-    
+
     # slider - time
     self.label_slider1 = tk.Label(app, text = "Select sdf number:")
     self.label_slider1.grid(column=0, row=0)
@@ -262,14 +262,14 @@ class snapshot_GUI:
     self.combo1 = ttk.Combobox(app, values=dat.variables)
     self.combo1.grid(column=1, row=1)
     self.combo1.current(0)
-  
+
     # check box - grid
     self.grid_variable = tk.BooleanVar(app)
     self.grid_button = tk.Checkbutton(app, text="grid", variable=self.grid_variable,
                                       onvalue=True, offvalue=False)
     self.grid_button.deselect()
     self.grid_button.grid(column=0, row=2)
-  
+
     # check box - polar coordinates
     self.polar_variable = tk.BooleanVar(app)
     self.polar_button = tk.Checkbutton(app, text="polar coordinates",
@@ -277,7 +277,7 @@ class snapshot_GUI:
                                        onvalue=True, offvalue=False)
     self.polar_button.deselect()
     self.polar_button.grid(column=0, row=3)
-    
+
     # check box - anisotropies
     self.anisotropies_variable = tk.BooleanVar(app)
     self.anisotropies_button = tk.Checkbutton(app, text="View anisotropies",
@@ -285,7 +285,7 @@ class snapshot_GUI:
                                        onvalue=True, offvalue=False)
     self.anisotropies_button.deselect()
     self.anisotropies_button.grid(column=0, row=4)
-    
+
     # check box - Logarithm
     self.log_variable = tk.BooleanVar(app)
     self.log_button = tk.Checkbutton(app, text="Take log_10",
@@ -293,21 +293,21 @@ class snapshot_GUI:
                                        onvalue=True, offvalue=False)
     self.log_button.deselect()
     self.log_button.grid(column=0, row=5)
-  
+
     # button - save fig as pdf
     self.print_button = tk.Button(app, text="Save .pdf", command=self.save_pdf)
     self.print_button.grid(column=1, row=2)
-    
+
     # button - reset button
     self.reset_button = tk.Button(app, text="Reset zoom")
     self.reset_button.grid(column=1, row=3)
     self.reset_axis_variable = tk.BooleanVar(app)
     self.reset_axis_variable.set(True)
-    
+
     # button - exit
     self.exit_button = tk.Button(app, text="Exit", command=self.exit_gui)
     self.exit_button.grid(column=1, row=4)
-    
+
     # button - save video
     self.video_button = tk.Button(app, text="Save video", command=self.save_video)
     self.video_button.grid(column=1, row=5)
@@ -320,27 +320,27 @@ class snapshot_GUI:
     self.combo_surf = ttk.Combobox(app, values=dat.track_surfaces)
     self.combo_surf.grid(column=1, row=6)
     self.combo_surf.current(0)
-    
+
     # Entry - Change cbar scale max
     self.apply_scale_max = tk.BooleanVar(app)
     self.scale_max_check = tk.Checkbutton(app, text="Apply max scaling", variable=self.apply_scale_max, onvalue=True, offvalue=False)
     self.scale_max_check.deselect()
     self.scale_max_check.grid(column=0, row=7)
-    
+
     self.entry_scale_max = tk.Entry(app)
     self.entry_scale_max.insert(0, "1.0")
     self.entry_scale_max.grid(column=1, row=7)
-    
+
     # Entry - Change cbar scale min
     self.apply_scale_min = tk.BooleanVar(app)
     self.scale_min_check = tk.Checkbutton(app, text="Apply min scaling", variable=self.apply_scale_min, onvalue=True, offvalue=False)
     self.scale_min_check.deselect()
     self.scale_min_check.grid(column=0, row=8)
-    
+
     self.entry_scale_min = tk.Entry(app)
     self.entry_scale_min.insert(0, "0.0")
     self.entry_scale_min.grid(column=1, row=8)
-    
+
     # check box - plot rays?
     self.rays_variable = tk.BooleanVar(app)
     self.rays_button = tk.Checkbutton(app, text="Show rays",
@@ -348,25 +348,25 @@ class snapshot_GUI:
                                        onvalue=True, offvalue=False)
     self.rays_button.deselect()
     self.rays_button.grid(column=0, row=9)
-    
+
     # Entry - Plot second file
     self.apply_comparison = tk.BooleanVar(app)
     self.comparison_check = tk.Checkbutton(app, text="Apply Comparison", variable=self.apply_comparison, onvalue=True, offvalue=False)
     self.comparison_check.deselect()
     self.comparison_check.grid(column=0, row=10)
-    
+
     self.entry_comparison = tk.Entry(app)
     self.entry_comparison.insert(0, os.path.abspath(os.getcwd()))
     self.entry_comparison.grid(column=1, row=10)
-    
+
     # Entry - Cross section
     self.labelcs = tk.Label(app, text="Choose lineout cross section:")
     self.labelcs.grid(column=0, row=11)
-    
+
     self.entry_cross_section = tk.Entry(app)
     self.entry_cross_section.insert(0, "1")
     self.entry_cross_section.grid(column=1, row=11)
-    
+
     # Bindings
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
@@ -401,11 +401,11 @@ class snapshot_GUI:
     self.parameters.apply_comparison = self.apply_comparison.get()
     self.parameters.entry_comparison = self.entry_comparison.get()
     self.parameters.cross_section = int(self.entry_cross_section.get())
-    
+
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3, self.parameters)
 
     self.reset_axis_variable.set(False)
-    
+
   def callbackFunc1(self, event):
     """This function resets the grid before the plot updateing function
     """
@@ -419,18 +419,18 @@ class snapshot_GUI:
     self.parameters.var_name = self.combo1.get()
     pdf_name = self.parameters.var_name + '_' + 'SDF_{0:04d}'.format(self.parameters.sdf_num) + '.pdf'
     self.fig.savefig(pdf_name)
-  
+
   def save_video(self):
     """Saves a video of 2d plot as default but can be changed by changing fig
     """
     self.parameters.reset_axis = self.reset_axis_variable.get()
-    
+
     filename1 = self.parameters.var_name + '.mp4'
     animation = ani.FuncAnimation(self.fig, op.data_and_plot, frames=range(self.parameters.istart, self.parameters.iend+1), fargs=(self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3, self.parameters), repeat=False)
 
     writer = ani.FFMpegWriter(fps=24, bitrate=2e6)
     animation.save(filename1, writer=writer)
-  
+
   def exit_gui(self):
     """Closes all created figure windows and stops code
     """
@@ -438,7 +438,7 @@ class snapshot_GUI:
     plt.close(self.fig2)
     self.app.destroy()
     sys.exit('GUI exit from button press')
-  
+
   def leftKey(self, event):
     """hotkey updates slider
     """

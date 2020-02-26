@@ -53,7 +53,7 @@ def time_history(dat, fig, ax1, cax1, *args, **kwargs):
   cbar_upscale = kwargs.get('cbar_upscale', -10.0)
   reset_axis = kwargs.get('reset_axis', True)
   grid_choice = kwargs.get('grid', 'default')
-  
+
   var = getattr(dat, var_name)
   unit_conv = getattr(var, "unit_conversion")
   units = getattr(var, "units_new")
@@ -63,15 +63,15 @@ def time_history(dat, fig, ax1, cax1, *args, **kwargs):
   grid_data = getattr(grid, "all_time_data")
   grid_conv = getattr(grid, "unit_conversion")
   grid_units = getattr(grid, "units_new")
-  
+
   c_data = getattr(var, "all_time_data") * unit_conv
   y_data, c_data = two_dim_grid(dat, c_data)
   x_data, y_data1 = np.meshgrid(dat.Times.all_time_data * dat.Times.unit_conversion, y_data[0,:], indexing='ij')
-  
+
   x_label = dat.Times.name + ' (' + getattr(dat.Times, 'units_new') + ')'
   y_label = 'Radius (' + grid_units + ')'
   c_label = name + " (" + units + ")"
-  
+
   if (grid_choice == 'default'):
     y_data = y_data
   elif (grid_choice == 'initial'):
@@ -84,38 +84,38 @@ def time_history(dat, fig, ax1, cax1, *args, **kwargs):
 
   cbar_range = np.max(c_data) - np.min(c_data) + small_num
   cbar_max = np.min(c_data) + np.exp(np.log(cbar_range) + cbar_upscale)
-  
+
   if reset_axis:
-    zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
+    zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]),
                              np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
   else:
-    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
+    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1],
                              ax1.get_ylim()[0], ax1.get_ylim()[1]])
-  
+
   ax1.clear() # This is nessasary for speed
   cax1.clear()
-  
+
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
   cmesh.set_clim(np.min(c_data), cbar_max)
-  
+
   cbar = fig.colorbar(cmesh, cax=cax1)
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
   cbar.set_label(c_label, fontsize = fs)
-  
+
   ax1.tick_params(axis='x', labelsize = fs)
   ax1.tick_params(axis='y', labelsize = fs)
   cbar.ax.tick_params(labelsize=fs)
-  
+
   cbar.ax.yaxis.get_offset_text().set(size = fs)
   ax1.xaxis.get_offset_text().set_size(fs)
   ax1.yaxis.get_offset_text().set_size(fs)
-  
+
   ax1.set_xlim(zoomed_axis1[:2])
   ax1.set_ylim(zoomed_axis1[2:])
   cbar.draw_all()
-  
+
   plt.show()
 
 
@@ -127,11 +127,11 @@ def two_dim_grid(dat, data):
   x_mid = dat.Grid_Grid_mid.all_time_data[0] * dat.Grid_Grid_mid.unit_conversion
   y_mid = dat.Grid_Grid_mid.all_time_data[1] * dat.Grid_Grid_mid.unit_conversion
   grid = np.sqrt(x_mid**2 + y_mid**2)
-  
+
   x_edge = dat.Grid_Grid.all_time_data[0] * dat.Grid_Grid_mid.unit_conversion
   y_edge = dat.Grid_Grid.all_time_data[1] * dat.Grid_Grid_mid.unit_conversion
   grid_edge = np.sqrt(x_edge**2 + y_edge**2)
-  
+
   if np.shape(data) != np.shape(grid):
     if np.shape(data) == np.shape(grid_edge):
       grid = grid_edge
@@ -140,7 +140,7 @@ def two_dim_grid(dat, data):
       print("Creating uniform grid")
       pos = np.linspace(0, np.shape(data)[1]-1, np.shape(data)[1])
       times, grid = np.meshgrid(dat.Times.all_time_data, pos, indexing='ij')
-  
+
   return grid, data
 
 
@@ -165,7 +165,7 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
     l1.set_ydata(y_data)
     y_label = name + " (" + units + ")"
     ax.set_ylabel(y_label, fontsize = fs)
-    
+
     ax.xaxis.get_offset_text().set_size(fs)
     ax.yaxis.get_offset_text().set_size(fs)
 
@@ -186,7 +186,7 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
 
     ax.set_xlabel(x_label, fontsize = fs)
     ax1.set_ylabel(y_label, color='tab:red', fontsize = fs)
-    
+
     ax.tick_params(axis='x', labelsize = fs)
     ax.tick_params(axis='y', labelsize = fs)
     ax1.tick_params(axis='y', labelsize = fs)
@@ -224,7 +224,7 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   print_string = 'Processing file {:4d}'.format(sdf_num) + ' of {:4d}'.format(parameters.iend) + '   '
   sys.stdout.write('\r' + print_string)
   sys.stdout.flush()
-  
+
   if parameters.apply_comparison:
     if os.path.isdir(parameters.entry_comparison):
       parameters.dat1 = isdf.use_sdf(sdf_num, parameters.entry_comparison, use_analysis = parameters.use_analysis, istart = parameters.istart)
@@ -232,12 +232,12 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
       parameters.apply_comparison = False
       print()
       print("Warning: " + parameters.entry_comparison + " is not a directory")
-   
-  
+
+
   dat = isdf.use_sdf(sdf_num, parameters.pathname, use_analysis = parameters.use_analysis, istart = parameters.istart)
-  
+
   snapshot(dat, fig, ax1, cax1, parameters.var_name, parameters = parameters)
-  
+
   lineout(dat, parameters.cross_section, fig2, ax2, ax3, parameters.var_name, parameters = parameters)
 
 
@@ -282,13 +282,13 @@ def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
     print_string = 'Processing ray {:4d}'.format(iray+1) + ' of {:4d}'.format(nrays) + '   '
     sys.stdout.write('\r' + print_string)
     sys.stdout.flush()
-    
+
     x_ray = beam.data[iray].data[0] * grid_conv
     y_ray = beam.data[iray].data[1] * grid_conv
     c_ray = beam_energy.data[iray].data
-    
+
     if use_polar: x_ray, y_ray, y_label = polar_coordinates(x_ray, y_ray)
-    
+
     plot_colourline(fig1, ax1, x_ray, y_ray, c_ray, cnorm)
   smap = cm.ScalarMappable(norm=cnorm, cmap='viridis')
   smap.set_array([])
@@ -333,7 +333,7 @@ def open_var_2d(dat, var_name, parameters):
   """
   var = getattr(dat, var_name)
   var_grid = getattr(var, 'grid')
-  
+
   grid_conv = getattr(var_grid, 'unit_conversion')
   x_data = getattr(var_grid, 'data')[0] * grid_conv
   y_data = getattr(var_grid, 'data')[1] * grid_conv
@@ -341,17 +341,17 @@ def open_var_2d(dat, var_name, parameters):
   y_label = 'Z (' + getattr(var_grid, 'units_new') + ')'
   if parameters.use_polar:
     x_data, y_data, y_label = polar_coordinates(x_data, y_data)
-  
+
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
   c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
   if parameters.view_anisotropies:
     c_data, c_label = mean_subtract(c_data, c_label)
-  
+
   if parameters.use_log:
     c_data = abs(c_data) + small_num
     c_data = np.log10(c_data)
     c_label = 'log10(' + c_label + ')'
-  
+
   return x_data, y_data, c_data, x_label, y_label, c_label
 
 
@@ -364,46 +364,46 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
     grid_colour = 'None'
   else:
     grid_colour = 'k'
-  
+
   x_data, y_data, c_data, x_label, y_label, c_label = open_var_2d(dat, var_name, parameters)
-  
+
   if parameters.apply_comparison:
     x_data1 = np.zeros(np.shape(x_data)) # this might allow plotting of different sized arrays
     y_data1 = np.zeros(np.shape(y_data))
     c_data1 = np.zeros((np.shape(c_data)[0],np.shape(c_data)[1]+1))
     x_data1[0:,0:], y_data1[0:,0:], c_data1[:,:-1], _, _, _ = open_var_2d(parameters.dat1, var_name, parameters)
-    
+
     x_data = np.hstack((x_data, np.flip(x_data1,1)))
     y_data = np.hstack((y_data, np.flip(-y_data1,1)))
     c_data = np.hstack((c_data, np.flip(c_data1,1)))
-  
+
   if parameters.reset_axis:
-    zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]), 
+    zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]),
                              np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
   else:
-    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
+    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1],
                              ax1.get_ylim()[0], ax1.get_ylim()[1]])
-  
+
   ax1.clear() # This is nessasary for speed
   cax1.clear()
-  
+
   if parameters.use_log:
     cmin = np.mean(c_data) - 2.0
     cmax = np.max(c_data)
   else:
     cmin = np.min(c_data)
     cmax = np.max(c_data)
-  
+
   if parameters.apply_scale_max:
     cmax = parameters.scale_max
   if parameters.apply_scale_min:
     cmin = parameters.scale_min
-  
+
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
   cmesh.set_edgecolor(grid_colour)
   cmesh.set_clim(cmin, cmax)
   cbar = fig.colorbar(cmesh, cax=cax1)
-    
+
   if parameters.plot_rays_on:
     var = getattr(dat, var_name)
     var_grid = getattr(var, 'grid')
@@ -416,19 +416,19 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
       for iname in range(0, num_burs):
         skip = 1
         plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1, parameters.use_polar, grid_conv)
-  
+
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
   cbar.set_label(c_label, fontsize = fs)
-  
+
   ax1.tick_params(axis='x', labelsize = fs)
   ax1.tick_params(axis='y', labelsize = fs)
   cbar.ax.tick_params(labelsize=fs)
-  
+
   cbar.ax.yaxis.get_offset_text().set(size = fs)
   ax1.xaxis.get_offset_text().set_size(fs)
   ax1.yaxis.get_offset_text().set_size(fs)
-  
+
   time = getattr(dat, "Times")
   t_data = getattr(time, "data") * getattr(time, 'unit_conversion')
   t_label = getattr(time, "name") + ' = {0:5.3f}'.format(t_data) + getattr(time, "units_new")
@@ -439,7 +439,7 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   new_ylim = zoomed_axis1[2:]
   ax1.set_ylim(new_ylim)
   cbar.draw_all()
-  
+
   plt.show()
 
 
@@ -457,12 +457,12 @@ def polar_coordinates(xc, yc):
   """Chnge to polar coordinates, radius vs theta.
   """
   y_label = "Radians"
-  
+
   x_data = np.sqrt(xc**2 + yc**2)
   y_data = np.arctan2(yc, xc) / np.pi
   # This correction makes singularity at radius = 0, look more intuitive.
   y_data[0,:] = y_data[1,:]
-  
+
   return x_data, y_data, y_label
 
 
@@ -479,22 +479,22 @@ def mass(*args, **kwargs):
 
   vol=dat.Fluid_Volume.data * fac
   mass=rho[:,:]*vol[:,:]
-  
+
   # The linout is abitrarily taken at halfway through the domain.
   half = round(np.shape(dat.Fluid_Volume.data)[1] / 2)
   cross_section = kwargs.get('cross_section', half)
-  
+
   print("Total mass is: ", np.sum(np.sum(mass)))
-  
+
   X=x[:,:]
   Y=y[:,:]
-  
+
   fig1=plt.figure()
   plt.pcolormesh(X,Y,mass,edgecolor='none')
   cbar = plt.colorbar()
   cbar.set_label('Mass (kg)')
   #plt.gca().set_aspect('equal', adjustable='box')
-  
+
   fig2=plt.figure()
   plt.plot(xc[:,cross_section],mass[:,cross_section])
   plt.plot(xc[:,cross_section],mass[:,cross_section],'*')
@@ -509,14 +509,14 @@ def empty_lineout(fig, ax):
   """Initilise empty 1D plot and lines to be populated with data later.
   """
   ax1 = ax.twinx()
-  
+
   ax_l1, = ax.plot(1, lw = 2.5, color='black')
   setattr(ax, 'line1', ax_l1)
   ax_l2, = ax.plot(1, lw = 2.5, color='black', linestyle = '--')
   setattr(ax, 'line2', ax_l2)
   ax_l3 = ax.axvline(0, lw = 1, color = 'tab:blue', linestyle = '--')
   setattr(ax, 'line3', ax_l3)
-  
+
   ax1_l1, = ax1.plot(1, lw = 2, color = 'tab:red')
   setattr(ax1, 'line1', ax1_l1)
   ax1_l2, = ax1.plot(1, lw = 2, color='tab:red', linestyle = '--')
@@ -538,32 +538,32 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     grid_style = 'None'
   else:
     grid_style = 'x'
-  
+
   ax_l1 = getattr(ax, 'line1')
   ax_l2 = getattr(ax, 'line2')
   ax_l3 = getattr(ax, 'line3')
   ax1_l1 = getattr(ax1, 'line1')
   ax1_l2 = getattr(ax1, 'line2')
-  
+
   # default variable for Odin is density but for other codes it is the first
   # in the list of variables
   if (dat.Header['code_name'] == 'Odin2D'):
     var_default = "Fluid_Rho"
   else:
     var_default = dat.variables[0]
-    
+
   x_data, y_data, x_label, y_label = open_var_1d(dat, var_default, cs, parameters.use_log)
   _, y_data1, _, y_label1 = open_var_1d(dat, var_name, cs, parameters.use_log)
-  
+
   ax_l1.set_xdata(x_data)
   ax_l1.set_ydata(y_data)
   ax1_l1.set_xdata(x_data)
   ax1_l1.set_ydata(y_data1)
-  
+
   if parameters.apply_comparison:
     x_data_comp, y_data_comp, _, _ = open_var_1d(parameters.dat1, var_default, cs, parameters.use_log)
     _, y_data1_comp, _, _ = open_var_1d(parameters.dat1, var_name, cs, parameters.use_log)
-  
+
     ax_l2.set_xdata(x_data_comp)
     ax_l2.set_ydata(y_data_comp)
     ax1_l2.set_xdata(x_data_comp)
@@ -573,10 +573,10 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     ax_l2.set_ydata(1)
     ax1_l2.set_xdata(1)
     ax1_l2.set_ydata(1)
-  
+
   ax.xaxis.get_offset_text().set_size(fs)
   ax.yaxis.get_offset_text().set_size(fs)
-  
+
   if parameters.use_log:
     ymin = np.mean(y_data[:-1]) - 2.0
     ymax = np.max(y_data[:-1]) + 0.3
@@ -587,20 +587,20 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     ymax = 1.3 * np.max(y_data[:-1])
     ymin1 = np.min(y_data1[:-1])
     ymax1 = 1.3 * np.max(y_data1[:-1])
-  
+
   # This section updates the axis with information from the data if
   # [reset_axis] is true or from the prevouis plot if false.
   if parameters.reset_axis:
-    zoomed_axis = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
+    zoomed_axis = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]),
                             ymin, ymax])
-    zoomed_axis1 = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]), 
+    zoomed_axis1 = np.array([np.min(x_data[:-1]), np.max(x_data[:-1]),
                              ymin1, ymax1])
   else:
-    zoomed_axis = np.array([ax.get_xlim()[0], ax.get_xlim()[1], 
+    zoomed_axis = np.array([ax.get_xlim()[0], ax.get_xlim()[1],
                              ax.get_ylim()[0], ax.get_ylim()[1]])
-    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1], 
+    zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1],
                              ymin1, ymax1])
-  
+
   # Track a particular point in the data as time is updated
   if parameters.surface_name == 'None':
     ax_l3.set_xdata(-big_num)
@@ -615,9 +615,9 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     else:
       surface_move = surface_location - old_surface_location
     ax_l3.set_xdata(surface_location)
-    
+
   setattr(ax, "loc_cell_track", surface_location)
-  
+
   ax_l1.set_marker(grid_style)
 
   ax.set_xlabel(x_label, fontsize = fs)
@@ -628,12 +628,12 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax.tick_params(axis='y', labelsize = fs)
   ax1.tick_params(axis='y', labelsize = fs)
   ax1.yaxis.get_offset_text().set_size(fs)
-  
+
   ax.set_xlim(zoomed_axis[:2] + surface_move)
   ax.set_ylim(zoomed_axis[2:])
   ax1.set_xlim(zoomed_axis1[:2] + surface_move)
   ax1.set_ylim(zoomed_axis1[2:])
-  
+
   ax.set_title(dat.Times.name
       + ' = {0:5.3f}'.format(dat.Times.data
       * dat.Times.unit_conversion), fontsize = fs)
@@ -655,23 +655,23 @@ def open_var_1d(dat, var_name, cs, use_log):
   grid_data = getattr(grid, "data")
   grid_conv = getattr(grid, "unit_conversion")
   grid_units = getattr(grid, "units_new")
-  
+
   pos1 = dat.Grid_Grid_mid.data[0][:,cs] * dat.Grid_Grid_mid.unit_conversion
   pos2 = dat.Grid_Grid_mid.data[1][:,cs] * dat.Grid_Grid_mid.unit_conversion
   # The linout is currently plot against radius not x coordinate! needs change
   x_data = np.sqrt(pos1**2 + pos2**2)
   y_data = getattr(var, "data")[:,cs] * unit_conv
-  
+
   y_data = one_dim_grid(np.array(grid_data)[:,:,cs], grid_conv, x_data, y_data)
-  
+
   x_label = grid_name + " (" + grid_units + ")"
   y_label = name + " (" + units + ")"
-  
+
   if use_log:
     y_data = abs(y_data) + small_num
     y_data = np.log10(y_data)
     y_label = 'log10(' + y_label + ')'
-  
+
   return x_data, y_data, x_label, y_label
 
 
@@ -679,11 +679,11 @@ def open_var_1d(dat, var_name, cs, use_log):
 def one_dim_grid(grid, grid_conv, x_data, y_data):
   """This code is used to find the correct grid for a cross section of 2D data
   as a midpoint variable can no longer be plotted against corners as in 2D but
-  must be plot against midpoints. 
+  must be plot against midpoints.
   """
   edge = np.sqrt(grid[0,:]**2 + grid[1,:]**2) * grid_conv
   XP = (edge[:-1] + edge[1:]) * 0.5
-  
+
   if np.shape(y_data) != np.shape(x_data):
     if np.shape(y_data) == np.shape(edge):
       XP = edge
@@ -693,7 +693,7 @@ def one_dim_grid(grid, grid_conv, x_data, y_data):
       print("Unknown geometry variable")
     print("Warning: Linear Interpolation!")
     y_data = np.interp(x_data, XP, y_data)
-  
+
   return y_data
 
 

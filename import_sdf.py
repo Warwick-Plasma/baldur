@@ -24,14 +24,14 @@ def add_label(dat):
     setattr(var, "unit_conversion", 1)
     units = getattr(var, "units")
     setattr(var, "units_new", units)
-  
+
   # default labels for grids
   for var_name in dat.grids:
     var = getattr(dat, var_name)
     setattr(var, "unit_conversion", 1)
     units = getattr(var, "units")
     setattr(var, "units_new", units[0])
-  
+
   # Epoch grids require change from a length N and a length M array
   # to a meshgrid of size N by M.
   if (dat.Header['code_name'] == 'Epoch2d'):
@@ -53,7 +53,7 @@ def add_label(dat):
     setattr(var, "unit_conversion", unit_conversion)
     units_new = "KeV"
     setattr(var, "units_new", units_new)
-    
+
     var = getattr(dat, "Fluid_Temperature_ion")
     name = 'Ion Temperature'
     setattr(var, "name", name)
@@ -61,7 +61,7 @@ def add_label(dat):
     setattr(var, "unit_conversion", unit_conversion)
     units_new = "KeV"
     setattr(var, "units_new", units_new)
-    
+
     var = getattr(dat, "Grid_Grid_mid")
     name = 'Distance, cell centred'
     setattr(var, "name", name)
@@ -69,7 +69,7 @@ def add_label(dat):
     setattr(var, "unit_conversion", unit_conversion)
     units_new = "$\mu m$"
     setattr(var, "units_new", units_new)
-    
+
     var = getattr(dat, "Grid_Grid")
     name = 'Distance, node centred'
     setattr(var, "name", name)
@@ -77,7 +77,7 @@ def add_label(dat):
     setattr(var, "unit_conversion", unit_conversion)
     units_new = "$\mu m$"
     setattr(var, "units_new", units_new)
-    
+
     var = getattr(dat, "Fluid_Rho")
     name = 'Density'
     setattr(var, "name", name)
@@ -85,7 +85,7 @@ def add_label(dat):
     setattr(var, "unit_conversion", unit_conversion)
     units_new = "g/cm$^3$"
     setattr(var, "units_new", units_new)
-    
+
     var = getattr(dat, "Fluid_Pressure_ion")
     name = 'Ion Pressure'
     setattr(var, "name", name)
@@ -93,7 +93,7 @@ def add_label(dat):
     setattr(var, "unit_conversion", unit_conversion)
     units_new = "Mbar"
     setattr(var, "units_new", units_new)
-    
+
     var = getattr(dat, "Fluid_Pressure_electron")
     name = 'Electron Pressure'
     setattr(var, "name", name)
@@ -101,7 +101,7 @@ def add_label(dat):
     setattr(var, "unit_conversion", unit_conversion)
     units_new = "Mbar"
     setattr(var, "units_new", units_new)
-    
+
     var = getattr(dat, "Fluid_Pressure")
     name = 'Total Pressure'
     setattr(var, "name", name)
@@ -109,7 +109,7 @@ def add_label(dat):
     setattr(var, "unit_conversion", unit_conversion)
     units_new = "Mbar"
     setattr(var, "units_new", units_new)
-  
+
   return dat
 
 
@@ -128,7 +128,7 @@ def preallocate_dat(dat, iend, cs):
     array[1,0,:] = data[1][:,cs]
     setattr(var, "all_time_data", array)
     setattr(var, "all_time_data_polar", array)
-  
+
   for var_name in dat.variables:
     var = getattr(dat, var_name)
     data = getattr(var, "data")
@@ -136,14 +136,14 @@ def preallocate_dat(dat, iend, cs):
     array = np.zeros((iend, len_x))
     array[0,:] = data[:,cs]
     setattr(var, "all_time_data", array)
-  
+
   for var_name in dat.variables_time:
     var = getattr(dat, var_name)
     data = getattr(var, "data")
     array = np.zeros(iend)
     array[0] = data
     setattr(var, "all_time_data", array)
-  
+
   return dat
 
 
@@ -160,13 +160,13 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
 
   SDFName=pathname+'/'+str(sdf_num).zfill(4)+'.sdf'
   dat = sh.getdata(SDFName,verbose=False)
-  
-  # Get all variables 
+
+  # Get all variables
   dat_names = list(dat.__dict__.keys())
   variable_type = sdf.BlockPlainVariable
   grid_type = sdf.BlockLagrangianMesh
   beam_type = sdf.BlockStitchedPath
-  
+
   # Create lists of certain types of variable for plotting
   dat_grid_names = []
   dat_variable_names = []
@@ -182,7 +182,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
       dat_grid_names.append(dat_names[n])
     elif type(var) == beam_type:
       dat_beam_names.append(dat_names[n])
-  
+
   # Clean grid list of things that require special effort to plot
   bad_var_list = []
   for var in dat_grid_names:
@@ -217,7 +217,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
 
   # Clean Epoch list of CPU and particle distributions that I cannot plot yet
   if (dat.Header['code_name'] == 'Epoch2d'):
-    dat_grid_names = ['Grid_Grid', 'Grid_Grid_mid']    
+    dat_grid_names = ['Grid_Grid', 'Grid_Grid_mid']
     bad_var_list = []
     for var in dat_variable_names:
       if ('CPU' in var):
@@ -234,7 +234,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   setattr(dat, "variables_time", dat_variable_time_names)
   setattr(dat, "beams", dat_beam_names)
   setattr(dat, "bursts", dat_burst_names)
-		
+
   # Save time variable
   var_list = dat.variables_time
   var_name = "Times"
@@ -244,9 +244,9 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
                                             unit_conversion = 1.0e9,
                                             name = "Time"))
   setattr(dat, "variables_time", var_list)
-  
+
   dat = add_label(dat)
-  
+
   # Analysis functions are applied to SDF data
   if use_analysis:
     dat = afunc.basic(dat)
@@ -254,7 +254,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
         sdf_num = sdf_num, istart = istart, pathname = pathname)
     dat = afunc.adiabat(dat, call_basic = False)
     dat = afunc.energy(dat, call_basic = False)
-  
+
   return dat
 
 
@@ -266,15 +266,15 @@ def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
   """
   irange = iend - istart + 1
   dat1 = preallocate_dat(dat1, irange, cs)
-  
+
   # loop over sdf files in range [istart] to [iend].
   for n in range(1, irange):
     print_string = 'Processing file {:4d}'.format(istart+n) + ' of {:4d}'.format(iend)
     sys.stdout.write('\r' + print_string)
     sys.stdout.flush()
-    
+
     dat = use_sdf(istart+n, pathname, use_analysis = use_analysis)
-    
+
     # Assemble arrays with position X and Y data stored for all time
     for var_name in dat.grids:
     	array = getattr(getattr(dat1, var_name), "all_time_data")
@@ -282,25 +282,25 @@ def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
     	array[0,n,:] = data[0][:,cs]
     	array[1,n,:] = data[1][:,cs]
     	setattr(getattr(dat1, var_name), "all_time_data", array)
-    
+
     # Assemble arrays with variable data stored for all time
     for var_name in dat.variables:
       array = getattr(getattr(dat1, var_name), "all_time_data")
       data = getattr(getattr(dat, var_name), "data")
       array[n,:] = data[:,cs]
       setattr(getattr(dat1, var_name), "all_time_data", array)
-    
+
     # Assemble lists of numbers that quantify each sdf file ie. total KE
     for var_name in dat.variables_time:
       array = getattr(getattr(dat1, var_name), "all_time_data")
       data = getattr(getattr(dat, var_name), "data")
       array[n] = data
       setattr(getattr(dat1, var_name), "all_time_data", array)
-  
+
   # special analysis functions applied to time series data
   if use_analysis:
     afunc.time_variables(dat1)
-  
+
   return dat1
 
 
