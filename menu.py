@@ -16,24 +16,11 @@ plt.switch_backend('TkAgg')
 
 
 
-def move_figure(f, x, y): # cxrodgers
-  """Move figure's upper left corner to pixel (x, y)
-  https://yagisanatode.com/2018/02/23/how-do-i-change-the-size-and-position-of-the-main-window-in-tkinter-and-python-3/
-  """
-  backend = matplotlib.get_backend()
-  if backend == 'TkAgg':
-    f.canvas.manager.window.wm_geometry("+%d+%d" % (x, y))
-  elif backend == 'WXAgg':
-    f.canvas.manager.window.SetPosition((x, y))
-  else:
-    # This works for QT and GTK
-    # You can also use window.setGeometry
-    f.canvas.manager.window.move(x, y)
-
-
-
 def options(*args, **kwargs):
-  """This function creates the Tkinter object tk.Tk()
+  """This is the primary function to call when using baldur. It can be run
+  with several options defined by the kwargs. It is a wrapper for other
+  functions but does create the Tkinter object tk.Tk() which allows for
+  passing of button information.
   """
   use_analysis = kwargs.get('use_analysis', False)
   user_istart = kwargs.get('user_istart', False)
@@ -50,8 +37,24 @@ def options(*args, **kwargs):
 
 
 
+def move_figure(f, x, y): # cxrodgers
+  """Move figure's upper left corner to pixel (x, y)
+  https://yagisanatode.com/2018/02/23/how-do-i-change-the-size-and-position-of-the-main-window-in-tkinter-and-python-3/
+  """
+  backend = matplotlib.get_backend()
+  if backend == 'TkAgg':
+    f.canvas.manager.window.wm_geometry("+%d+%d" % (x, y))
+  elif backend == 'WXAgg':
+    f.canvas.manager.window.SetPosition((x, y))
+  else:
+    # This works for QT and GTK
+    # You can also use window.setGeometry
+    f.canvas.manager.window.move(x, y)
+
+
 def sdf_counter(runs, user_istart, user_iend):
-    """This function counts the total number of sdf files in the current directory to bound the slider.
+    """This function counts the total number of sdf files in the current
+    directory to bound the slider.
     """
     RunCounter = len(runs)
     run_array = np.zeros(RunCounter)
@@ -79,14 +82,17 @@ def sdf_counter(runs, user_istart, user_iend):
 class time_history_GUI:
   """This class creates plots which require data from all of the sdf files.
   
-  __init__ is called on creation of the class and defines when the menu's controls will call the other functions.
-  callbackFunc1 resets the grid and calls the plot update function
-  callbackFunc updates the plot with the new slider values, variable choice etc.
+  [__init__] is called on creation of the class and defines when the menu's
+  controls will call the other functions.
+  [callbackFunc1] resets the grid and calls the plot update function
+  [callbackFunc] updates the plot with the new slider values, variable choice
+  etc.
   """
   def __init__(self, app, use_analysis, user_istart, user_iend):
-    """This function is only called on creation of the class and initialises the tkinter menu.
-    
-    First setup is done including importing data needed fo initialising menu controls from sdf files, then the figures are initialised to be populated later, the tkinter objects are setup.
+    """This function is only called on creation of the class and initialises
+    the tkinter menu. First setup is done including importing data needed for
+    initialising menu controls from sdf files, then the figures are
+    initialised to be populated later, the tkinter objects are setup.
     """
     self.app = app
     self.use_analysis = use_analysis
@@ -191,16 +197,18 @@ class time_history_GUI:
 class snapshot_GUI:
   """This class creates plots which require data from a single sdf file.
   
-  __init__ is called on creation of the class and defines when the menu's controls will call the other functions.
-  callbackFunc1 resets the grid and calls the plot update function
-  callbackFunc updates the plot with the new slider values, variable choice etc.
-  leftkey update slider with arrow key
-  rightkey update slider with arrow key
+  [__init__] is called on creation of the class and defines when the menu's
+  controls will call the other functions.
+  [callbackFunc1] resets the grid and calls the plot update function
+  [callbackFunc] updates the plot with the new slider values, variable
+  choice etc.
+  [leftkey] update slider with arrow key
+  [rightkey] update slider with arrow key
   
   title is self explanatory:
-  save_pdf 
-  save_video
-  exit_gui
+  [save_pdf]
+  [save_video]
+  [exit_gui]
   """
   def __init__(self, app, use_analysis, user_istart, user_iend):
     self.app = app
@@ -374,7 +382,8 @@ class snapshot_GUI:
     self.comparison_check.bind("<ButtonRelease-1>", self.callbackFunc)
 
   def callbackFunc(self, event):
-    """Update 1D and 2d plots with values given by tkinter controls which are saved in class 'parameters'
+    """Update 1D and 2d plots with values given by tkinter controls which are
+    saved in class 'parameters'
     """
     self.parameters.grid_boolean = self.grid_variable.get()
     self.parameters.use_polar = self.polar_variable.get()
@@ -404,7 +413,8 @@ class snapshot_GUI:
     self.callbackFunc(event)
 
   def save_pdf(self):
-    """Save pdf of 2d file as default but easily changed by using fig1 instead of fig
+    """Save pdf of 2d file as default but easily changed by using fig1
+    instead of fig
     """
     self.parameters.var_name = self.combo1.get()
     pdf_name = self.parameters.var_name + '_' + 'SDF_{0:04d}'.format(self.parameters.sdf_num) + '.pdf'
