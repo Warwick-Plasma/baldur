@@ -5,6 +5,7 @@ import numpy as np
 import glob
 import import_sdf as isdf
 import sys, os
+import csv
 from matplotlib import cm
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, BoundaryNorm
@@ -18,6 +19,26 @@ global big_num
 fs = 15
 small_num = 1e-100
 big_num = 1e100
+
+
+
+def plot_laser_profile(*args, **kwargs):
+  name = kwargs.get('name', 'laser_profile.csv')
+  with open(name) as csvfile:
+    readCSV = csv.reader(csvfile, delimiter=',')
+    times = []
+    powers = []
+    for row in readCSV:
+      time = float(row[0]) / 1000.0
+      times.append(time)
+      power = float(row[1])
+      powers.append(power)
+      print(time, power)
+  plt.figure()
+  plt.xlabel('Time (ns)')
+  plt.ylabel('Power (TW)')
+  plt.plot(times, powers)
+  plt.show()
 
 
 
@@ -189,7 +210,7 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   The dat file is created with all the data from the sdf file indicated in
   parameters.
   """
-  print_string = 'Processing file {:4d}'.format(sdf_num) + ' of {:4d}'.format(parameters.iend)
+  print_string = 'Processing file {:4d}'.format(sdf_num) + ' of {:4d}'.format(parameters.iend) + '   '
   sys.stdout.write('\r' + print_string)
   sys.stdout.flush()
   
@@ -236,7 +257,7 @@ def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
   cmin = min(min(beam_energy.data, key=lambda x: min(x.data)).data)
   cnorm = plt.Normalize(cmin, cmax)
   for iray in range(0, nrays, skip):
-    print_string = 'Processing ray {:4d}'.format(iray+1) + ' of {:4d}'.format(nrays)
+    print_string = 'Processing ray {:4d}'.format(iray+1) + ' of {:4d}'.format(nrays) + '   '
     sys.stdout.write('\r' + print_string)
     sys.stdout.flush()
     
@@ -368,11 +389,11 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
     var_grid = getattr(var, 'grid')
     grid_conv = getattr(var_grid, 'unit_conversion')
     if hasattr(dat, 'Beam1'):
-      skip = 10
+      skip = 1
       plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, parameters.use_polar, grid_conv)
     if hasattr(dat, 'Burst1'):
       num_burs = len(dat.bursts)
-      for iname in range(0, num_burs, 10):
+      for iname in range(0, num_burs):
         skip = 1
         plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1, parameters.use_polar, grid_conv)
   
