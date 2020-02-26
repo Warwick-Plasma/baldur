@@ -7,7 +7,8 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.animation as ani
 import numpy as np
 import glob
-import sys, os
+import sys
+import os
 import tkinter as tk
 from tkinter import ttk
 import odin_plot as op
@@ -259,7 +260,7 @@ class snapshot_GUI:
     self.slider1 = tk.Scale(app, from_=self.parameters.istart,
                             to=self.parameters.iend, tickinterval=100,
                             orient=tk.HORIZONTAL, command=self.callbackFunc,
-                            length  = 300, resolution = 1.0)
+                            length = 300, resolution = 1.0)
     self.slider1.grid(column=1, row=0)
     self.slider1.set(self.parameters.istart)
 
