@@ -159,16 +159,19 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   dat_track_surfaces = []
   dat_beam_names = []
   dat_burst_names = []
+  dat_particle_names = []
   for n in range(0, len(dat_names)):
     var = getattr(dat, dat_names[n])
     if type(var) == variable_type:
       dat_variable_names.append(dat_names[n])
-    elif type(var) == grid_type:
+    elif (type(var) == grid_type) or (type(var) == sdf.BlockPointMesh):
       dat_grid_names.append(dat_names[n])
     elif type(var) == grid_type2:
       dat_grid_names.append(dat_names[n])
     elif type(var) == beam_type:
       dat_beam_names.append(dat_names[n])
+    elif type(var) == sdf.BlockPointVariable:
+      dat_particle_names.append(dat_names[n])
 
   bad_var_list = []
   for var in dat_grid_names:
@@ -216,6 +219,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   setattr(dat, "variables_time", dat_variable_time_names)
   setattr(dat, "beams", dat_beam_names)
   setattr(dat, "bursts", dat_burst_names)
+  setattr(dat, "particles", dat_particle_names)
 		
   # Save time variable
   var_list = dat.variables_time
