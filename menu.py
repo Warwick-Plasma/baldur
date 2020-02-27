@@ -333,6 +333,14 @@ class snapshot_GUI:
     self.entry_cross_section.insert(0, "1")
     self.entry_cross_section.grid(column=1, row=11)
     
+    # check box - Plot x velocities
+    self.velx_variable = tk.BooleanVar(app)
+    self.velx_button = tk.Checkbutton(app, text="Show v_x",
+                                       variable=self.velx_variable,
+                                       onvalue=True, offvalue=False)
+    self.velx_button.deselect()
+    self.velx_button.grid(column=0, row=12)
+
     # Bindings
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
@@ -345,6 +353,7 @@ class snapshot_GUI:
     self.combo_surf.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
     self.rays_button.bind("<ButtonRelease-1>", self.callbackFunc)
+    self.velx_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.comparison_check.bind("<ButtonRelease-1>", self.callbackFunc)
 
   def callbackFunc(self, event):
@@ -361,6 +370,7 @@ class snapshot_GUI:
     self.parameters.apply_scale_min = self.apply_scale_min.get()
     self.parameters.scale_min = float(self.entry_scale_min.get())
     self.parameters.plot_rays_on = self.rays_variable.get()
+    self.parameters.plot_particle_velx_on = self.velx_variable.get()
     self.parameters.apply_comparison = self.apply_comparison.get()
     self.parameters.entry_comparison = self.entry_comparison.get()
     self.parameters.cross_section = int(self.entry_cross_section.get())

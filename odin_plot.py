@@ -297,6 +297,7 @@ class plot_parameters:
     self.apply_comparison = False
     self.dat1 = None
     self.cross_section = 1
+    self.plot_particle_velx_on = False
 
 
 
@@ -372,12 +373,18 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
     cmin = parameters.scale_min
   
   if (dat.Header['code_name'] == 'Epoch2d'):
-    x = dat.Grid_Particles_Electron.data[0]
-    y = dat.Grid_Particles_Electron.data[1]
-    colors = dat.Particles_Vx_Electron.data
+    if parameters.plot_particle_velx_on:  	
+      x = dat.Grid_Particles_Electron.data[0]
+      y = dat.Grid_Particles_Electron.data[1]
+      colors = dat.Particles_Vx_Electron.data
+      cmesh = ax1.scatter(x, y, c=colors)
+      cbar = fig.colorbar(cmesh, cax=cax1)
+    else:
+      cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
+      cmesh.set_edgecolor(grid_colour)
+      cmesh.set_clim(cmin, cmax)
+      cbar = fig.colorbar(cmesh, cax=cax1)
     
-    cmesh = ax1.scatter(x, y, c=colors)
-    cbar = fig.colorbar(cmesh, cax=cax1)
   else:
     cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
     cmesh.set_edgecolor(grid_colour)
