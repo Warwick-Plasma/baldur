@@ -408,24 +408,30 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
     cmax = parameters.scale_max
   if parameters.apply_scale_min:
     cmin = parameters.scale_min
-  
+ 
+  '''Checks if using EPOCH and if so, allows user to optionally diplay
+    particle properties. (Only x velocity at the moment)
+  '''
   if (dat.Header['code_name'] == 'Epoch2d'):
     if parameters.plot_particle_velx_on:  	
       x = dat.Grid_Particles_Electron.data[0]
       y = dat.Grid_Particles_Electron.data[1]
       colors = dat.Particles_Vx_Electron.data
-      cmesh = ax1.scatter(x, y, c=colors)
+      cmesh = ax1.scatter(x, y, c=colors, s=1)
       cbar = fig.colorbar(cmesh, cax=cax1)
+      cbar.set_label('Velocity x-component [m/s]', fontsize = fs)
     else:
       cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
       cmesh.set_edgecolor(grid_colour)
       cmesh.set_clim(cmin, cmax)
       cbar = fig.colorbar(cmesh, cax=cax1)
+      cbar.set_label(c_label, fontsize = fs)
   else:
     cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
     cmesh.set_edgecolor(grid_colour)
     cmesh.set_clim(cmin, cmax)
     cbar = fig.colorbar(cmesh, cax=cax1)
+    cbar.set_label(c_label, fontsize = fs)
 
   if parameters.plot_rays_on:
     var = getattr(dat, var_name)
@@ -444,7 +450,6 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
-  cbar.set_label(c_label, fontsize = fs)
 
   ax1.tick_params(axis='x', labelsize = fs)
   ax1.tick_params(axis='y', labelsize = fs)
