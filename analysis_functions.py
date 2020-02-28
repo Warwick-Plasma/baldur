@@ -112,6 +112,20 @@ def basic(dat):
                                       units_new = "kg",
                                       unit_conversion = 1,
                                       name = "Mass"))
+
+  var_name = "Relative_Mass_Change"
+  var_list.append(var_name)
+  delta_mass = mass * 0.0
+  delta_mass[1:,:] = mass[:-1,:] - mass[1:,:]
+  rel_mass_change = delta_mass / (mass + small_number)
+  max_val = 100.0
+  rel_mass_change = np.where(rel_mass_change < max_val, rel_mass_change, -1.0)
+  setattr(dat, var_name, new_variable(data = rel_mass_change,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "Unitless",
+                                      unit_conversion = 1,
+                                      name = "Relative Mass Change"))
+
   var_name = "Fluid_Speed"
   var_list.append(var_name)
   speed = np.sqrt(v1**2 + v2**2 + v3**2)
@@ -120,6 +134,7 @@ def basic(dat):
                                       units_new = "m/s",
                                       unit_conversion = 1,
                                       name = "Speed of Cell"))
+
   var_name = "Rho_r"
   var_list.append(var_name)
   dr = np.zeros(np.shape(radius))
