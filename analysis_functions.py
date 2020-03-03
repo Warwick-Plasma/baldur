@@ -446,7 +446,8 @@ def energy(dat, *args, **kwargs):
 
 
 def shell(dat, *args, **kwargs):
-  """
+  """ Here we try to determine where is the shell and the hotspot as well as
+  perturbations to the hotspot
   """
   
   nmat = dat.Integer_flags.nmat
@@ -465,7 +466,8 @@ def shell(dat, *args, **kwargs):
     
     boolean_shell_mask = (np.array(dat.Fluid_Rho.data) >= inshell_den)
     shell_mask = boolean_shell_mask + 0.0
-    clean_shell_mask = (shell_mask[2:] + shell_mask[1:-1] + shell_mask[:-2]) + (shell_mask[:-2] - 1)
+    clean_shell_mask = (shell_mask[2:] + shell_mask[1:-1] + shell_mask[:-2]) \
+        + (shell_mask[:-2] - 1)
     clean_shell_mask = (clean_shell_mask >= 1) + 0.0
     shell_mask[1:-1] = clean_shell_mask
     
