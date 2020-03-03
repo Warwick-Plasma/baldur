@@ -463,8 +463,10 @@ def shell(dat, *args, **kwargs):
     rho_max = np.max(dat.Fluid_Rho.data)
   
     inshell_den = 0.1 * (rho_max - gas_rho_mean) + gas_rho_mean
-    
+
+    # If cell is greater than a given density it is part of the shell.
     boolean_shell_mask = (np.array(dat.Fluid_Rho.data) >= inshell_den)
+    # I try to remove any "islands" of high density with this cleaning routine.
     shell_mask = boolean_shell_mask + 0.0
     clean_shell_mask = (shell_mask[2:] + shell_mask[1:-1] + shell_mask[:-2]) \
         + (shell_mask[:-2] - 1)
