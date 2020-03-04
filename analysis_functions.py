@@ -347,12 +347,12 @@ def hot_electron(dat, *args, **kwargs):
   sdf_num = kwargs.get('sdf_num', 0)
   istart = kwargs.get('istart', 0)
   pathname = kwargs.get('pathname', os.path.abspath(os.getcwd()))
-  
+
   electron_dep = dat.Fluid_Energy_deposited_hot_electron.data
-  
-  # Variables that change in time and space 
+
+  # Variables that change in time and space
   var_list = dat.variables
-  
+
   var_name = "Electron_Power_per_volume"
   var_list.append(var_name)
   if sdf_num == istart:
@@ -361,40 +361,44 @@ def hot_electron(dat, *args, **kwargs):
   elif sdf_num >= istart:
     SDFName=pathname+'/'+str(sdf_num-1).zfill(4)+'.sdf'
     dat2 = sh.getdata(SDFName,verbose=False)
-    electron_dep_step = electron_dep - dat2.Fluid_Energy_deposited_hot_electron.data
+    electron_dep_step = electron_dep \
+        - dat2.Fluid_Energy_deposited_hot_electron.data
     dt = dat.Header.get('time') - dat2.Header.get('time')
   else:
     print('Error with electron change calculation')
     print('sdf_num = ', sdf_num, ' and the minimum = ', istart)
   if dt < small_number:
     dt = 1.0
-  
-  electron_pwr_per_vol = electron_dep_step * dat.Cell_Mass.data / dat.Fluid_Volume_rz.data / dt
+
+  electron_pwr_per_vol = electron_dep_step * dat.Cell_Mass.data \
+      / dat.Fluid_Volume_rz.data / dt
   setattr(dat, var_name, new_variable(data = electron_pwr_per_vol,
                                       grid = dat.Grid_Grid,
                                       units_new = "W/m$^3$",
                                       unit_conversion = 1,
                                       name = "Hot Electron Power Per Volume"))
-  
-  electron_pwr_per_vol = electron_dep_step * dat.Cell_Mass.data / dat.Fluid_Volume_rz.data / dt
+
+  electron_pwr_per_vol = electron_dep_step * dat.Cell_Mass.data \
+      / dat.Fluid_Volume_rz.data / dt
   setattr(dat, var_name, new_variable(data = electron_pwr_per_vol,
                                       grid = dat.Grid_Grid,
                                       units_new = "W/m$^3$",
                                       unit_conversion = 1,
                                       name = "Hot Electron Power Per Volume"))
-  
+
   setattr(dat, "variables", var_list)
-  
+
   # variables that only change in time
   var_list = dat.variables_time
 
   var_name = "Hot_Electron_Power_Total_Deposited"
   var_list.append(var_name)
   tot_ele_dep = np.sum(np.sum(electron_dep_step * dat.Cell_Mass.data)) / dt
-  setattr(dat, var_name, new_variable(data = tot_ele_dep,
-                                      units_new = 'TW',
-                                      unit_conversion = 1.0e-15,
-                                      name = "Total Hot Electron Power Deposited"))
+  setattr(dat, var_name,
+          new_variable(data = tot_ele_dep,
+                       units_new = 'TW',
+                       unit_conversion = 1.0e-15,
+                       name = "Total Hot Electron Power Deposited"))
 
   var_name = "Hot_Electron_Energy_Total_Deposited"
   var_list.append(var_name)
@@ -403,9 +407,9 @@ def hot_electron(dat, *args, **kwargs):
                                       units_new = 'kJ',
                                       unit_conversion = 1.0e-3,
                                       name = "Total laser energy deposited"))
-  
+
   setattr(dat, "variables_time", var_list)
-  
+
   return dat
 
 
