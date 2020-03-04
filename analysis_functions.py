@@ -112,6 +112,7 @@ def basic(dat):
                                       units_new = "kg",
                                       unit_conversion = 1,
                                       name = "Mass"))
+
   var_name = "Fluid_Speed"
   var_list.append(var_name)
   speed = np.sqrt(v1**2 + v2**2 + v3**2)
@@ -119,7 +120,24 @@ def basic(dat):
                                       grid = dat.Grid_Grid,
                                       units_new = "m/s",
                                       unit_conversion = 1,
+                                      name = "Speed of Node"))
+
+  var_name = "Cell_Speed"
+  var_list.append(var_name)
+  vel = dat.Fluid_Speed.data
+  corner_mass = dat.Test_Corner_Mass.data * fac
+  cell_speed = (corner_mass[::2,::2] * vel[:-1,:-1]\
+     + corner_mass[1::2,1::2] * vel[1:,1:]\
+     + corner_mass[1::2,::2] * vel[1:,:-1]\
+     + corner_mass[::2,1::2] * vel[:-1,1:])\
+     / (corner_mass[::2,::2] + corner_mass[1::2,1::2]
+     + corner_mass[1::2,::2] + corner_mass[::2,1::2] + small_number)
+  setattr(dat, var_name, new_variable(data = cell_speed,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "m/s",
+                                      unit_conversion = 1,
                                       name = "Speed of Cell"))
+
   var_name = "Rho_r"
   var_list.append(var_name)
   dr = np.zeros(np.shape(radius))
@@ -346,7 +364,7 @@ def adiabat(dat, *args, **kwargs):
   var_list.append(var_name)
   # The conversion to electron degeneracy pressure is only true for DT
   # See "The Physics of Inertial Fusion" by Atzeni and Meyer-ter-Vehn
-  # page number pending (sorry!)
+  # page 52 it is labelled "isentrope"
   deg_pressure = 2.17e12 * (rho / 1000)**(5.0/3.0) / 10 + small_number
   adiabat = pressure / deg_pressure
   max_val = 100.0
@@ -466,13 +484,39 @@ def shell(dat, *args, **kwargs):
 
     # If cell is greater than a given density it is part of the shell.
     boolean_shell_mask = (np.array(dat.Fluid_Rho.data) >= inshell_den)
-    # I try to remove any "islands" of high density with this cleaning routine.
+    # Remove any 1 cell "islands" of high density with this cleaning routine.
     shell_mask = boolean_shell_mask + 0.0
     clean_shell_mask = (shell_mask[2:] + shell_mask[1:-1] + shell_mask[:-2]) \
         + (shell_mask[:-2] - 1)
     clean_shell_mask = (clean_shell_mask >= 1) + 0.0
     shell_mask[1:-1] = clean_shell_mask
-    
+
+    # Add any large "islands" and the material between island and shell to
+    # the main shell
+    nx = np.size(shell_mask,0)
+    ny = np.size(shell_mask,1)
+    hotspot_mask = shell_mask * 0
+    hotspot_outer_index = [None] * ny
+    hotspot_outer_radius = [None] * ny
+    for iy in range(0, ny):
+      first = True
+      island = False
+      for ix in range(0, nx):
+        if (shell_mask[ix,iy]==1) and first:
+          first = False
+          hotspot_outer_index[iy] = ix - 1
+          hotspot_outer_radius[iy] = dat.Radius_mid.data[0][ix,iy]
+        if (shell_mask[ix,iy] == 0) and not first and not island:
+          island = True
+          sx = ix
+        if (shell_mask[ix,iy] == 1) and island:
+          island = False
+          shell_mask[sx:ix,iy] = 1
+        if (shell_mask[ix,iy] == 0) and first:
+          hotspot_mask[ix,iy] = 1
+        else:
+          hotspot_mask[ix,iy] = 0
+
     # Variables that change in time and space
     var_list = dat.variables
     
@@ -486,9 +530,62 @@ def shell(dat, *args, **kwargs):
   
     setattr(dat, "variables", var_list)
   
+    var_list = dat.track_surfaces
+
+    var_name = "Hotspot_outer_radius"
+    var_list.append(var_name)
+    setattr(dat, var_name,
+            new_variable(data = hotspot_outer_radius,
+                         index = hotspot_outer_index,
+                         units_new = dat.Grid_Grid.units_new,
+                         unit_conversion = dat.Grid_Grid.unit_conversion,
+                         name = "Location of the Hotspot Edge"))
+
+    setattr(dat, "track_surfaces", var_list)
+
     # variables that only change in time
     var_list = dat.variables_time
   
+    var_name = "Radius_Perturbation"
+    var_list.append(var_name)
+    average_radius = np.mean(hotspot_outer_radius)
+    delta_radius = np.sqrt(np.sum((hotspot_outer_radius - average_radius)**2)) \
+        / average_radius
+    setattr(dat, var_name, new_variable(data = delta_radius,
+                                        units_new = 'unitless',
+                                        unit_conversion = 1,
+                                        name = "RMS perturbation in Radius"))
+  
+    var_name = "Ignition_threshold_factor"
+    var_list.append(var_name)
+    # I0 factor is found by running a series of similar shots but degrading
+    # the implosion in one of the key variables until gain = 1, at this point
+    # the ITF = 1. This normally also corresponds to a performance cliff.
+    I0 = 4.0
+    hotspot_mass = np.sum(hotspot_mask * dat.Cell_Mass.data)
+    nominal_mass = 30.0e-6 # nominal values are taken from 1D ignition
+    shell_velocity = shell_mask * dat.Cell_Speed.data
+    shell_mass = shell_mask * dat.Cell_Mass.data
+    shell_velocity_average = np.average(shell_velocity, weights=shell_mass)
+    nominal_velocity = 360.0e3 # nominal values are taken from 1D ignition
+    shell_adiabat = shell_mask * dat.Fluid_Adiabat.data
+    shell_adiabat_average = np.average(shell_adiabat, weights=shell_mass)
+    nominal_adiabat = 8.0 # nominal values are taken from 1D ignition
+    #print(hotspot_mass / nominal_mass)
+    #print(shell_velocity_average / nominal_velocity)
+    #print(shell_adiabat_average / nominal_adiabat)
+    #print(1.0 - 1.2 * delta_radius)
+    
+    # Equation 1 of Haan et al 2011 (missing mix terms)
+    ITF = I0 * (hotspot_mass / nominal_mass) \
+             * (shell_velocity_average / nominal_velocity) ** 8 \
+             * (shell_adiabat_average / nominal_adiabat) ** (-4) \
+             * (1.0 - 1.2 * delta_radius) ** 4
+    setattr(dat, var_name, new_variable(data = ITF,
+                                        units_new = 'unitless',
+                                        unit_conversion = 1,
+                                        name = "RMS perturbation in Radius"))
+
     setattr(dat, "variables_time", var_list)
   
   else:
