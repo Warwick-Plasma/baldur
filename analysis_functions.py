@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import glob
 import sys, os
+import csv
 from matplotlib.widgets import Slider, RadioButtons
 plt.switch_backend('TkAgg')
 
@@ -545,6 +546,51 @@ def time_variables(dat, *args, **kwargs):
   """This routine calculates variables that have no spatial dependance but
   do change in time.
   """
+  # fraction of total sphere
+  frac_sphere = 1.0
+  if dat.Logical_flags.use_rz:
+    frac_sphere = (dat.Real_flags.y_max - dat.Real_flags.y_min) / 2.0
+
+  laser_profile_filename = "laser_profile.csv"
+  if os.path.exists(laser_profile_filename):
+
+    var_name = "Input_laser_profile"
+    with open(laser_profile_filename) as csv_file:
+      csv_reader = csv.reader(csv_file,delimiter=',')
+      laser_profile_time = []
+      laser_profile_pwr = []
+      for row in csv_reader:
+        laser_profile_time.append(float(row[0]))
+        laser_profile_pwr.append(float(row[1]))
+    laser_profile_time = np.asarray(laser_profile_time)
+    laser_profile_pwr = np.asarray(laser_profile_pwr) * frac_sphere
+    setattr(dat, var_name, new_variable(data = 0.0,
+                                        all_time_data = laser_profile_pwr,
+                                        units_new = 'TW',
+                                        unit_conversion = 1.0e-12,
+                                        name = "Original Laser Profile"))
+    setattr(getattr(dat,var_name), "times", laser_profile_time)
+    setattr(getattr(dat,var_name), "times_units", 'ns')
+    setattr(getattr(dat,var_name), "times_conversion", 1.0e9)
+
+    var_name = "Input_laser_profile_energy"
+    profile_length = len(laser_profile_time)
+    laser_profile_energy = np.zeros(profile_length)
+    for i in range(1, profile_length):
+      laser_profile_energy[i] = laser_profile_energy[i-1] + \
+      (laser_profile_time[i] - laser_profile_time[i-1]) * \
+      (0.5 * abs(laser_profile_pwr[i] - laser_profile_pwr[i-1]) + \
+      min(laser_profile_pwr[i], laser_profile_pwr[i-1]))
+    setattr(dat, var_name, new_variable(data = 0.0,
+                                        all_time_data = laser_profile_energy,
+                                        units_new = 'kJ',
+                                        unit_conversion = 1.0e-3,
+                                        name = "Original Laser Profile Energy"))
+    setattr(getattr(dat,var_name), "times", laser_profile_time)
+    setattr(getattr(dat,var_name), "times_units", 'ns')
+    setattr(getattr(dat,var_name), "times_conversion", 1.0e9)
+  else:
+    print(laser_profile_filename, " DOES NOT exist")
 
   # variables that only change in time
   var_list = dat.variables_time
