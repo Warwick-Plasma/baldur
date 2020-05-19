@@ -579,6 +579,11 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax1_l1 = getattr(ax1, 'line1')
   ax1_l2 = getattr(ax1, 'line2')
 
+  ax_l1.set_label('axl1')
+  ax_l2.set_label('axl2')
+  ax1_l1.set_label('ax1l1')
+  ax1_l2.set_label('ax1l2')
+
   # default variable for Odin is density but for other codes it is the first
   # in the list of variables
   if (dat.Header['code_name'] == 'Odin2D'):
@@ -674,6 +679,15 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax.set_title(dat.Times.name
       + ' = {0:5.3f}'.format(dat.Times.data
       * dat.Times.unit_conversion), fontsize = fs)
+
+  lines, labels = ax.get_legend_handles_labels()
+  lines1, labels1 = ax1.get_legend_handles_labels()
+  all_lines = lines + lines1
+  all_labels = labels + labels1
+  order = [0,2,1,3]
+  all_lines = [all_lines[idx] for idx in order]
+  all_labels = [all_labels[idx] for idx in order]
+  ax.legend(all_lines, all_labels, loc = 'upper right')
 
   plt.show()
 
