@@ -156,6 +156,7 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
   l1 = getattr(ax, 'line1')
   l2 = getattr(ax, 'line2')
   l3 = getattr(ax1, 'line1')
+  l4 = getattr(ax1, 'line2')
 
   if use_analysis:
     var = dat.Laser_Power_Total_Deposited
@@ -178,7 +179,6 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
 
     x_data = dat.Times.all_time_data * dat.Times.unit_conversion
     l1.set_xdata(x_data)
-    l2.set_xdata(0)
     l3.set_xdata(x_data)
     l3.set_ydata(y_data1)
 
@@ -197,6 +197,25 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
     ax.set_ylim(np.min(y_data[:-1]), 1.3 * np.max(y_data[:-1]))
     ax1.set_xlim(np.min(x_data[:-1]), np.max(x_data[:-1]))
     ax1.set_ylim(np.min(y_data1[:-1]), 1.3 * np.max(y_data1[:-1]))
+
+    if hasattr(dat, "Input_laser_profile"):
+      var = getattr(dat, "Input_laser_profile")
+      x_data = var.times * var.times_conversion
+      l2.set_xdata(x_data)
+      y_data = var.all_time_data * var.unit_conversion
+      l2.set_ydata(y_data)
+      if (var_name == "Laser_Energy_Total_Deposited"):
+        var = getattr(dat, "Input_laser_profile_energy")
+        x_data = var.times * var.times_conversion
+        l4.set_xdata(x_data)
+        y_data = var.all_time_data * var.unit_conversion
+        l4.set_ydata(y_data)
+      else:
+        l4.set_xdata(-big_num)
+        l4.set_ydata(0)
+    else:
+      l2.set_xdata(-big_num)
+      l2.set_ydata(0)
 
     plt.show()
 
@@ -527,7 +546,7 @@ def empty_lineout(fig, ax):
   setattr(ax, 'line1', ax_l1)
   ax_l2, = ax.plot(1, lw = 2.5, color='black', linestyle = '--')
   setattr(ax, 'line2', ax_l2)
-  ax_l3 = ax.axvline(0, lw = 1, color = 'tab:blue', linestyle = '--')
+  ax_l3 = ax.axvline(-big_num, lw = 1, color = 'tab:blue', linestyle = '--')
   setattr(ax, 'line3', ax_l3)
 
   ax1_l1, = ax1.plot(1, lw = 2, color = 'tab:red')
