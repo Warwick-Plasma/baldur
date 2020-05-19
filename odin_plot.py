@@ -46,7 +46,7 @@ def plot_laser_profile(*args, **kwargs):
 
 
 
-def time_history(dat, fig, ax1, cax1, *args, **kwargs):
+def time_history(fig, ax1, cax1, parameters, *args, **kwargs):
   """A pcolormesh plot of space against time with a variable shown in colour
   """
   var_name = kwargs.get('var_name', "Fluid_Rho")
@@ -54,7 +54,7 @@ def time_history(dat, fig, ax1, cax1, *args, **kwargs):
   reset_axis = kwargs.get('reset_axis', True)
   grid_choice = kwargs.get('grid', 'default')
 
-  var = getattr(dat, var_name)
+  var = getattr(parameters.dat, parameters.var_name)
   unit_conv = getattr(var, "unit_conversion")
   units = getattr(var, "units_new")
   name = getattr(var, "name")
@@ -65,11 +65,12 @@ def time_history(dat, fig, ax1, cax1, *args, **kwargs):
   grid_units = getattr(grid, "units_new")
 
   c_data = getattr(var, "all_time_data") * unit_conv
-  y_data, c_data = two_dim_grid(dat, c_data)
-  x_data, y_data1 = np.meshgrid(dat.Times.all_time_data \
-                  * dat.Times.unit_conversion, y_data[0,:], indexing='ij')
+  y_data, c_data = two_dim_grid(parameters.dat, c_data)
+  times = parameters.dat.Times
+  x_data, y_data1 = np.meshgrid(times.all_time_data \
+                  * times.unit_conversion, y_data[0,:], indexing='ij')
 
-  x_label = dat.Times.name + ' (' + getattr(dat.Times, 'units_new') + ')'
+  x_label = times.name + ' (' + getattr(times, 'units_new') + ')'
   y_label = 'Radius (' + grid_units + ')'
   c_label = name + " (" + units + ")"
 
@@ -80,11 +81,12 @@ def time_history(dat, fig, ax1, cax1, *args, **kwargs):
     y_label = 'Initial ' + y_label
   elif (grid_choice == 'cell number'):
     pos = np.linspace(0, np.shape(c_data)[1]-1, np.shape(c_data)[1])
-    _, y_data = np.meshgrid(dat.Times.all_time_data, pos, indexing='ij')
+    _, y_data = np.meshgrid(times.all_time_data, pos, indexing='ij')
     y_label = 'Cell Number'
 
   cbar_range = np.max(c_data) - np.min(c_data) + small_num
-  cbar_max = np.min(c_data) + np.exp(np.log(cbar_range) + cbar_upscale)
+  cbar_max = np.min(c_data) + np.exp(np.log(cbar_range) \
+           + parameters.cbar_colour_scale)
 
   if reset_axis:
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]),
@@ -146,20 +148,18 @@ def two_dim_grid(dat, data):
 
 
 
-def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
+def time_history_lineout(fig, ax, ax1, parameters, *args, **kwargs):
   """ A 1D line of time vs amplitude for the tkiter selected variable. Only
   called from time history menu.
   """
-  use_analysis = kwargs.get('use_analysis', False)
-  var_name = kwargs.get('var_name', "Laser_Energy_Total_Deposited")
 
   l1 = getattr(ax, 'line1')
   l2 = getattr(ax, 'line2')
   l3 = getattr(ax1, 'line1')
   l4 = getattr(ax1, 'line2')
 
-  if use_analysis:
-    var = dat.Laser_Power_Total_Deposited
+  if parameters.use_analysis:
+    var = parameters.dat.Laser_Power_Total_Deposited
     y_data = var.all_time_data * var.unit_conversion
     name = var.name
     units = var.units_new
@@ -171,18 +171,19 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
     ax.xaxis.get_offset_text().set_size(fs)
     ax.yaxis.get_offset_text().set_size(fs)
 
-    var = getattr(dat, var_name)
+    var = getattr(parameters.dat, parameters.var_name2)
     unit_conv = getattr(var, "unit_conversion")
     units = getattr(var, "units_new")
     name = getattr(var, "name")
     y_data1 = getattr(var, "all_time_data") * unit_conv
 
-    x_data = dat.Times.all_time_data * dat.Times.unit_conversion
+    times = parameters.dat.Times
+    x_data = times.all_time_data * times.unit_conversion
     l1.set_xdata(x_data)
     l3.set_xdata(x_data)
     l3.set_ydata(y_data1)
 
-    x_label = dat.Times.name + " (" + dat.Times.units_new + ")"
+    x_label = times.name + " (" + times.units_new + ")"
     y_label = name + " (" + units + ")"
 
     ax.set_xlabel(x_label, fontsize = fs)
@@ -198,14 +199,14 @@ def time_history_lineout(dat, fig, ax, ax1, *args, **kwargs):
     ax1.set_xlim(np.min(x_data[:-1]), np.max(x_data[:-1]))
     ax1.set_ylim(np.min(y_data1[:-1]), 1.3 * np.max(y_data1[:-1]))
 
-    if hasattr(dat, "Input_laser_profile"):
-      var = getattr(dat, "Input_laser_profile")
+    if hasattr(parameters.dat, "Input_laser_profile"):
+      var = getattr(parameters.dat, "Input_laser_profile")
       x_data = var.times * var.times_conversion
       l2.set_xdata(x_data)
       y_data = var.all_time_data * var.unit_conversion
       l2.set_ydata(y_data)
-      if (var_name == "Laser_Energy_Total_Deposited"):
-        var = getattr(dat, "Input_laser_profile_energy")
+      if (parameters.var_name2 == "Laser_Energy_Total_Deposited"):
+        var = getattr(parameters.dat, "Input_laser_profile_energy")
         x_data = var.times * var.times_conversion
         l4.set_xdata(x_data)
         y_data = var.all_time_data * var.unit_conversion
@@ -347,6 +348,11 @@ class plot_parameters:
     self.dat1 = None
     self.cross_section = 1
 
+    # Time history params
+    self.dat = None
+    self.var_name2 = 'None'
+    self.grid_choice = 'None'
+    self.cbar_colour_scale = 1.0
 
 
 def open_var_2d(dat, var_name, parameters):
