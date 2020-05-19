@@ -49,10 +49,6 @@ def plot_laser_profile(*args, **kwargs):
 def time_history(fig, ax1, cax1, parameters, *args, **kwargs):
   """A pcolormesh plot of space against time with a variable shown in colour
   """
-  var_name = kwargs.get('var_name', "Fluid_Rho")
-  cbar_upscale = kwargs.get('cbar_upscale', -10.0)
-  reset_axis = kwargs.get('reset_axis', True)
-  grid_choice = kwargs.get('grid', 'default')
 
   var = getattr(parameters.dat, parameters.var_name)
   unit_conv = getattr(var, "unit_conversion")
@@ -74,12 +70,12 @@ def time_history(fig, ax1, cax1, parameters, *args, **kwargs):
   y_label = 'Radius (' + grid_units + ')'
   c_label = name + " (" + units + ")"
 
-  if (grid_choice == 'default'):
+  if (parameters.grid_choice == 'default'):
     y_data = y_data
-  elif (grid_choice == 'initial'):
+  elif (parameters.grid_choice == 'initial'):
     y_data = y_data1
     y_label = 'Initial ' + y_label
-  elif (grid_choice == 'cell number'):
+  elif (parameters.grid_choice == 'cell number'):
     pos = np.linspace(0, np.shape(c_data)[1]-1, np.shape(c_data)[1])
     _, y_data = np.meshgrid(times.all_time_data, pos, indexing='ij')
     y_label = 'Cell Number'
@@ -88,7 +84,7 @@ def time_history(fig, ax1, cax1, parameters, *args, **kwargs):
   cbar_max = np.min(c_data) + np.exp(np.log(cbar_range) \
            + parameters.cbar_colour_scale)
 
-  if reset_axis:
+  if parameters.reset_axis:
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]),
                              np.min(y_data[:-1,:]), np.max(y_data[:-1,:])])
   else:
