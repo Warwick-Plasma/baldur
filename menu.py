@@ -96,7 +96,8 @@ class time_history_GUI:
     initialised to be populated later, the tkinter objects are setup.
     """
     self.app = app
-    self.use_analysis = use_analysis
+    self.parameters = op.plot_parameters()
+    self.parameters.use_analysis = use_analysis
     app.title("Time history GUI")
     app.geometry('450x200+10+10')
 
@@ -106,15 +107,18 @@ class time_history_GUI:
     self.cross_section = 1
 
     # find sdf files and count
-    self.pathname = os.path.abspath(os.getcwd())
-    runs = glob.glob1(self.pathname,"*.sdf")
-    self.istart, self.iend, sdf_num = sdf_counter(runs, user_istart, user_iend)
+    self.parameters.pathname = os.path.abspath(os.getcwd())
+    runs = glob.glob1(self.parameters.pathname,"*.sdf")
+    self.parameters.istart, self.parameters.iend, self.parameters.sdf_num \
+        = sdf_counter(runs, user_istart, user_iend)
 
     # initial data import, needed for variable selection combo box
-    dat = isdf.use_sdf(sdf_num, self.pathname, use_analysis =
-                       self.use_analysis, istart = self.istart)
-    self.dat = isdf.get_data_all(dat, self.istart, self.iend, self.pathname,
-                                 self.use_analysis, self.cross_section)
+    dat = isdf.use_sdf(self.parameters.sdf_num, self.parameters.pathname,
+        use_analysis = self.parameters.use_analysis,
+        istart = self.parameters.istart)
+    self.parameters.dat = isdf.get_data_all(dat, self.parameters.istart,
+        self.parameters.iend, self.parameters.pathname,
+        self.parameters.use_analysis, self.cross_section)
 
     # create empty figures
     aspc = 1.2
@@ -156,8 +160,8 @@ class time_history_GUI:
     self.combo3.bind("<<ComboboxSelected>>", self.callbackFunc1)
     self.combo3.current(0)
 
-    # slider - scale up colour
-    self.label_slider1 = tk.Label(app, text = "Minimum value on colourbar:")
+    # slider - scale colour
+    self.label_slider1 = tk.Label(app, text = "Colourbar scale:")
     self.label_slider1.grid(column=0, row=4)
 
     self.slider1 = tk.Scale(app, from_ = -10, to = 0, tickinterval=100,
@@ -187,18 +191,14 @@ class time_history_GUI:
   def callbackFunc(self, event):
     """Update 1D and 2d plots with values given by tkinter controls
     """
-    var_name = self.combo1.get()
-    var_name2 = self.combo2.get()
-    grid_choice = self.combo3.get()
-    cbar_upscale = self.slider1.get()
-    reset_axis = self.reset_axis_variable.get()
+    self.parameters.var_name = self.combo1.get()
+    self.parameters.var_name2 = self.combo2.get()
+    self.parameters.grid_choice = self.combo3.get()
+    self.parameters.cbar_colour_scale = self.slider1.get()
+    self.parameters.reset_axis = self.reset_axis_variable.get()
 
-    op.time_history(self.dat, self.fig, self.ax1, self.cax1,
-                    var_name = var_name, cbar_upscale = cbar_upscale,
-                    grid = grid_choice, reset_axis = reset_axis)
-    op.time_history_lineout(self.dat, self.fig2, self.ax2, self.ax3,
-                            var_name = var_name2,
-                            use_analysis = self.use_analysis)
+    op.time_history(self.fig, self.ax1, self.cax1, self.parameters)
+    op.time_history_lineout(self.fig2, self.ax2, self.ax3, self.parameters)
 
     self.reset_axis_variable.set(False)
 
