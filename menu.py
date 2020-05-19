@@ -396,6 +396,14 @@ class snapshot_GUI:
     self.entry_cross_section.insert(0, "1")
     self.entry_cross_section.grid(column=1, row=11)
 
+    # check box - show legend
+    self.legend_variable = tk.BooleanVar(app)
+    self.legend_button = tk.Checkbutton(app, text="Show legend",
+                                      variable=self.legend_variable,
+                                      onvalue=True, offvalue=False)
+    self.legend_button.deselect()
+    self.legend_button.grid(column=0, row=12)
+
     # Bindings
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
@@ -409,6 +417,7 @@ class snapshot_GUI:
     self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
     self.rays_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.comparison_check.bind("<ButtonRelease-1>", self.callbackFunc)
+    self.legend_button.bind("<ButtonRelease-1>", self.callbackFunc)
 
   def callbackFunc(self, event):
     """Update 1D and 2d plots with values given by tkinter controls which are
@@ -430,6 +439,7 @@ class snapshot_GUI:
     self.parameters.apply_comparison = self.apply_comparison.get()
     self.parameters.entry_comparison = self.entry_comparison.get()
     self.parameters.cross_section = int(self.entry_cross_section.get())
+    self.parameters.show_legend = self.legend_variable.get()
 
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1,
                      self.fig2, self.ax2, self.ax3, self.parameters)
