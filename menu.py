@@ -172,6 +172,10 @@ class time_history_GUI:
     self.reset_axis_variable = tk.BooleanVar(app)
     self.reset_axis_variable.set(True)
 
+    # button - exit
+    self.exit_button = tk.Button(app, text="Exit", command=self.exit_gui)
+    self.exit_button.grid(column=0, row=6)
+
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
 
   def callbackFunc1(self, event):
@@ -197,6 +201,14 @@ class time_history_GUI:
                             use_analysis = self.use_analysis)
 
     self.reset_axis_variable.set(False)
+
+  def exit_gui(self):
+    """Closes all created figure windows and stops code
+    """
+    plt.close(self.fig)
+    plt.close(self.fig2)
+    self.app.destroy()
+    sys.exit('GUI exit from button press')
 
 
 
