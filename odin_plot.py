@@ -580,10 +580,10 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax1_l1 = getattr(ax1, 'line1')
   ax1_l2 = getattr(ax1, 'line2')
 
-  ax_l1.set_label('axl1')
-  ax_l2.set_label('axl2')
-  ax1_l1.set_label('ax1l1')
-  ax1_l2.set_label('ax1l2')
+  ax_l1.set_label('line 1')
+  ax_l2.set_label('line 2')
+  ax1_l1.set_label(' ')
+  ax1_l2.set_label(' ')
 
   # default variable for Odin is density but for other codes it is the first
   # in the list of variables
@@ -691,7 +691,10 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     all_labels = [all_labels[idx] for idx in order]
     ax.legend(all_lines, all_labels, loc = 'upper right')
   else:
-    ax.get_legend().remove()
+    try:
+      ax.get_legend().remove()
+    except AttributeError:
+      pass
 
   plt.show()
 
