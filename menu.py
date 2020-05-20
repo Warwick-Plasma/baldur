@@ -404,6 +404,14 @@ class snapshot_GUI:
     self.legend_button.deselect()
     self.legend_button.grid(column=0, row=12)
 
+    self.entry_line1 = tk.Entry(app)
+    self.entry_line1.insert(0, "Solid lines")
+    self.entry_line1.grid(column=1, row=12)
+
+    self.entry_line2 = tk.Entry(app)
+    self.entry_line2.insert(0, "Dashed lines")
+    self.entry_line2.grid(column=1, row=13)
+
     # Bindings
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
@@ -440,6 +448,8 @@ class snapshot_GUI:
     self.parameters.entry_comparison = self.entry_comparison.get()
     self.parameters.cross_section = int(self.entry_cross_section.get())
     self.parameters.show_legend = self.legend_variable.get()
+    self.parameters.line1_label = self.entry_line1.get()
+    self.parameters.line2_label = self.entry_line2.get()
 
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1,
                      self.fig2, self.ax2, self.ax3, self.parameters)

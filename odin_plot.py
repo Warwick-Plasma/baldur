@@ -344,6 +344,8 @@ class plot_parameters:
     self.dat1 = None
     self.cross_section = 1
     self.show_legend = False
+    self.line1_label = 'None'
+    self.line2_label = 'None'
 
     # Time history params
     self.dat = None
@@ -580,8 +582,8 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax1_l1 = getattr(ax1, 'line1')
   ax1_l2 = getattr(ax1, 'line2')
 
-  ax_l1.set_label('line 1')
-  ax_l2.set_label('line 2')
+  ax_l1.set_label(parameters.line1_label)
+  ax_l2.set_label(parameters.line2_label)
   ax1_l1.set_label(' ')
   ax1_l2.set_label(' ')
 
