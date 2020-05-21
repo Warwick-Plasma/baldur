@@ -245,7 +245,8 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
 
   if parameters.apply_comparison:
     if os.path.isdir(parameters.entry_comparison):
-      parameters.dat1 = isdf.use_sdf(sdf_num, parameters.entry_comparison,
+      parameters.dat1 = isdf.use_sdf(parameters.sdf_num2,
+                                     parameters.entry_comparison,
                                      use_analysis = parameters.use_analysis,
                                      istart = parameters.istart)
     else:
@@ -346,6 +347,7 @@ class plot_parameters:
     self.show_legend = False
     self.line1_label = 'None'
     self.line2_label = 'None'
+    self.sdf_num2 = 0
 
     # Time history params
     self.dat = None

@@ -463,6 +463,7 @@ class snapshot_GUI:
     self.parameters.show_legend = self.legend_variable.get()
     self.parameters.line1_label = self.entry_line1.get()
     self.parameters.line2_label = self.entry_line2.get()
+    self.parameters.sdf_num2 = self.slider2.get()
 
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1,
                      self.fig2, self.ax2, self.ax3, self.parameters)
