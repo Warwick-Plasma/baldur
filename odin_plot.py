@@ -343,6 +343,9 @@ class plot_parameters:
     self.apply_comparison = False
     self.dat1 = None
     self.cross_section = 1
+    self.show_legend = False
+    self.line1_label = 'None'
+    self.line2_label = 'None'
 
     # Time history params
     self.dat = None
@@ -579,6 +582,11 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax1_l1 = getattr(ax1, 'line1')
   ax1_l2 = getattr(ax1, 'line2')
 
+  ax_l1.set_label(parameters.line1_label)
+  ax_l2.set_label(parameters.line2_label)
+  ax1_l1.set_label(' ')
+  ax1_l2.set_label(' ')
+
   # default variable for Odin is density but for other codes it is the first
   # in the list of variables
   if (dat.Header['code_name'] == 'Odin2D'):
@@ -674,6 +682,21 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax.set_title(dat.Times.name
       + ' = {0:5.3f}'.format(dat.Times.data
       * dat.Times.unit_conversion), fontsize = fs)
+
+  if parameters.show_legend:
+    lines, labels = ax.get_legend_handles_labels()
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    all_lines = lines + lines1
+    all_labels = labels + labels1
+    order = [0,2,1,3]
+    all_lines = [all_lines[idx] for idx in order]
+    all_labels = [all_labels[idx] for idx in order]
+    ax.legend(all_lines, all_labels, loc = 'upper right')
+  else:
+    try:
+      ax.get_legend().remove()
+    except AttributeError:
+      pass
 
   plt.show()
 
