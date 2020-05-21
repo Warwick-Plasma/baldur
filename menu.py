@@ -405,11 +405,11 @@ class snapshot_GUI:
     self.legend_button.grid(column=0, row=12)
 
     self.entry_line1 = tk.Entry(app)
-    self.entry_line1.insert(0, "Solid lines")
+    self.entry_line1.insert(0, "Dataset1")
     self.entry_line1.grid(column=1, row=12)
 
     self.entry_line2 = tk.Entry(app)
-    self.entry_line2.insert(0, "Dashed lines")
+    self.entry_line2.insert(0, "Dataset2")
     self.entry_line2.grid(column=1, row=13)
 
     # slider - time for comparison data
@@ -521,13 +521,17 @@ class snapshot_GUI:
     """hotkey updates slider
     """
     sdf_num = self.slider1.get()
+    sdf_num2 = self.slider2.get()
     self.slider1.set(sdf_num - 1)
+    self.slider2.set(sdf_num2 - 1)
 
   def rightKey(self, event):
     """hotkey updates slider
     """
     sdf_num = self.slider1.get()
+    sdf_num2 = self.slider2.get()
     self.slider1.set(sdf_num + 1)
+    self.slider2.set(sdf_num2 + 1)
 
 
 

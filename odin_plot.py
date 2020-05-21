@@ -411,6 +411,11 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
     x_data = np.hstack((x_data, np.flip(x_data1,1)))
     y_data = np.hstack((y_data, np.flip(-y_data1,1)))
     c_data = np.hstack((c_data, np.flip(c_data1,1)))
+    t_label = time_label(dat, parameters.line1_label)
+    t_label1 = time_label(parameters.dat1, parameters.line2_label)
+    t_label = t_label + " and " + t_label1
+  else:
+    t_label = time_label(dat, " ")
 
   if parameters.reset_axis:
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]),
@@ -457,6 +462,7 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
   cbar.set_label(c_label, fontsize = fs)
+  ax1.set_title(t_label, fontsize = fs)
 
   ax1.tick_params(axis='x', labelsize = fs)
   ax1.tick_params(axis='y', labelsize = fs)
@@ -466,12 +472,6 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   ax1.xaxis.get_offset_text().set_size(fs)
   ax1.yaxis.get_offset_text().set_size(fs)
 
-  time = getattr(dat, "Times")
-  t_data = getattr(time, "data") * getattr(time, 'unit_conversion')
-  t_label = getattr(time, "name") + ' = {0:5.3f}'.format(t_data) \
-          + getattr(time, "units_new")
-  ax1.set_title(t_label, fontsize = fs)
-
   new_xlim = zoomed_axis1[:2]
   ax1.set_xlim(new_xlim)
   new_ylim = zoomed_axis1[2:]
@@ -479,6 +479,15 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   cbar.draw_all()
 
   plt.show()
+
+
+
+def time_label(dat, data_name):
+  time = getattr(dat, "Times")
+  t_data = getattr(time, "data") * getattr(time, 'unit_conversion')
+  t_label = data_name + ' ' + getattr(time, "name") \
+          + ' = {0:5.3f}'.format(t_data) + getattr(time, "units_new")
+  return t_label
 
 
 
@@ -615,11 +624,17 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     ax_l2.set_ydata(y_data_comp)
     ax1_l2.set_xdata(x_data_comp)
     ax1_l2.set_ydata(y_data1_comp)
+
+    t_label = time_label(dat, parameters.line1_label)
+    t_label1 = time_label(parameters.dat1, parameters.line2_label)
+    t_label = t_label + " and " + t_label1
   else:
     ax_l2.set_xdata(1)
     ax_l2.set_ydata(1)
     ax1_l2.set_xdata(1)
     ax1_l2.set_ydata(1)
+
+    t_label = time_label(dat, " ")
 
   ax.xaxis.get_offset_text().set_size(fs)
   ax.yaxis.get_offset_text().set_size(fs)
@@ -670,6 +685,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax.set_xlabel(x_label, fontsize = fs)
   ax.set_ylabel(y_label, fontsize = fs)
   ax1.set_ylabel(y_label1, color='tab:red', fontsize = fs)
+  ax.set_title(t_label, fontsize = fs)
 
   ax.tick_params(axis='x', labelsize = fs)
   ax.tick_params(axis='y', labelsize = fs)
@@ -680,10 +696,6 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax.set_ylim(zoomed_axis[2:])
   ax1.set_xlim(zoomed_axis1[:2] + surface_move)
   ax1.set_ylim(zoomed_axis1[2:])
-
-  ax.set_title(dat.Times.name
-      + ' = {0:5.3f}'.format(dat.Times.data
-      * dat.Times.unit_conversion), fontsize = fs)
 
   if parameters.show_legend:
     lines, labels = ax.get_legend_handles_labels()
