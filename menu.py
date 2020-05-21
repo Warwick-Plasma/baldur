@@ -412,6 +412,19 @@ class snapshot_GUI:
     self.entry_line2.insert(0, "Dashed lines")
     self.entry_line2.grid(column=1, row=13)
 
+    # slider - time for comparison data
+    self.label_slider2 = tk.Label(app, text = "Offset comparison file:")
+    self.label_slider2.grid(column=0, row=14)
+    self.label_slider2.grid_remove()
+
+    self.slider2 = tk.Scale(app, from_=self.parameters.istart,
+                            to=self.parameters.iend, tickinterval=100,
+                            orient=tk.HORIZONTAL, command=self.callbackFunc,
+                            length = 300, resolution = 1.0)
+    self.slider2.grid(column=1, row=14)
+    self.slider2.set(self.parameters.istart)
+    self.slider2.grid_remove()
+
     # Bindings
     self.app.bind('<Left>', self.leftKey)
     self.app.bind('<Right>', self.rightKey)
@@ -424,7 +437,7 @@ class snapshot_GUI:
     self.combo_surf.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
     self.rays_button.bind("<ButtonRelease-1>", self.callbackFunc)
-    self.comparison_check.bind("<ButtonRelease-1>", self.callbackFunc)
+    self.comparison_check.bind("<ButtonRelease-1>", self.hide_slider)
     self.legend_button.bind("<ButtonRelease-1>", self.callbackFunc)
 
   def callbackFunc(self, event):
@@ -455,6 +468,16 @@ class snapshot_GUI:
                      self.fig2, self.ax2, self.ax3, self.parameters)
 
     self.reset_axis_variable.set(False)
+
+  def hide_slider(self, event):
+    show_slider_boolean = self.apply_comparison.get()
+    if show_slider_boolean:
+      self.label_slider2.grid()
+      self.slider2.grid()
+    else:
+      self.label_slider2.grid_remove()
+      self.slider2.grid_remove()
+    self.callbackFunc(event)
 
   def callbackFunc1(self, event):
     """This function resets the grid before the plot updateing function
