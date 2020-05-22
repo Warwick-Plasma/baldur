@@ -405,12 +405,25 @@ class snapshot_GUI:
     self.legend_button.grid(column=0, row=12)
 
     self.entry_line1 = tk.Entry(app)
-    self.entry_line1.insert(0, "Solid lines")
+    self.entry_line1.insert(0, "Dataset1")
     self.entry_line1.grid(column=1, row=12)
 
     self.entry_line2 = tk.Entry(app)
-    self.entry_line2.insert(0, "Dashed lines")
+    self.entry_line2.insert(0, "Dataset2")
     self.entry_line2.grid(column=1, row=13)
+
+    # slider - time for comparison data
+    self.label_slider2 = tk.Label(app, text = "Offset comparison file:")
+    self.label_slider2.grid(column=0, row=14)
+    self.label_slider2.grid_remove()
+
+    self.slider2 = tk.Scale(app, from_=self.parameters.istart,
+                            to=self.parameters.iend, tickinterval=100,
+                            orient=tk.HORIZONTAL, command=self.callbackFunc,
+                            length = 300, resolution = 1.0)
+    self.slider2.grid(column=1, row=14)
+    self.slider2.set(self.parameters.istart)
+    self.slider2.grid_remove()
 
     # Bindings
     self.app.bind('<Left>', self.leftKey)
@@ -424,7 +437,7 @@ class snapshot_GUI:
     self.combo_surf.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
     self.rays_button.bind("<ButtonRelease-1>", self.callbackFunc)
-    self.comparison_check.bind("<ButtonRelease-1>", self.callbackFunc)
+    self.comparison_check.bind("<ButtonRelease-1>", self.hide_slider)
     self.legend_button.bind("<ButtonRelease-1>", self.callbackFunc)
 
   def callbackFunc(self, event):
@@ -450,11 +463,26 @@ class snapshot_GUI:
     self.parameters.show_legend = self.legend_variable.get()
     self.parameters.line1_label = self.entry_line1.get()
     self.parameters.line2_label = self.entry_line2.get()
+    self.parameters.sdf_num2 = self.slider2.get()
 
     op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1,
                      self.fig2, self.ax2, self.ax3, self.parameters)
 
     self.reset_axis_variable.set(False)
+
+  def hide_slider(self, event):
+    show_slider_boolean = self.apply_comparison.get()
+    if show_slider_boolean:
+      print()
+      print("Use arrow keys to move sliders together")
+
+      self.slider2.set(self.slider1.get())
+      self.label_slider2.grid()
+      self.slider2.grid()
+    else:
+      self.label_slider2.grid_remove()
+      self.slider2.grid_remove()
+    self.callbackFunc(event)
 
   def callbackFunc1(self, event):
     """This function resets the grid before the plot updateing function
@@ -497,13 +525,17 @@ class snapshot_GUI:
     """hotkey updates slider
     """
     sdf_num = self.slider1.get()
+    sdf_num2 = self.slider2.get()
     self.slider1.set(sdf_num - 1)
+    self.slider2.set(sdf_num2 - 1)
 
   def rightKey(self, event):
     """hotkey updates slider
     """
     sdf_num = self.slider1.get()
+    sdf_num2 = self.slider2.get()
     self.slider1.set(sdf_num + 1)
+    self.slider2.set(sdf_num2 + 1)
 
 
 
