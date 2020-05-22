@@ -473,6 +473,9 @@ class snapshot_GUI:
   def hide_slider(self, event):
     show_slider_boolean = self.apply_comparison.get()
     if show_slider_boolean:
+      print()
+      print("Use arrow keys to move sliders together")
+
       self.slider2.set(self.slider1.get())
       self.label_slider2.grid()
       self.slider2.grid()
