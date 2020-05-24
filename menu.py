@@ -220,8 +220,10 @@ class snapshot_GUI:
   [callbackFunc1] resets the grid and calls the plot update function
   [callbackFunc] updates the plot with the new slider values, variable
   choice etc.
-  [leftkey] update slider with arrow key
-  [rightkey] update slider with arrow key
+  [left_key] update slider with arrow key
+  [right_key] update slider with arrow key
+  [up_key] move slider to final sdf file
+  [down_key] move slider to first sdf file
 
   title is self explanatory:
   [save_pdf]
@@ -426,8 +428,10 @@ class snapshot_GUI:
     self.slider2.grid_remove()
 
     # Bindings
-    self.app.bind('<Left>', self.leftKey)
-    self.app.bind('<Right>', self.rightKey)
+    self.app.bind('<Left>', self.left_key)
+    self.app.bind('<Right>', self.right_key)
+    self.app.bind('<Up>', self.up_key)
+    self.app.bind('<Down>', self.down_key)
     self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.grid_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.polar_button.bind("<ButtonRelease-1>", self.callbackFunc1)
@@ -521,7 +525,7 @@ class snapshot_GUI:
     self.app.destroy()
     sys.exit('GUI exit from button press')
 
-  def leftKey(self, event):
+  def left_key(self, event):
     """hotkey updates slider
     """
     sdf_num = self.slider1.get()
@@ -529,13 +533,25 @@ class snapshot_GUI:
     self.slider1.set(sdf_num - 1)
     self.slider2.set(sdf_num2 - 1)
 
-  def rightKey(self, event):
+  def right_key(self, event):
     """hotkey updates slider
     """
     sdf_num = self.slider1.get()
     sdf_num2 = self.slider2.get()
     self.slider1.set(sdf_num + 1)
     self.slider2.set(sdf_num2 + 1)
+
+  def up_key(self, event):
+    """hotkey updates slider
+    """
+    self.slider1.set(self.parameters.iend)
+    self.slider2.set(self.parameters.iend)
+
+  def down_key(self, event):
+    """hotkey updates slider
+    """
+    self.slider1.set(self.parameters.istart)
+    self.slider2.set(self.parameters.istart)
 
 
 
