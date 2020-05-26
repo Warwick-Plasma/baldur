@@ -504,7 +504,7 @@ def mean_subtract(cc, cl):
 def polar_coordinates(xc, yc):
   """Chnge to polar coordinates, radius vs theta.
   """
-  y_label = "Radians"
+  y_label = "Radians (/$\pi$)"
 
   x_data = np.sqrt(xc**2 + yc**2)
   y_data = np.arctan2(yc, xc) / np.pi
