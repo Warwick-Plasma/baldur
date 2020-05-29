@@ -555,11 +555,25 @@ class snapshot_GUI:
 
 
 
-def main():
-	"""
-	"""
+def main(argv):
+  """
+  """
+  if (len(argv) != 3):
+    print("Provide options at command line i.e.")
+    print("python menu.py 1 0")
+    print("meaning use_analysis = True and time_history = False")
+    sys.exit('Exit due to insufficient arguments')
+  if (int(argv[1]) == 1):
+    analysis = True
+  else:
+    analysis = False
+  if (int(argv[2]) == 1):
+    history = True
+  else:
+    history = False
+  options(use_analysis = analysis, time_history = history)
 
 
 
 if __name__ == "__main__":
-	main()
+  main(sys.argv)
