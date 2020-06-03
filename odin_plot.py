@@ -401,16 +401,36 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
       open_var_2d(dat, var_name, parameters)
 
   if parameters.apply_comparison:
-    # this might allow plotting of different sized arrays
-    x_data1 = np.zeros(np.shape(x_data))
-    y_data1 = np.zeros(np.shape(y_data))
-    c_data1 = np.zeros((np.shape(c_data)[0],np.shape(c_data)[1]+1))
-    x_data1[0:,0:], y_data1[0:,0:], c_data1[:,:-1], _, _, _ \
+    x_data1, y_data1, c_data1, _, _, _ \
         = open_var_2d(parameters.dat1, var_name, parameters)
 
-    x_data = np.hstack((x_data, np.flip(x_data1,1)))
-    y_data = np.hstack((y_data, np.flip(-y_data1,1)))
-    c_data = np.hstack((c_data, np.flip(c_data1,1)))
+    x_size = max(np.shape(x_data)[0], np.shape(x_data1)[0])
+    y_size = np.shape(x_data)[1] + np.shape(x_data1)[1]
+
+    new_x_data = np.zeros((x_size, y_size))
+    new_x_data[x_size-np.shape(x_data1)[0]:,:np.shape(x_data1)[1]] \
+    = np.flip(-x_data1,1)
+    new_x_data[x_size-np.shape(x_data)[0]:,np.shape(x_data1)[1]:] \
+    = x_data
+
+    new_y_data = np.zeros((x_size, y_size))
+    new_y_data[x_size-np.shape(x_data1)[0]:,:np.shape(x_data1)[1]] \
+    = np.flip(y_data1,1)
+    new_y_data[x_size-np.shape(x_data)[0]:,np.shape(x_data1)[1]:] \
+    = y_data
+
+    # c_data is 1 smaller than x and y as it is cell centred so we minus 1 from
+    # x and 2 from y but we need an extra blank space to combine the data sets
+    # so we +1 in the y direction
+    new_c_data = np.zeros((x_size-1, y_size-1))
+    new_c_data[x_size-1-np.shape(c_data1)[0]:,:np.shape(c_data1)[1]] \
+    = np.flip(c_data1,1)
+    new_c_data[x_size-1-np.shape(c_data)[0]:,np.shape(c_data1)[1]+1:] = c_data
+
+    x_data = new_x_data
+    y_data = new_y_data
+    c_data = new_c_data
+
     t_label = time_label(dat, parameters.line1_label)
     t_label1 = time_label(parameters.dat1, parameters.line2_label)
     t_label = t_label + " and " + t_label1
