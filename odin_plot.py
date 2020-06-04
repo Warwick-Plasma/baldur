@@ -348,6 +348,7 @@ class plot_parameters:
     self.line1_label = 'None'
     self.line2_label = 'None'
     self.sdf_num2 = 0
+    self.plot_all_rays = False
 
     # Time history params
     self.dat = None

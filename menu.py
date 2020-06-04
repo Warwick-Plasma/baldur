@@ -395,6 +395,29 @@ class snapshot_GUI:
                                       onvalue=True, offvalue=False)
     self.rays_button.deselect()
     self.rays_button.grid(column=0, row=control_row)
+
+    # check box - plot all rays?
+    self.all_rays_variable = tk.BooleanVar(app)
+    self.all_rays_button = tk.Checkbutton(app, text="All rays?",
+                                      variable=self.all_rays_variable,
+                                      onvalue=True, offvalue=False)
+    self.all_rays_button.deselect()
+    self.all_rays_button.grid(column=1, row=control_row)
+    self.all_rays_button.grid_remove()
+    control_row += 1
+
+    # slider - ray selecter
+    self.label_slider3 = tk.Label(app, text = "Which rays to plot:")
+    self.label_slider3.grid(column=0, row=control_row)
+    self.label_slider3.grid_remove()
+
+    self.slider3 = tk.Scale(app, from_=1,
+                            to=1000, tickinterval=100,
+                            orient=tk.HORIZONTAL, command=self.callbackFunc,
+                            length = 300, resolution = 1.0)
+    self.slider3.set(1)
+    self.slider3.grid(column=1, row=control_row)
+    self.slider3.grid_remove()
     control_row += 1
 
     # Entry - Plot second file
@@ -464,7 +487,7 @@ class snapshot_GUI:
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
     self.combo_surf.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
-    self.rays_button.bind("<ButtonRelease-1>", self.callbackFunc)
+    self.rays_button.bind("<ButtonRelease-1>", self.show_ray_slider)
     self.comparison_check.bind("<ButtonRelease-1>", self.hide_slider)
     self.legend_button.bind("<ButtonRelease-1>", self.callbackFunc)
 
@@ -485,6 +508,7 @@ class snapshot_GUI:
     self.parameters.apply_scale_min = self.apply_scale_min.get()
     self.parameters.scale_min = float(self.entry_scale_min.get())
     self.parameters.plot_rays_on = self.rays_variable.get()
+    self.parameters.plot_all_rays = self.all_rays_variable.get()
     self.parameters.apply_comparison = self.apply_comparison.get()
     self.parameters.entry_comparison = self.entry_comparison.get()
     self.parameters.cross_section = int(self.entry_cross_section.get())
@@ -497,6 +521,18 @@ class snapshot_GUI:
                      self.fig2, self.ax2, self.ax3, self.parameters)
 
     self.reset_axis_variable.set(False)
+
+  def show_ray_slider(self, event):
+    show_ray_slider = self.rays_variable.get()
+    if show_ray_slider:
+      self.label_slider3.grid()
+      self.slider3.grid()
+      self.all_rays_button.grid()
+    else:
+      self.label_slider3.grid_remove()
+      self.slider3.grid_remove()
+      self.all_rays_button.grid_remove()
+    self.callbackFunc(event)
 
   def hide_slider(self, event):
     show_slider_boolean = self.apply_comparison.get()
