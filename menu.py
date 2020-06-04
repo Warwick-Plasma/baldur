@@ -132,53 +132,61 @@ class time_history_GUI:
     self.ax2 = plt.axes()
     self.ax3 = op.empty_lineout(self.fig2, self.ax2)
 
+    control_row = 0
+
     # Combo box - variable
     self.labelTop_combo1 = tk.Label(app, text = "Select variable:")
-    self.labelTop_combo1.grid(column=0, row=1)
+    self.labelTop_combo1.grid(column=0, row=control_row)
 
     self.combo1 = ttk.Combobox(app, values = dat.variables)
-    self.combo1.grid(column=1, row=1)
     self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.combo1.current(0)
+    self.combo1.grid(column=1, row=control_row)
+    control_row += 1
 
     # Combo box - time variable
     self.labelTop_combo2 = tk.Label(app, text = "Select time variable:")
-    self.labelTop_combo2.grid(column=0, row=2)
+    self.labelTop_combo2.grid(column=0, row=control_row)
 
     self.combo2 = ttk.Combobox(app, values = dat.variables_time)
-    self.combo2.grid(column=1, row=2)
     self.combo2.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.combo2.current(0)
+    self.combo2.grid(column=1, row=control_row)
+    control_row += 1
 
     # Combo box - grid choice
     grid_list = ['default', 'initial', 'cell number']
     self.labelTop_combo3 = tk.Label(app, text = "Select a grid:")
-    self.labelTop_combo3.grid(column=0, row=3)
+    self.labelTop_combo3.grid(column=0, row=control_row)
 
     self.combo3 = ttk.Combobox(app, values = grid_list)
-    self.combo3.grid(column=1, row=3)
     self.combo3.bind("<<ComboboxSelected>>", self.callbackFunc1)
     self.combo3.current(0)
+    self.combo3.grid(column=1, row=control_row)
+    control_row += 1
 
     # slider - scale colour
     self.label_slider1 = tk.Label(app, text = "Colourbar scale:")
-    self.label_slider1.grid(column=0, row=4)
+    self.label_slider1.grid(column=0, row=control_row)
 
     self.slider1 = tk.Scale(app, from_ = -10, to = 0, tickinterval=100,
                             orient=tk.HORIZONTAL, command=self.callbackFunc,
                             length  = 200, resolution = 0.01)
-    self.slider1.grid(column=1, row=4)
     self.slider1.set(0)
+    self.slider1.grid(column=1, row=control_row)
+    control_row += 1
 
     # button - reset button
     self.reset_button = tk.Button(app, text="Reset zoom")
-    self.reset_button.grid(column=0, row=5)
     self.reset_axis_variable = tk.BooleanVar(app)
     self.reset_axis_variable.set(True)
+    self.reset_button.grid(column=0, row=control_row)
+    control_row += 1
 
     # button - exit
     self.exit_button = tk.Button(app, text="Exit", command=self.exit_gui)
-    self.exit_button.grid(column=0, row=6)
+    self.exit_button.grid(column=0, row=control_row)
+    control_row += 1
 
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
 
@@ -240,7 +248,6 @@ class snapshot_GUI:
     plt.ion()
     plt.close('all')
 
-    self.parameters.cs = 1
     # find sdf files and count
     self.parameters.pathname = os.path.abspath(os.getcwd())
     runs = glob.glob1(self.parameters.pathname,"*.sdf")
@@ -266,24 +273,28 @@ class snapshot_GUI:
     self.ax3 = op.empty_lineout(self.fig2, self.ax2)
     setattr(self.ax2 , "loc_cell_track", 0)
 
+    control_row = 0
+
     # slider - time
     self.label_slider1 = tk.Label(app, text = "Select sdf number:")
-    self.label_slider1.grid(column=0, row=0)
+    self.label_slider1.grid(column=0, row=control_row)
 
     self.slider1 = tk.Scale(app, from_=self.parameters.istart,
                             to=self.parameters.iend, tickinterval=100,
                             orient=tk.HORIZONTAL, command=self.callbackFunc,
                             length = 300, resolution = 1.0)
-    self.slider1.grid(column=1, row=0)
+    self.slider1.grid(column=1, row=control_row)
     self.slider1.set(self.parameters.istart)
+    control_row += 1
 
     # Combo box - variable
     self.labelTop_combo1 = tk.Label(app, text="Select variable:")
-    self.labelTop_combo1.grid(column=0, row=1)
+    self.labelTop_combo1.grid(column=0, row=control_row)
 
     self.combo1 = ttk.Combobox(app, values=dat.variables)
-    self.combo1.grid(column=1, row=1)
+    self.combo1.grid(column=1, row=control_row)
     self.combo1.current(0)
+    control_row += 1
 
     # check box - grid
     self.grid_variable = tk.BooleanVar(app)
@@ -291,7 +302,12 @@ class snapshot_GUI:
                                       variable=self.grid_variable,
                                       onvalue=True, offvalue=False)
     self.grid_button.deselect()
-    self.grid_button.grid(column=0, row=2)
+    self.grid_button.grid(column=0, row=control_row)
+
+    # button - save fig as pdf
+    self.print_button = tk.Button(app, text="Save .pdf", command=self.save_pdf)
+    self.print_button.grid(column=1, row=control_row)
+    control_row += 1
 
     # check box - polar coordinates
     self.polar_variable = tk.BooleanVar(app)
@@ -299,7 +315,14 @@ class snapshot_GUI:
                                        variable = self.polar_variable,
                                        onvalue=True, offvalue=False)
     self.polar_button.deselect()
-    self.polar_button.grid(column=0, row=3)
+    self.polar_button.grid(column=0, row=control_row)
+
+    # button - reset button
+    self.reset_button = tk.Button(app, text="Reset zoom")
+    self.reset_axis_variable = tk.BooleanVar(app)
+    self.reset_axis_variable.set(True)
+    self.reset_button.grid(column=1, row=control_row)
+    control_row += 1
 
     # check box - anisotropies
     self.anisotropies_variable = tk.BooleanVar(app)
@@ -308,7 +331,12 @@ class snapshot_GUI:
                        variable=self.anisotropies_variable,
                        onvalue=True, offvalue=False)
     self.anisotropies_button.deselect()
-    self.anisotropies_button.grid(column=0, row=4)
+    self.anisotropies_button.grid(column=0, row=control_row)
+
+    # button - exit
+    self.exit_button = tk.Button(app, text="Exit", command=self.exit_gui)
+    self.exit_button.grid(column=1, row=control_row)
+    control_row += 1
 
     # check box - Logarithm
     self.log_variable = tk.BooleanVar(app)
@@ -316,35 +344,23 @@ class snapshot_GUI:
                                      variable=self.log_variable,
                                      onvalue=True, offvalue=False)
     self.log_button.deselect()
-    self.log_button.grid(column=0, row=5)
-
-    # button - save fig as pdf
-    self.print_button = tk.Button(app, text="Save .pdf", command=self.save_pdf)
-    self.print_button.grid(column=1, row=2)
-
-    # button - reset button
-    self.reset_button = tk.Button(app, text="Reset zoom")
-    self.reset_button.grid(column=1, row=3)
-    self.reset_axis_variable = tk.BooleanVar(app)
-    self.reset_axis_variable.set(True)
-
-    # button - exit
-    self.exit_button = tk.Button(app, text="Exit", command=self.exit_gui)
-    self.exit_button.grid(column=1, row=4)
+    self.log_button.grid(column=0, row=control_row)
 
     # button - save video
     self.video_button = tk.Button(app, text="Save video",
                                   command=self.save_video)
-    self.video_button.grid(column=1, row=5)
+    self.video_button.grid(column=1, row=control_row)
+    control_row += 1
 
     # Combo box - surface tracking
     self.label_combo_surf = tk.Label(app, text="Select a surface to track:")
-    self.label_combo_surf.grid(column=0, row=6)
+    self.label_combo_surf.grid(column=0, row=control_row)
 
     dat.track_surfaces.insert(0,'None')
     self.combo_surf = ttk.Combobox(app, values=dat.track_surfaces)
-    self.combo_surf.grid(column=1, row=6)
     self.combo_surf.current(0)
+    self.combo_surf.grid(column=1, row=control_row)
+    control_row += 1
 
     # Entry - Change cbar scale max
     self.apply_scale_max = tk.BooleanVar(app)
@@ -352,11 +368,12 @@ class snapshot_GUI:
                                           variable=self.apply_scale_max,
                                           onvalue=True, offvalue=False)
     self.scale_max_check.deselect()
-    self.scale_max_check.grid(column=0, row=7)
+    self.scale_max_check.grid(column=0, row=control_row)
 
     self.entry_scale_max = tk.Entry(app)
     self.entry_scale_max.insert(0, "1.0")
-    self.entry_scale_max.grid(column=1, row=7)
+    self.entry_scale_max.grid(column=1, row=control_row)
+    control_row += 1
 
     # Entry - Change cbar scale min
     self.apply_scale_min = tk.BooleanVar(app)
@@ -364,11 +381,12 @@ class snapshot_GUI:
                                           variable=self.apply_scale_min,
                                           onvalue=True, offvalue=False)
     self.scale_min_check.deselect()
-    self.scale_min_check.grid(column=0, row=8)
+    self.scale_min_check.grid(column=0, row=control_row)
 
     self.entry_scale_min = tk.Entry(app)
     self.entry_scale_min.insert(0, "0.0")
-    self.entry_scale_min.grid(column=1, row=8)
+    self.entry_scale_min.grid(column=1, row=control_row)
+    control_row += 1
 
     # check box - plot rays?
     self.rays_variable = tk.BooleanVar(app)
@@ -376,7 +394,8 @@ class snapshot_GUI:
                                       variable=self.rays_variable,
                                       onvalue=True, offvalue=False)
     self.rays_button.deselect()
-    self.rays_button.grid(column=0, row=9)
+    self.rays_button.grid(column=0, row=control_row)
+    control_row += 1
 
     # Entry - Plot second file
     self.apply_comparison = tk.BooleanVar(app)
@@ -384,19 +403,21 @@ class snapshot_GUI:
                                            variable=self.apply_comparison,
                                            onvalue=True, offvalue=False)
     self.comparison_check.deselect()
-    self.comparison_check.grid(column=0, row=10)
+    self.comparison_check.grid(column=0, row=control_row)
 
     self.entry_comparison = tk.Entry(app)
     self.entry_comparison.insert(0, os.path.abspath(os.getcwd()))
-    self.entry_comparison.grid(column=1, row=10)
+    self.entry_comparison.grid(column=1, row=control_row)
+    control_row += 1
 
     # Entry - Cross section
     self.labelcs = tk.Label(app, text="Choose lineout cross section:")
-    self.labelcs.grid(column=0, row=11)
+    self.labelcs.grid(column=0, row=control_row)
 
     self.entry_cross_section = tk.Entry(app)
     self.entry_cross_section.insert(0, "1")
-    self.entry_cross_section.grid(column=1, row=11)
+    self.entry_cross_section.grid(column=1, row=control_row)
+    control_row += 1
 
     # check box - show legend
     self.legend_variable = tk.BooleanVar(app)
@@ -404,28 +425,31 @@ class snapshot_GUI:
                                       variable=self.legend_variable,
                                       onvalue=True, offvalue=False)
     self.legend_button.deselect()
-    self.legend_button.grid(column=0, row=12)
+    self.legend_button.grid(column=0, row=control_row)
 
     self.entry_line1 = tk.Entry(app)
     self.entry_line1.insert(0, "Dataset1")
-    self.entry_line1.grid(column=1, row=12)
+    self.entry_line1.grid(column=1, row=control_row)
+    control_row += 1
 
     self.entry_line2 = tk.Entry(app)
     self.entry_line2.insert(0, "Dataset2")
-    self.entry_line2.grid(column=1, row=13)
+    self.entry_line2.grid(column=1, row=control_row)
+    control_row += 1
 
     # slider - time for comparison data
     self.label_slider2 = tk.Label(app, text = "Offset comparison file:")
-    self.label_slider2.grid(column=0, row=14)
+    self.label_slider2.grid(column=0, row=control_row)
     self.label_slider2.grid_remove()
 
     self.slider2 = tk.Scale(app, from_=self.parameters.istart,
                             to=self.parameters.iend, tickinterval=100,
                             orient=tk.HORIZONTAL, command=self.callbackFunc,
                             length = 300, resolution = 1.0)
-    self.slider2.grid(column=1, row=14)
     self.slider2.set(self.parameters.istart)
+    self.slider2.grid(column=1, row=control_row)
     self.slider2.grid_remove()
+    control_row += 1
 
     # Bindings
     self.app.bind('<Left>', self.left_key)
