@@ -74,6 +74,17 @@ def basic(dat):
   # Variables that change in time and space
   var_list = dat.variables
 
+  var_name = "Blank"
+  var_list.insert(0, var_name)
+  blank = dat.Fluid_Rho.data * 0.0 + 1.0
+  setattr(dat, var_name, new_variable(data = blank,
+                                      grid = dat.Grid_Grid,
+                                      units_new = " ",
+                                      unit_conversion = 1,
+                                      name = "No Variable"))
+
+
+
   var_name = "Fluid_Volume_rz"
   var_list.append(var_name)
   vol = dat.Fluid_Volume.data * fac
