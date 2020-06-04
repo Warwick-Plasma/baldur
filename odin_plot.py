@@ -349,6 +349,7 @@ class plot_parameters:
     self.line2_label = 'None'
     self.sdf_num2 = 0
     self.plot_all_rays = False
+    self.select_ray = False
 
     # Time history params
     self.dat = None
@@ -469,6 +470,7 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
     var = getattr(dat, var_name)
     var_grid = getattr(var, 'grid')
     grid_conv = getattr(var_grid, 'unit_conversion')
+    select_ray = parameters.select_ray
     if hasattr(dat, 'Beam1'):
       skip = 1
       plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, parameters.use_polar,
@@ -478,9 +480,10 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
       print("No light ray data found")
     if hasattr(dat, 'Burst1'):
       num_burs = len(dat.bursts)
-      for iname in range(0, num_burs):
-        skip = 1
-        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
+      #for iname in range(0, num_burs):
+      iname = parameters.select_ray
+      skip = 1
+      plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
                   parameters.use_polar, grid_conv)
     else:
       print(" ")
