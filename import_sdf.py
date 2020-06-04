@@ -159,7 +159,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   use_analysis = kwargs.get('use_analysis', False)
 
   SDFName=pathname+'/'+str(sdf_num).zfill(4)+'.sdf'
-  dat = sh.getdata(SDFName,verbose=False)
+  dat = sdf.read(SDFName)
 
   # Get all variables
   dat_names = list(dat.__dict__.keys())
