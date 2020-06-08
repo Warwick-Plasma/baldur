@@ -281,7 +281,7 @@ def plot_colourline(fig1, ax1, x, y, c, cnorm):
   segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
   # Create a continuous norm to map from data points to colors
-  lc = LineCollection(segments, cmap='viridis', norm=cnorm)
+  lc = LineCollection(segments, cmap='Reds', norm=cnorm)
   # Set the values used for colormapping
   lc.set_array(c)
   lc.set_linewidth(2)
@@ -313,7 +313,7 @@ def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
     if use_polar: x_ray, y_ray, y_label = polar_coordinates(x_ray, y_ray)
 
     plot_colourline(fig1, ax1, x_ray, y_ray, c_ray, cnorm)
-  smap = cm.ScalarMappable(norm=cnorm, cmap='viridis')
+  smap = cm.ScalarMappable(norm=cnorm, cmap='Reds')
   smap.set_array([])
   #fig1.colorbar(smap)
 
@@ -467,33 +467,7 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   cbar = fig.colorbar(cmesh, cax=cax1)
 
   if parameters.plot_rays_on:
-    var = getattr(dat, var_name)
-    var_grid = getattr(var, 'grid')
-    grid_conv = getattr(var_grid, 'unit_conversion')
-    select_ray = parameters.select_ray
-    if hasattr(dat, 'Beam1'):
-      skip = 1
-      plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, parameters.use_polar,
-                grid_conv)
-    else:
-      print(" ")
-      print("No light ray data found")
-    if hasattr(dat, 'Burst1'):
-      if parameters.plot_all_rays:
-        num_burs = len(dat.bursts)
-        for iname in range(0, num_burs):
-          skip = 1
-          plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
-                    parameters.use_polar, grid_conv)
-      else:
-        num_burs = len(dat.bursts)
-        iname = parameters.select_ray
-        skip = 1
-        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
-                  parameters.use_polar, grid_conv)
-    else:
-      print(" ")
-      print("No electron path data found")
+    wrapper_plot_rays(dat, parameters, fig, ax1)
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
@@ -515,6 +489,37 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   cbar.draw_all()
 
   plt.show()
+
+
+
+def wrapper_plot_rays(dat, parameters, fig, ax1):
+  var = getattr(dat, parameters.var_name)
+  var_grid = getattr(var, 'grid')
+  grid_conv = getattr(var_grid, 'unit_conversion')
+  select_ray = parameters.select_ray
+  if hasattr(dat, 'Beam1'):
+    skip = 1
+    plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, parameters.use_polar,
+              grid_conv)
+  else:
+    print(" ")
+    print("No light ray data found")
+  if hasattr(dat, 'Burst1'):
+    if parameters.plot_all_rays:
+      num_burs = len(dat.bursts)
+      for iname in range(0, num_burs):
+        skip = 1
+        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
+                  parameters.use_polar, grid_conv)
+    else:
+      num_burs = len(dat.bursts)
+      iname = parameters.select_ray
+      skip = 1
+      plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
+                parameters.use_polar, grid_conv)
+  else:
+    print(" ")
+    print("No electron path data found")
 
 
 
@@ -559,7 +564,7 @@ def mass(*args, **kwargs):
 
   fac = 1.0
   if dat.Logical_flags.use_rz:
-          fac = 2*np.pi
+    fac = 2*np.pi
 
   vol=dat.Fluid_Volume.data * fac
   mass=rho[:,:]*vol[:,:]
