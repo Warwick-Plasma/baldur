@@ -488,6 +488,7 @@ class snapshot_GUI:
     self.combo_surf.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
     self.rays_button.bind("<ButtonRelease-1>", self.show_ray_slider)
+    self.all_rays_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.comparison_check.bind("<ButtonRelease-1>", self.hide_slider)
     self.legend_button.bind("<ButtonRelease-1>", self.callbackFunc)
 

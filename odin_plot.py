@@ -479,11 +479,17 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
       print(" ")
       print("No light ray data found")
     if hasattr(dat, 'Burst1'):
-      num_burs = len(dat.bursts)
-      #for iname in range(0, num_burs):
-      iname = parameters.select_ray
-      skip = 1
-      plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
+      if parameters.plot_all_rays:
+        num_burs = len(dat.bursts)
+        for iname in range(0, num_burs):
+          skip = 1
+          plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
+                    parameters.use_polar, grid_conv)
+      else:
+        num_burs = len(dat.bursts)
+        iname = parameters.select_ray
+        skip = 1
+        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
                   parameters.use_polar, grid_conv)
     else:
       print(" ")
