@@ -398,7 +398,7 @@ def hot_electron(dat, *args, **kwargs):
   setattr(dat, var_name,
           new_variable(data = tot_ele_dep,
                        units_new = 'TW',
-                       unit_conversion = 1.0e-15,
+                       unit_conversion = 1.0e-12,
                        name = "Total Hot Electron Power Deposited"))
 
   var_name = "Hot_Electron_Energy_Total_Deposited"
@@ -407,7 +407,7 @@ def hot_electron(dat, *args, **kwargs):
   setattr(dat, var_name, new_variable(data = tot_electron_dep,
                                       units_new = 'kJ',
                                       unit_conversion = 1.0e-3,
-                                      name = "Total laser energy deposited"))
+                                      name = "Total Hot Electron Energy Deposited"))
 
   setattr(dat, "variables_time", var_list)
 
