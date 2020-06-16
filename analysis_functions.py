@@ -346,8 +346,6 @@ def laser(dat, *args, **kwargs):
 
   setattr(dat, "variables_time", var_list)
 
-
-
   return dat
 
 
@@ -365,7 +363,7 @@ def hot_electron(dat, *args, **kwargs):
   # Variables that change in time and space
   var_list = dat.variables
 
-  var_name = "Electron_Power_per_volume"
+  var_name = "Electron_energy_per_step"
   var_list.append(var_name)
   if sdf_num == istart:
     electron_dep_step = electron_dep
@@ -379,17 +377,16 @@ def hot_electron(dat, *args, **kwargs):
   else:
     print('Error with electron change calculation')
     print('sdf_num = ', sdf_num, ' and the minimum = ', istart)
+  setattr(dat, var_name, new_variable(data = electron_dep_step,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "J/kg",
+                                      unit_conversion = 1,
+                                      name = "Hot Electron Energy Deposited"))
+
+  var_name = "Electron_Power_per_volume"
+  var_list.append(var_name)
   if dt < small_number:
     dt = 1.0
-
-  electron_pwr_per_vol = electron_dep_step * dat.Cell_Mass.data \
-      / dat.Fluid_Volume_rz.data / dt
-  setattr(dat, var_name, new_variable(data = electron_pwr_per_vol,
-                                      grid = dat.Grid_Grid,
-                                      units_new = "W/m$^3$",
-                                      unit_conversion = 1,
-                                      name = "Hot Electron Power Per Volume"))
-
   electron_pwr_per_vol = electron_dep_step * dat.Cell_Mass.data \
       / dat.Fluid_Volume_rz.data / dt
   setattr(dat, var_name, new_variable(data = electron_pwr_per_vol,
