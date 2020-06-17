@@ -255,12 +255,14 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
       print("Warning: " + parameters.entry_comparison + " is not a directory")
 
 
-  dat = isdf.use_sdf(sdf_num, parameters.pathname,
+  parameters.dat = isdf.use_sdf(sdf_num, parameters.pathname,
                      use_analysis = parameters.use_analysis,
                      istart = parameters.istart)
-  snapshot(dat, fig, ax1, cax1, parameters.var_name, parameters = parameters)
-  lineout(dat, parameters.cross_section, fig2, ax2, ax3, parameters.var_name,
+  snapshot(parameters.dat, fig, ax1, cax1, parameters.var_name, parameters = parameters)
+  lineout(parameters.dat, parameters.cross_section, fig2, ax2, ax3, parameters.var_name,
           parameters = parameters)
+
+  return parameters
 
 
 
@@ -467,7 +469,8 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   cbar = fig.colorbar(cmesh, cax=cax1)
 
   if parameters.plot_rays_on:
-    wrapper_plot_rays(dat, parameters, fig, ax1)
+    wrapper_plot_light_rays(dat, parameters, fig, ax1)
+    wrapper_plot_electron_rays(dat, parameters, fig, ax1)
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
@@ -492,7 +495,7 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
 
 
 
-def wrapper_plot_rays(dat, parameters, fig, ax1):
+def wrapper_plot_light_rays(dat, parameters, fig, ax1):
   var = getattr(dat, parameters.var_name)
   var_grid = getattr(var, 'grid')
   grid_conv = getattr(var_grid, 'unit_conversion')
@@ -504,6 +507,14 @@ def wrapper_plot_rays(dat, parameters, fig, ax1):
   else:
     print(" ")
     print("No light ray data found")
+
+
+
+def wrapper_plot_electron_rays(dat, parameters, fig, ax1):
+  var = getattr(dat, parameters.var_name)
+  var_grid = getattr(var, 'grid')
+  grid_conv = getattr(var_grid, 'unit_conversion')
+  select_ray = parameters.select_ray
   if hasattr(dat, 'Burst1'):
     if parameters.plot_all_rays:
       num_burs = len(dat.bursts)

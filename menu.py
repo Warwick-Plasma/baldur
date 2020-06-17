@@ -413,7 +413,7 @@ class snapshot_GUI:
 
     self.slider3 = tk.Scale(app, from_=1,
                             to=1000, tickinterval=100,
-                            orient=tk.HORIZONTAL, command=self.callbackFunc,
+                            orient=tk.HORIZONTAL, command=self.update_ray,
                             length = 300, resolution = 1.0)
     self.slider3.set(1)
     self.slider3.grid(column=1, row=control_row)
@@ -488,7 +488,7 @@ class snapshot_GUI:
     self.combo_surf.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
     self.rays_button.bind("<ButtonRelease-1>", self.show_ray_slider)
-    self.all_rays_button.bind("<ButtonRelease-1>", self.callbackFunc)
+    self.all_rays_button.bind("<ButtonRelease-1>", self.show_ray_slider)
     self.comparison_check.bind("<ButtonRelease-1>", self.hide_slider)
     self.legend_button.bind("<ButtonRelease-1>", self.callbackFunc)
 
@@ -508,8 +508,6 @@ class snapshot_GUI:
     self.parameters.scale_max = float(self.entry_scale_max.get())
     self.parameters.apply_scale_min = self.apply_scale_min.get()
     self.parameters.scale_min = float(self.entry_scale_min.get())
-    self.parameters.plot_rays_on = self.rays_variable.get()
-    self.parameters.plot_all_rays = self.all_rays_variable.get()
     self.parameters.apply_comparison = self.apply_comparison.get()
     self.parameters.entry_comparison = self.entry_comparison.get()
     self.parameters.cross_section = int(self.entry_cross_section.get())
@@ -517,16 +515,18 @@ class snapshot_GUI:
     self.parameters.line1_label = self.entry_line1.get()
     self.parameters.line2_label = self.entry_line2.get()
     self.parameters.sdf_num2 = self.slider2.get()
-    self.parameters.select_ray = self.slider3.get()
 
-    op.data_and_plot(self.parameters.sdf_num, self.fig, self.ax1, self.cax1,
-                     self.fig2, self.ax2, self.ax3, self.parameters)
+    self.parameters = op.data_and_plot(self.parameters.sdf_num, self.fig,
+                                       self.ax1, self.cax1, self.fig2,
+                                       self.ax2, self.ax3, self.parameters)
 
     self.reset_axis_variable.set(False)
 
   def show_ray_slider(self, event):
-    show_ray_slider = self.rays_variable.get()
-    if show_ray_slider:
+    self.parameters.select_ray = self.slider3.get()
+    self.parameters.plot_rays_on = self.rays_variable.get()
+    self.parameters.plot_all_rays = self.all_rays_variable.get()
+    if self.parameters.plot_rays_on:
       self.label_slider3.grid()
       self.slider3.grid()
       self.all_rays_button.grid()
@@ -534,7 +534,17 @@ class snapshot_GUI:
       self.label_slider3.grid_remove()
       self.slider3.grid_remove()
       self.all_rays_button.grid_remove()
-    self.callbackFunc(event)
+    op.wrapper_plot_light_rays(self.parameters.dat, self.parameters, self.fig,
+        self.ax1)
+    op.wrapper_plot_electron_rays(self.parameters.dat, self.parameters, self.fig,
+        self.ax1)
+
+  def update_ray(self, event):
+    self.parameters.select_ray = self.slider3.get()
+    self.parameters.plot_rays_on = self.rays_variable.get()
+    self.parameters.plot_all_rays = self.all_rays_variable.get()
+    op.wrapper_plot_electron_rays(self.parameters.dat, self.parameters, self.fig,
+        self.ax1)
 
   def hide_slider(self, event):
     show_slider_boolean = self.apply_comparison.get()
