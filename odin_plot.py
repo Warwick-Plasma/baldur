@@ -255,12 +255,14 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
       print("Warning: " + parameters.entry_comparison + " is not a directory")
 
 
-  dat = isdf.use_sdf(sdf_num, parameters.pathname,
+  parameters.dat = isdf.use_sdf(sdf_num, parameters.pathname,
                      use_analysis = parameters.use_analysis,
                      istart = parameters.istart)
-  snapshot(dat, fig, ax1, cax1, parameters.var_name, parameters = parameters)
-  lineout(dat, parameters.cross_section, fig2, ax2, ax3, parameters.var_name,
+  snapshot(parameters.dat, fig, ax1, cax1, parameters.var_name, parameters = parameters)
+  lineout(parameters.dat, parameters.cross_section, fig2, ax2, ax3, parameters.var_name,
           parameters = parameters)
+
+  return parameters
 
 
 
@@ -281,7 +283,7 @@ def plot_colourline(fig1, ax1, x, y, c, cnorm):
   segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
   # Create a continuous norm to map from data points to colors
-  lc = LineCollection(segments, cmap='viridis', norm=cnorm)
+  lc = LineCollection(segments, cmap='Reds', norm=cnorm)
   # Set the values used for colormapping
   lc.set_array(c)
   lc.set_linewidth(2)
@@ -297,9 +299,6 @@ def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
   beam = getattr(dat, name)
   beam_energy = getattr(dat, name + '_' + name_var)
   nrays = len(beam.data)
-  cmax = max(max(beam_energy.data, key=lambda x: max(x.data)).data)
-  cmin = min(min(beam_energy.data, key=lambda x: min(x.data)).data)
-  cnorm = plt.Normalize(cmin, cmax)
   for iray in range(0, nrays, skip):
     print_string = 'Processing ray {:4d}'.format(iray+1) \
                  + ' of {:4d}'.format(nrays) + '   '
@@ -309,11 +308,14 @@ def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
     x_ray = beam.data[iray].data[0] * grid_conv
     y_ray = beam.data[iray].data[1] * grid_conv
     c_ray = beam_energy.data[iray].data
+    cmax = np.max(beam_energy.data[iray].data)
+    cmin = np.min(beam_energy.data[iray].data)
+    cnorm = plt.Normalize(cmin, cmax)
 
     if use_polar: x_ray, y_ray, y_label = polar_coordinates(x_ray, y_ray)
 
     plot_colourline(fig1, ax1, x_ray, y_ray, c_ray, cnorm)
-  smap = cm.ScalarMappable(norm=cnorm, cmap='viridis')
+  smap = cm.ScalarMappable(norm=cnorm, cmap='Reds')
   smap.set_array([])
   #fig1.colorbar(smap)
 
@@ -348,6 +350,8 @@ class plot_parameters:
     self.line1_label = 'None'
     self.line2_label = 'None'
     self.sdf_num2 = 0
+    self.plot_all_rays = False
+    self.select_ray = False
 
     # Time history params
     self.dat = None
@@ -465,19 +469,8 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   cbar = fig.colorbar(cmesh, cax=cax1)
 
   if parameters.plot_rays_on:
-    var = getattr(dat, var_name)
-    var_grid = getattr(var, 'grid')
-    grid_conv = getattr(var_grid, 'unit_conversion')
-    if hasattr(dat, 'Beam1'):
-      skip = 1
-      plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, parameters.use_polar,
-                grid_conv)
-    if hasattr(dat, 'Burst1'):
-      num_burs = len(dat.bursts)
-      for iname in range(0, num_burs):
-        skip = 1
-        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
-                  parameters.use_polar, grid_conv)
+    wrapper_plot_light_rays(dat, parameters, fig, ax1)
+    wrapper_plot_electron_rays(dat, parameters, fig, ax1)
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
@@ -499,6 +492,45 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   cbar.draw_all()
 
   plt.show()
+
+
+
+def wrapper_plot_light_rays(dat, parameters, fig, ax1):
+  var = getattr(dat, parameters.var_name)
+  var_grid = getattr(var, 'grid')
+  grid_conv = getattr(var_grid, 'unit_conversion')
+  select_ray = parameters.select_ray
+  if hasattr(dat, 'Beam1'):
+    skip = 1
+    plot_rays('Beam1', 'Energy', skip, dat, fig, ax1, parameters.use_polar,
+              grid_conv)
+  else:
+    print(" ")
+    print("No light ray data found")
+
+
+
+def wrapper_plot_electron_rays(dat, parameters, fig, ax1):
+  var = getattr(dat, parameters.var_name)
+  var_grid = getattr(var, 'grid')
+  grid_conv = getattr(var_grid, 'unit_conversion')
+  select_ray = parameters.select_ray
+  if hasattr(dat, 'Burst1'):
+    if parameters.plot_all_rays:
+      num_burs = len(dat.bursts)
+      for iname in range(0, num_burs):
+        skip = 1
+        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
+                  parameters.use_polar, grid_conv)
+    else:
+      num_burs = len(dat.bursts)
+      iname = parameters.select_ray
+      skip = 1
+      plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
+                parameters.use_polar, grid_conv)
+  else:
+    print(" ")
+    print("No electron path data found")
 
 
 
@@ -543,7 +575,7 @@ def mass(*args, **kwargs):
 
   fac = 1.0
   if dat.Logical_flags.use_rz:
-          fac = 2*np.pi
+    fac = 2*np.pi
 
   vol=dat.Fluid_Volume.data * fac
   mass=rho[:,:]*vol[:,:]
