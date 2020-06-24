@@ -434,8 +434,12 @@ class snapshot_GUI:
     control_row += 1
 
     # Entry - Cross section
-    self.labelcs = tk.Label(app, text="Choose lineout cross section:")
-    self.labelcs.grid(column=0, row=control_row)
+    self.y_dir_cross_section = tk.BooleanVar(app)
+    self.cross_section_check = tk.Checkbutton(app, text="Cross section X/Y, location:",
+                                           variable=self.y_dir_cross_section,
+                                           onvalue=True, offvalue=False)
+    self.cross_section_check.deselect()
+    self.cross_section_check.grid(column=0, row=control_row)
 
     self.entry_cross_section = tk.Entry(app)
     self.entry_cross_section.insert(0, "1")
@@ -491,6 +495,7 @@ class snapshot_GUI:
     self.all_rays_button.bind("<ButtonRelease-1>", self.show_ray_slider)
     self.comparison_check.bind("<ButtonRelease-1>", self.hide_slider)
     self.legend_button.bind("<ButtonRelease-1>", self.callbackFunc)
+    self.cross_section_check.bind("<ButtonRelease-1>", self.callbackFunc1)
 
   def callbackFunc(self, event):
     """Update 1D and 2d plots with values given by tkinter controls which are
@@ -515,6 +520,7 @@ class snapshot_GUI:
     self.parameters.line1_label = self.entry_line1.get()
     self.parameters.line2_label = self.entry_line2.get()
     self.parameters.sdf_num2 = self.slider2.get()
+    self.parameters.y_dir_cross_section = self.y_dir_cross_section.get()
 
     self.parameters = op.data_and_plot(self.parameters.sdf_num, self.fig,
                                        self.ax1, self.cax1, self.fig2,
