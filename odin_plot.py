@@ -352,6 +352,7 @@ class plot_parameters:
     self.sdf_num2 = 0
     self.plot_all_rays = False
     self.select_ray = False
+    self.y_dir_cross_section = False
 
     # Time history params
     self.dat = None
@@ -658,8 +659,10 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     var_default = dat.variables[0]
 
   x_data, y_data, x_label, y_label = open_var_1d(dat, var_default, cs,
-                                                 parameters.use_log)
-  _, y_data1, _, y_label1 = open_var_1d(dat, var_name, cs, parameters.use_log)
+                                                 parameters.use_log,
+                                                 parameters.y_dir_cross_section)
+  _, y_data1, _, y_label1 = open_var_1d(dat, var_name, cs, parameters.use_log,
+                                        parameters.y_dir_cross_section)
 
   ax_l1.set_xdata(x_data)
   ax_l1.set_ydata(y_data)
@@ -668,9 +671,11 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
 
   if parameters.apply_comparison:
     x_data_comp, y_data_comp, _, _ = open_var_1d(parameters.dat1, var_default,
-                                                 cs, parameters.use_log)
+                                                 cs, parameters.use_log,
+                                                 parameters.y_dir_cross_section)
     _, y_data1_comp, _, _ = open_var_1d(parameters.dat1, var_name, cs,
-                                        parameters.use_log)
+                                        parameters.use_log,
+                                        parameters.y_dir_cross_section)
 
     ax_l2.set_xdata(x_data_comp)
     ax_l2.set_ydata(y_data_comp)
@@ -768,7 +773,7 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
 
 
 
-def open_var_1d(dat, var_name, cs, use_log):
+def open_var_1d(dat, var_name, cs, use_log, y_dir_cross_section):
   """Aligns variable [var_name] from [dat] with the appropriate grid for
   plotting. Use [cs] to find which slice through the data is taken.
   """
@@ -782,16 +787,27 @@ def open_var_1d(dat, var_name, cs, use_log):
   grid_conv = getattr(grid, "unit_conversion")
   grid_units = getattr(grid, "units_new")
 
-  pos1 = dat.Grid_Grid_mid.data[0][:,cs] * dat.Grid_Grid_mid.unit_conversion
-  pos2 = dat.Grid_Grid_mid.data[1][:,cs] * dat.Grid_Grid_mid.unit_conversion
-  # The linout is currently plot against radius not x coordinate! needs change
-  x_data = np.sqrt(pos1**2 + pos2**2)
-  y_data = getattr(var, "data")[:,cs] * unit_conv
+  if not y_dir_cross_section:
+    pos1 = dat.Grid_Grid_mid.data[0][:,cs] * dat.Grid_Grid_mid.unit_conversion
+    pos2 = dat.Grid_Grid_mid.data[1][:,cs] * dat.Grid_Grid_mid.unit_conversion
+    # The linout is currently plot against radius not x coordinate! needs change
+    x_data = np.sqrt(pos1**2 + pos2**2)
+    y_data = getattr(var, "data")[:,cs] * unit_conv
 
-  y_data = one_dim_grid(np.array(grid_data)[:,:,cs], grid_conv, x_data, y_data)
+    y_data = one_dim_grid(np.array(grid_data)[:,:,cs], grid_conv, x_data, y_data)
 
-  x_label = grid_name + " (" + grid_units + ")"
-  y_label = name + " (" + units + ")"
+    x_label = "Distance from origin" + " (" + grid_units + ")"
+    y_label = name + " (" + units + ")"
+  else:
+    pos1 = dat.Grid_Grid_mid.data[0][cs,:] * dat.Grid_Grid_mid.unit_conversion
+    pos2 = dat.Grid_Grid_mid.data[1][cs,:] * dat.Grid_Grid_mid.unit_conversion
+    x_data = np.arctan(pos2 / pos1)
+    y_data = getattr(var, "data")[cs,:] * unit_conv
+
+    y_data = one_dim_grid(np.array(grid_data)[:,cs,:], grid_conv, x_data, y_data)
+
+    x_label = "Angle from X-axis" + " (radians)"
+    y_label = name + " (" + units + ")"
 
   if use_log:
     y_data = abs(y_data) + small_num
