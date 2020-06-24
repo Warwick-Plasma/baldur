@@ -586,7 +586,6 @@ def mass(*args, **kwargs):
   if dat.Logical_flags.use_rz:
     fac = 2*np.pi
 
-
   vol=dat.Fluid_Volume.data * fac
   mass=rho[:,:]*vol[:,:]
 
