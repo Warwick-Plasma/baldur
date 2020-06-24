@@ -540,10 +540,13 @@ class snapshot_GUI:
       self.label_slider3.grid_remove()
       self.slider3.grid_remove()
       self.all_rays_button.grid_remove()
-    op.wrapper_plot_light_rays(self.parameters.dat, self.parameters, self.fig,
-        self.ax1)
-    op.wrapper_plot_electron_rays(self.parameters.dat, self.parameters, self.fig,
-        self.ax1)
+    if (self.parameters.dat == None):
+      self.callbackFunc(event)
+    else:
+      op.wrapper_plot_light_rays(self.parameters.dat, self.parameters, self.fig,
+          self.ax1)
+      op.wrapper_plot_electron_rays(self.parameters.dat, self.parameters,
+          self.fig, self.ax1)
 
   def update_ray(self, event):
     self.parameters.select_ray = self.slider3.get()

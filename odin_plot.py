@@ -312,7 +312,7 @@ def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
     cmin = np.min(beam_energy.data[iray].data)
     cnorm = plt.Normalize(cmin, cmax)
 
-    if use_polar: x_ray, y_ray, y_label = polar_coordinates(x_ray, y_ray)
+    if use_polar: x_ray, y_ray, _, _ = polar_coordinates(x_ray, y_ray, " ")
 
     plot_colourline(fig1, ax1, x_ray, y_ray, c_ray, cnorm)
   smap = cm.ScalarMappable(norm=cnorm, cmap='Reds')
@@ -374,10 +374,17 @@ def open_var_2d(dat, var_name, parameters):
   grid_conv = getattr(var_grid, 'unit_conversion')
   x_data = getattr(var_grid, 'data')[0] * grid_conv
   y_data = getattr(var_grid, 'data')[1] * grid_conv
-  x_label = 'R (' + getattr(var_grid, 'units_new') + ')'
-  y_label = 'Z (' + getattr(var_grid, 'units_new') + ')'
+
+  if dat.Logical_flags.use_rz:
+    x_label = 'R (' + getattr(var_grid, 'units_new') + ')'
+    y_label = 'Z (' + getattr(var_grid, 'units_new') + ')'
+  else:
+    x_label = 'X (' + getattr(var_grid, 'units_new') + ')'
+    y_label = 'Y (' + getattr(var_grid, 'units_new') + ')'
+
   if parameters.use_polar:
-    x_data, y_data, y_label = polar_coordinates(x_data, y_data)
+    units = getattr(var_grid, 'units_new')
+    x_data, y_data, x_label, y_label = polar_coordinates(x_data, y_data, units)
 
   c_data = getattr(var, 'data') * getattr(var, 'unit_conversion')
   c_label = getattr(var, "name") + " (" + getattr(var, "units_new") + ")"
@@ -554,17 +561,18 @@ def mean_subtract(cc, cl):
 
 
 
-def polar_coordinates(xc, yc):
+def polar_coordinates(xc, yc, units):
   """Chnge to polar coordinates, radius vs theta.
   """
-  y_label = "Radians (/$\pi$)"
+  x_label = 'Distance from origin (' + units + ')'
+  y_label = "Angle from X-axis (radians)"
 
   x_data = np.sqrt(xc**2 + yc**2)
-  y_data = np.arctan2(yc, xc) / np.pi
+  y_data = np.arctan2(yc, xc)
   # This correction makes singularity at radius = 0, look more intuitive.
   y_data[0,:] = y_data[1,:]
 
-  return x_data, y_data, y_label
+  return x_data, y_data, x_label, y_label
 
 
 
