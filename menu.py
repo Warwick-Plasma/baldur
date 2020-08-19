@@ -299,10 +299,12 @@ class snapshot_GUI:
     # Combo box - variable 2
     self.labelTop_combo2 = tk.Label(app, text="Select variable 2:")
     self.labelTop_combo2.grid(column=0, row=control_row)
+    self.labelTop_combo2.grid_remove()
 
     self.combo2 = ttk.Combobox(app, values=dat.variables)
     self.combo2.grid(column=1, row=control_row)
     self.combo2.current(0)
+    self.combo2.grid_remove()
     control_row += 1
 
     # check box - grid
@@ -492,7 +494,7 @@ class snapshot_GUI:
     self.app.bind('<Right>', self.right_key)
     self.app.bind('<Up>', self.up_key)
     self.app.bind('<Down>', self.down_key)
-    self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
+    self.combo1.bind("<<ComboboxSelected>>", self.show_variable_combo)
     self.combo2.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.grid_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.polar_button.bind("<ButtonRelease-1>", self.callbackFunc1)
@@ -538,6 +540,17 @@ class snapshot_GUI:
                                        self.ax2, self.ax3, self.parameters)
 
     self.reset_axis_variable.set(False)
+
+  def show_variable_combo(self, event):
+    self.parameters.var_name[0] = self.combo1.get()
+    if self.parameters.var_name[0] == 'None':
+      self.combo2.set('None')
+      self.labelTop_combo2.grid_remove()
+      self.combo2.grid_remove()
+    else:
+      self.labelTop_combo2.grid()
+      self.combo2.grid()
+    self.callbackFunc(event)
 
   def show_ray_slider(self, event):
     self.parameters.select_ray = self.slider3.get()

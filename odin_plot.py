@@ -626,6 +626,7 @@ def empty_lineout(fig, ax):
   setattr(ax, 'line2', ax_l2)
   ax_l3 = ax.axvline(-big_num, lw = 1, color = 'tab:blue', linestyle = '--')
   setattr(ax, 'line3', ax_l3)
+  ax_l3.set_visible(False)
 
   ax1_l1, = ax1.plot(1, lw = 2, color = 'tab:red')
   setattr(ax1, 'line1', ax1_l1)
@@ -657,10 +658,28 @@ def lineout(dat, cs, fig, ax, ax1, *args, **kwargs):
   ax1_l1 = getattr(ax1, 'line1')
   ax1_l2 = getattr(ax1, 'line2')
 
-  ax_l1.set_label(parameters.line1_label)
-  ax_l2.set_label(parameters.line2_label)
+  ax_l1.set_label(' ')
+  ax_l2.set_label(' ')
   ax1_l1.set_label(' ')
   ax1_l2.set_label(' ')
+
+  if var_default == 'None':
+    ax_l1.set_visible(False)
+    ax_l2.set_visible(False)
+  else: 
+    ax_l1.set_visible(True)
+    ax_l2.set_visible(True)
+    ax_l1.set_label(parameters.line1_label)
+    ax_l2.set_label(parameters.line2_label) 
+
+  if var_name == 'None':
+    ax1.set_visible(False)
+    ax1_l1.set_visible(False)
+    ax1_l2.set_visible(False)
+  else: 
+    ax1.set_visible(True)
+    ax1_l1.set_visible(True)
+    ax1_l2.set_visible(True)
 
   x_data, y_data, x_label, y_label = open_var_1d(dat, var_default, cs,
                                                  parameters.use_log,
@@ -728,10 +747,11 @@ def lineout(dat, cs, fig, ax, ax1, *args, **kwargs):
 
   # Track a particular point in the data as time is updated
   if parameters.surface_name == 'None':
-    ax_l3.set_xdata(-big_num)
+    ax_l3.set_visible(False)
     surface_location = 'None'
     surface_move = 0.0
   else:
+    ax_l3.set_visible(True)
     old_surface_location = getattr(ax, "loc_cell_track")
     surface = getattr(dat, parameters.surface_name)
     surface_location = surface.data[cs] * surface.unit_conversion
@@ -768,6 +788,9 @@ def lineout(dat, cs, fig, ax, ax1, *args, **kwargs):
     order = [0,2,1,3]
     all_lines = [all_lines[idx] for idx in order]
     all_labels = [all_labels[idx] for idx in order]
+    if var_name == 'None':
+      del all_lines[1::2]
+      del all_labels[1::2]
     ax.legend(all_lines, all_labels, loc = 'upper right')
   else:
     try:
