@@ -258,8 +258,8 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   parameters.dat = isdf.use_sdf(sdf_num, parameters.pathname,
                      use_analysis = parameters.use_analysis,
                      istart = parameters.istart)
-  snapshot(parameters.dat, fig, ax1, cax1, parameters.var_name, parameters = parameters)
-  lineout(parameters.dat, parameters.cross_section, fig2, ax2, ax3, parameters.var_name,
+  snapshot(parameters.dat, fig, ax1, cax1, parameters = parameters)
+  lineout(parameters.dat, parameters.cross_section, fig2, ax2, ax3,
           parameters = parameters)
 
   return parameters
@@ -332,7 +332,7 @@ class plot_parameters:
     self.iend = 0
     self.grid_boolean = False
     self.use_polar = False
-    self.var_name = 'None'
+    self.var_name = ['None'] * 2
     self.reset_axis = False
     self.view_anisotropies = False
     self.use_log = False
@@ -400,10 +400,11 @@ def open_var_2d(dat, var_name, parameters):
 
 
 
-def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
+def snapshot(dat, fig, ax1, cax1, *args, **kwargs):
   """This function plots [var_name] from the data set [dat] on [ax1].
   """
   parameters = kwargs.get('parameters', plot_parameters())
+  var_name = parameters.var_name[1]
   if parameters.grid_boolean == False:
     grid_colour = 'None'
   else:
@@ -635,7 +636,7 @@ def empty_lineout(fig, ax):
 
 
 
-def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
+def lineout(dat, cs, fig, ax, ax1, *args, **kwargs):
   """1D plot of [var_name] from data set [dat] on axis [ax1]. Axis [ax] is
   currently resevred for default variable which in Odin is Fluid_Rho. The [cs]
   provides information about which slice through the data to take. The x and y
@@ -643,6 +644,8 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   axis updates with the data.
   """
   parameters = kwargs.get('parameters', plot_parameters())
+  var_default = parameters.var_name[0]
+  var_name = parameters.var_name[1]
   if parameters.grid_boolean == False:
     grid_style = 'None'
   else:
@@ -658,13 +661,6 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   ax_l2.set_label(parameters.line2_label)
   ax1_l1.set_label(' ')
   ax1_l2.set_label(' ')
-
-  # default variable for Odin is density but for other codes it is the first
-  # in the list of variables
-  if (dat.Header['code_name'] == 'Odin2D'):
-    var_default = "Fluid_Rho"
-  else:
-    var_default = dat.variables[0]
 
   x_data, y_data, x_label, y_label = open_var_1d(dat, var_default, cs,
                                                  parameters.use_log,

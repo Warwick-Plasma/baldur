@@ -287,13 +287,22 @@ class snapshot_GUI:
     self.slider1.set(self.parameters.istart)
     control_row += 1
 
-    # Combo box - variable
-    self.labelTop_combo1 = tk.Label(app, text="Select variable:")
+    # Combo box - variable 1
+    self.labelTop_combo1 = tk.Label(app, text="Select variable 1:")
     self.labelTop_combo1.grid(column=0, row=control_row)
 
     self.combo1 = ttk.Combobox(app, values=dat.variables)
     self.combo1.grid(column=1, row=control_row)
     self.combo1.current(0)
+    control_row += 1
+
+    # Combo box - variable 2
+    self.labelTop_combo2 = tk.Label(app, text="Select variable 2:")
+    self.labelTop_combo2.grid(column=0, row=control_row)
+
+    self.combo2 = ttk.Combobox(app, values=dat.variables)
+    self.combo2.grid(column=1, row=control_row)
+    self.combo2.current(0)
     control_row += 1
 
     # check box - grid
@@ -484,6 +493,7 @@ class snapshot_GUI:
     self.app.bind('<Up>', self.up_key)
     self.app.bind('<Down>', self.down_key)
     self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
+    self.combo2.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.grid_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.polar_button.bind("<ButtonRelease-1>", self.callbackFunc1)
     self.anisotropies_button.bind("<ButtonRelease-1>", self.callbackFunc)
@@ -504,7 +514,8 @@ class snapshot_GUI:
     self.parameters.grid_boolean = self.grid_variable.get()
     self.parameters.use_polar = self.polar_variable.get()
     self.parameters.sdf_num = self.slider1.get()
-    self.parameters.var_name = self.combo1.get()
+    self.parameters.var_name[0] = self.combo1.get()
+    self.parameters.var_name[1] = self.combo2.get()
     self.parameters.reset_axis = self.reset_axis_variable.get()
     self.parameters.view_anisotropies = self.anisotropies_variable.get()
     self.parameters.use_log = self.log_variable.get()
