@@ -97,6 +97,7 @@ class time_history_GUI:
     """
     self.app = app
     self.parameters = op.plot_parameters()
+    self.data_struct = op.data_structure()
     self.parameters.use_analysis = use_analysis
     app.title("Time history GUI")
     app.geometry('450x200+10+10')
@@ -113,10 +114,10 @@ class time_history_GUI:
         = sdf_counter(runs, user_istart, user_iend)
 
     # initial data import, needed for variable selection combo box
-    dat = isdf.use_sdf(self.parameters.sdf_num, self.parameters.pathname,
+    data = isdf.use_sdf(self.parameters.sdf_num, self.parameters.pathname,
         use_analysis = self.parameters.use_analysis,
         istart = self.parameters.istart)
-    self.parameters.dat = isdf.get_data_all(dat, self.parameters.istart,
+    self.data_struct.data = isdf.get_data_all(data, self.parameters.istart,
         self.parameters.iend, self.parameters.pathname,
         self.parameters.use_analysis, self.cross_section)
 
@@ -138,7 +139,7 @@ class time_history_GUI:
     self.labelTop_combo1 = tk.Label(app, text = "Select variable:")
     self.labelTop_combo1.grid(column=0, row=control_row)
 
-    self.combo1 = ttk.Combobox(app, values = dat.variables)
+    self.combo1 = ttk.Combobox(app, values = data.variables)
     self.combo1.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.combo1.current(0)
     self.combo1.grid(column=1, row=control_row)
@@ -148,7 +149,7 @@ class time_history_GUI:
     self.labelTop_combo2 = tk.Label(app, text = "Select time variable:")
     self.labelTop_combo2.grid(column=0, row=control_row)
 
-    self.combo2 = ttk.Combobox(app, values = dat.variables_time)
+    self.combo2 = ttk.Combobox(app, values = data.variables_time)
     self.combo2.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.combo2.current(0)
     self.combo2.grid(column=1, row=control_row)
@@ -205,8 +206,10 @@ class time_history_GUI:
     self.parameters.cbar_colour_scale = self.slider1.get()
     self.parameters.reset_axis = self.reset_axis_variable.get()
 
-    op.time_history(self.fig, self.ax1, self.cax1, self.parameters)
-    op.time_history_lineout(self.fig2, self.ax2, self.ax3, self.parameters)
+    op.time_history(self.fig, self.ax1, self.cax1,
+                    parameters = self.parameters, data = self.data_struct)
+    op.time_history_lineout(self.fig2, self.ax2, self.ax3,
+                            parameters = self.parameters, data = self.data_struct)
 
     self.reset_axis_variable.set(False)
 
@@ -249,13 +252,34 @@ class snapshot_GUI:
     plt.close('all')
 
     # find sdf files and count
+    seperator = "/"
     self.parameters.pathname = os.path.abspath(os.getcwd())
+    self.parameters.parent_dir = self.parameters.pathname.split(seperator)[:-1]
+    self.parameters.parent_dir = seperator.join(self.parameters.parent_dir)
+    self.parameters.dir_list[0] = self.parameters.pathname.split(seperator)[-1]
+    self.parameters.dir_list[1] = self.parameters.pathname.split(seperator)[-1]
     runs = glob.glob1(self.parameters.pathname,"*.sdf")
+    if len(runs) < 1:
+      self.parameters.dir_list = glob.glob1(self.parameters.pathname,"*")
+      self.parameters.dir_list.sort()
+      self.parameters.num_dir = len(self.parameters.dir_list)
+      self.parameters.parent_dir = self.parameters.pathname
+      self.parameters.pathname = os.path.abspath(os.getcwd()) + '/' \
+          + self.parameters.dir_list[0]
+      runs = glob.glob1(self.parameters.pathname,"*.sdf")
+      if len(runs) < 1:
+        self.app.destroy()
+        sys.exit('Failed to find .sdf files')
+      if self.parameters.num_dir == 1:
+        self.parameters.num_dir = 2
+        self.parameters.dir_list = self.parameters.dir_list \
+            + self.parameters.dir_list
+
     self.parameters.istart, self.parameters.iend, self.parameters.sdf_num = \
         sdf_counter(runs, user_istart, user_iend)
 
     # initial data import, needed for variable selection combo box
-    dat = isdf.use_sdf(self.parameters.sdf_num, self.parameters.pathname,
+    data = isdf.use_sdf(self.parameters.sdf_num, self.parameters.pathname,
         use_analysis = self.parameters.use_analysis,
         istart = self.parameters.istart)
 
@@ -287,11 +311,25 @@ class snapshot_GUI:
     self.slider1.set(self.parameters.istart)
     control_row += 1
 
+    # slider - time for comparison data
+    self.label_slider2 = tk.Label(app, text = "Offset comparison file:")
+    self.label_slider2.grid(column=0, row=control_row)
+    self.label_slider2.grid_remove()
+
+    self.slider2 = tk.Scale(app, from_=self.parameters.istart,
+                            to=self.parameters.iend, tickinterval=100,
+                            orient=tk.HORIZONTAL, command=self.callbackFunc,
+                            length = 300, resolution = 1.0)
+    self.slider2.set(self.parameters.istart)
+    self.slider2.grid(column=1, row=control_row)
+    self.slider2.grid_remove()
+    control_row += 1
+
     # Combo box - variable 1
     self.labelTop_combo1 = tk.Label(app, text="Select variable 1:")
     self.labelTop_combo1.grid(column=0, row=control_row)
 
-    self.combo1 = ttk.Combobox(app, values=dat.variables)
+    self.combo1 = ttk.Combobox(app, values=data.variables)
     self.combo1.grid(column=1, row=control_row)
     self.combo1.current(0)
     control_row += 1
@@ -301,7 +339,7 @@ class snapshot_GUI:
     self.labelTop_combo2.grid(column=0, row=control_row)
     self.labelTop_combo2.grid_remove()
 
-    self.combo2 = ttk.Combobox(app, values=dat.variables)
+    self.combo2 = ttk.Combobox(app, values=data.variables)
     self.combo2.grid(column=1, row=control_row)
     self.combo2.current(0)
     self.combo2.grid_remove()
@@ -367,8 +405,8 @@ class snapshot_GUI:
     self.label_combo_surf = tk.Label(app, text="Select a surface to track:")
     self.label_combo_surf.grid(column=0, row=control_row)
 
-    dat.track_surfaces.insert(0,'None')
-    self.combo_surf = ttk.Combobox(app, values=dat.track_surfaces)
+    data.track_surfaces.insert(0,'None')
+    self.combo_surf = ttk.Combobox(app, values=data.track_surfaces)
     self.combo_surf.current(0)
     self.combo_surf.grid(column=1, row=control_row)
     control_row += 1
@@ -432,17 +470,27 @@ class snapshot_GUI:
     control_row += 1
 
     # Entry - Plot second file
-    self.apply_comparison = tk.BooleanVar(app)
-    self.comparison_check = tk.Checkbutton(app, text="Apply Comparison",
-                                           variable=self.apply_comparison,
-                                           onvalue=True, offvalue=False)
-    self.comparison_check.deselect()
-    self.comparison_check.grid(column=0, row=control_row)
+    self.parameters.apply_comparison = [False] * self.parameters.num_dir
+    self.parameters.apply_comparison[0] = True
+    self.parameters.entry_comparison = [None] * self.parameters.num_dir
+    self.parameters.entry_comparison[0] = self.parameters.pathname
+    self.apply_comparison = [None] * (self.parameters.num_dir - 1)
+    self.comparison_check = [None] * (self.parameters.num_dir - 1)
+    self.entry_comparison = [None] * (self.parameters.num_dir - 1)
+    for num in range(0, self.parameters.num_dir-1):
+      self.apply_comparison[num] = tk.BooleanVar(app)
+      self.comparison_check[num] = tk.Checkbutton(app, text="Apply Comparison" +
+                                                  " from file ->",
+                                                  variable=self.apply_comparison[num],
+                                                  onvalue=True, offvalue=False)
+      self.comparison_check[num].deselect()
+      self.comparison_check[num].grid(column=0, row=control_row)
 
-    self.entry_comparison = tk.Entry(app)
-    self.entry_comparison.insert(0, os.path.abspath(os.getcwd()))
-    self.entry_comparison.grid(column=1, row=control_row)
-    control_row += 1
+      self.entry_comparison[num] = tk.Entry(app)
+      self.entry_comparison[num].insert(0, self.parameters.parent_dir + '/'
+          + self.parameters.dir_list[num+1])
+      self.entry_comparison[num].grid(column=1, row=control_row)
+      control_row += 1
 
     # Entry - Cross section
     self.y_dir_cross_section = tk.BooleanVar(app)
@@ -465,29 +513,14 @@ class snapshot_GUI:
     self.legend_button.deselect()
     self.legend_button.grid(column=0, row=control_row)
 
-    self.entry_line1 = tk.Entry(app)
-    self.entry_line1.insert(0, "Dataset1")
-    self.entry_line1.grid(column=1, row=control_row)
-    control_row += 1
-
-    self.entry_line2 = tk.Entry(app)
-    self.entry_line2.insert(0, "Dataset2")
-    self.entry_line2.grid(column=1, row=control_row)
-    control_row += 1
-
-    # slider - time for comparison data
-    self.label_slider2 = tk.Label(app, text = "Offset comparison file:")
-    self.label_slider2.grid(column=0, row=control_row)
-    self.label_slider2.grid_remove()
-
-    self.slider2 = tk.Scale(app, from_=self.parameters.istart,
-                            to=self.parameters.iend, tickinterval=100,
-                            orient=tk.HORIZONTAL, command=self.callbackFunc,
-                            length = 300, resolution = 1.0)
-    self.slider2.set(self.parameters.istart)
-    self.slider2.grid(column=1, row=control_row)
-    self.slider2.grid_remove()
-    control_row += 1
+    self.parameters.line_labels = [None] * self.parameters.num_dir
+    self.entry_line = [None] * self.parameters.num_dir
+    for num in range(0, self.parameters.num_dir):
+      self.parameters.line_labels[num] = self.parameters.dir_list[num]
+      self.entry_line[num] = tk.Entry(app)
+      self.entry_line[num].insert(0, self.parameters.dir_list[num])
+      self.entry_line[num].grid(column=1, row=control_row)
+      control_row += 1
 
     # Bindings
     self.app.bind('<Left>', self.left_key)
@@ -505,7 +538,8 @@ class snapshot_GUI:
     self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
     self.rays_button.bind("<ButtonRelease-1>", self.show_ray_slider)
     self.all_rays_button.bind("<ButtonRelease-1>", self.show_ray_slider)
-    self.comparison_check.bind("<ButtonRelease-1>", self.hide_slider)
+    for num in range(0, self.parameters.num_dir - 1):
+      self.comparison_check[num].bind("<ButtonRelease-1>", self.hide_slider)
     self.legend_button.bind("<ButtonRelease-1>", self.callbackFunc)
     self.cross_section_check.bind("<ButtonRelease-1>", self.callbackFunc1)
 
@@ -513,6 +547,7 @@ class snapshot_GUI:
     """Update 1D and 2d plots with values given by tkinter controls which are
     saved in class 'parameters'
     """
+    self.parameters.first_call = False
     self.parameters.grid_boolean = self.grid_variable.get()
     self.parameters.use_polar = self.polar_variable.get()
     self.parameters.sdf_num = self.slider1.get()
@@ -526,16 +561,18 @@ class snapshot_GUI:
     self.parameters.scale_max = float(self.entry_scale_max.get())
     self.parameters.apply_scale_min = self.apply_scale_min.get()
     self.parameters.scale_min = float(self.entry_scale_min.get())
-    self.parameters.apply_comparison = self.apply_comparison.get()
-    self.parameters.entry_comparison = self.entry_comparison.get()
     self.parameters.cross_section = int(self.entry_cross_section.get())
     self.parameters.show_legend = self.legend_variable.get()
-    self.parameters.line1_label = self.entry_line1.get()
-    self.parameters.line2_label = self.entry_line2.get()
+    self.parameters.line_labels[0] = self.entry_line[0].get()
+    for num in range(0, self.parameters.num_dir - 1):
+      self.parameters.apply_comparison[num+1] = self.apply_comparison[num].get()
+      self.parameters.entry_comparison[num+1] = self.entry_comparison[num].get()
+      self.parameters.line_labels[num+1] = self.entry_line[num+1].get()
     self.parameters.sdf_num2 = self.slider2.get()
     self.parameters.y_dir_cross_section = self.y_dir_cross_section.get()
 
-    self.parameters = op.data_and_plot(self.parameters.sdf_num, self.fig,
+    self.parameters, self.data_struct \
+                    = op.data_and_plot(self.parameters.sdf_num, self.fig,
                                        self.ax1, self.cax1, self.fig2,
                                        self.ax2, self.ax3, self.parameters)
 
@@ -564,12 +601,12 @@ class snapshot_GUI:
       self.label_slider3.grid_remove()
       self.slider3.grid_remove()
       self.all_rays_button.grid_remove()
-    if (self.parameters.dat == None):
+    if (self.parameters.first_call):
       self.callbackFunc(event)
     else:
-      op.wrapper_plot_light_rays(self.parameters.dat, self.parameters, self.fig,
-          self.ax1)
-      op.wrapper_plot_electron_rays(self.parameters.dat, self.parameters,
+      op.wrapper_plot_light_rays(self.data_struct.data[0], self.parameters,
+          self.fig, self.ax1)
+      op.wrapper_plot_electron_rays(self.data_struct.data[0], self.parameters,
           self.fig, self.ax1)
 
   def update_ray(self, event):
@@ -580,7 +617,7 @@ class snapshot_GUI:
         self.ax1)
 
   def hide_slider(self, event):
-    show_slider_boolean = self.apply_comparison.get()
+    show_slider_boolean = self.apply_comparison[0].get()
     if show_slider_boolean:
       print()
       print("Use arrow keys to move sliders together")
