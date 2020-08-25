@@ -46,11 +46,13 @@ def plot_laser_profile(*args, **kwargs):
 
 
 
-def time_history(fig, ax1, cax1, parameters, *args, **kwargs):
+def time_history(fig, ax1, cax1, *args, **kwargs):
   """A pcolormesh plot of space against time with a variable shown in colour
   """
+  parameters = kwargs.get('parameters', plot_parameters())
+  data_struct = kwargs.get('data', data_structure())
 
-  var = getattr(parameters.dat, parameters.var_name)
+  var = getattr(data_struct.data, parameters.var_name)
   unit_conv = getattr(var, "unit_conversion")
   units = getattr(var, "units_new")
   name = getattr(var, "name")
@@ -61,8 +63,8 @@ def time_history(fig, ax1, cax1, parameters, *args, **kwargs):
   grid_units = getattr(grid, "units_new")
 
   c_data = getattr(var, "all_time_data") * unit_conv
-  y_data, c_data = two_dim_grid(parameters.dat, c_data)
-  times = parameters.dat.Times
+  y_data, c_data = two_dim_grid(data_struct.data, c_data)
+  times = data_struct.data.Times
   x_data, y_data1 = np.meshgrid(times.all_time_data \
                   * times.unit_conversion, y_data[0,:], indexing='ij')
 
@@ -144,40 +146,41 @@ def two_dim_grid(dat, data):
 
 
 
-def time_history_lineout(fig, ax, ax1, parameters, *args, **kwargs):
+def time_history_lineout(fig, ax, ax1, *args, **kwargs):
   """ A 1D line of time vs amplitude for the tkiter selected variable. Only
   called from time history menu.
   """
-
-  l1 = getattr(ax, 'line1')
-  l2 = getattr(ax, 'line2')
-  l3 = getattr(ax1, 'line1')
-  l4 = getattr(ax1, 'line2')
+  parameters = kwargs.get('parameters', plot_parameters())
+  data_struct = kwargs.get('data', data_structure())
 
   if parameters.use_analysis:
-    var = parameters.dat.Laser_Power_Total_Deposited
+    ax.lines[0].set_visible(True)
+    ax1.lines[0].set_visible(True)
+
+    var = data_struct.data.Laser_Power_Total_Deposited
     y_data = var.all_time_data * var.unit_conversion
     name = var.name
     units = var.units_new
 
-    l1.set_ydata(y_data)
+    ax.lines[0].set_ydata(y_data)
     y_label = name + " (" + units + ")"
     ax.set_ylabel(y_label, fontsize = fs)
 
     ax.xaxis.get_offset_text().set_size(fs)
     ax.yaxis.get_offset_text().set_size(fs)
 
-    var = getattr(parameters.dat, parameters.var_name2)
+    var = getattr(data_struct.data, parameters.var_name2)
     unit_conv = getattr(var, "unit_conversion")
     units = getattr(var, "units_new")
     name = getattr(var, "name")
     y_data1 = getattr(var, "all_time_data") * unit_conv
 
-    times = parameters.dat.Times
+    times = data_struct.data.Times
     x_data = times.all_time_data * times.unit_conversion
-    l1.set_xdata(x_data)
-    l3.set_xdata(x_data)
-    l3.set_ydata(y_data1)
+    ax.lines[0].set_xdata(x_data)
+    ax.lines[1].set_xdata(x_data)
+    ax1.lines[0].set_xdata(x_data)
+    ax1.lines[0].set_ydata(y_data1)
 
     x_label = times.name + " (" + times.units_new + ")"
     y_label = name + " (" + units + ")"
@@ -195,24 +198,24 @@ def time_history_lineout(fig, ax, ax1, parameters, *args, **kwargs):
     ax1.set_xlim(np.min(x_data[:-1]), np.max(x_data[:-1]))
     ax1.set_ylim(np.min(y_data1[:-1]), 1.3 * np.max(y_data1[:-1]))
 
-    if hasattr(parameters.dat, "Input_laser_profile"):
-      var = getattr(parameters.dat, "Input_laser_profile")
+    if hasattr(data_struct.data, "Input_laser_profile"):
+      ax.lines[1].set_visible(True)
+      var = getattr(data_struct.data, "Input_laser_profile")
       x_data = var.times * var.times_conversion
-      l2.set_xdata(x_data)
+      ax.lines[1].set_xdata(x_data)
       y_data = var.all_time_data * var.unit_conversion
-      l2.set_ydata(y_data)
+      ax.lines[1].set_ydata(y_data)
       if (parameters.var_name2 == "Laser_Energy_Total_Deposited"):
-        var = getattr(parameters.dat, "Input_laser_profile_energy")
+        ax1.lines[1].set_visible(True)
+        var = getattr(data_struct.data, "Input_laser_profile_energy")
         x_data = var.times * var.times_conversion
-        l4.set_xdata(x_data)
+        ax1.lines[1].set_xdata(x_data)
         y_data = var.all_time_data * var.unit_conversion
-        l4.set_ydata(y_data)
+        ax1.lines[1].set_ydata(y_data)
       else:
-        l4.set_xdata(-big_num)
-        l4.set_ydata(0)
+        ax1.lines[1].set_visible(False)
     else:
-      l2.set_xdata(-big_num)
-      l2.set_ydata(0)
+      ax.lines[1].set_visible(False)
 
     plt.show()
 
@@ -242,27 +245,30 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
                + ' of {:4d}'.format(parameters.iend) + '   '
   sys.stdout.write('\r' + print_string)
   sys.stdout.flush()
+  data_struct = data_structure()
+  data_struct.data = [None] * parameters.num_dir
 
-  if parameters.apply_comparison:
-    if os.path.isdir(parameters.entry_comparison):
-      parameters.dat1 = isdf.use_sdf(parameters.sdf_num2,
-                                     parameters.entry_comparison,
-                                     use_analysis = parameters.use_analysis,
-                                     istart = parameters.istart)
+  for num in range(0, parameters.num_dir):
+    if num == 0:
+      sdf_num = parameters.sdf_num
     else:
-      parameters.apply_comparison = False
-      print()
-      print("Warning: " + parameters.entry_comparison + " is not a directory")
+      sdf_num = parameters.sdf_num2
+    if parameters.apply_comparison[num]:
+      if os.path.isdir(parameters.entry_comparison[num]):
+        #print("Data loaded from: " + parameters.entry_comparison[num] + " to " + num)
+        data_struct.data[num] = isdf.use_sdf(sdf_num,
+                                             parameters.entry_comparison[num],
+                                             use_analysis = parameters.use_analysis,
+                                             istart = parameters.istart)
+      else:
+        parameters.apply_comparison[num] = False
+        print()
+        print("Warning: " + parameters.entry_comparison[num] + " is not a directory")
 
+  snapshot(fig, ax1, cax1, parameters = parameters, data = data_struct)
+  lineout(fig2, ax2, ax3, parameters = parameters, data = data_struct)
 
-  parameters.dat = isdf.use_sdf(sdf_num, parameters.pathname,
-                     use_analysis = parameters.use_analysis,
-                     istart = parameters.istart)
-  snapshot(parameters.dat, fig, ax1, cax1, parameters.var_name, parameters = parameters)
-  lineout(parameters.dat, parameters.cross_section, fig2, ax2, ax3, parameters.var_name,
-          parameters = parameters)
-
-  return parameters
+  return parameters, data_struct
 
 
 
@@ -321,10 +327,19 @@ def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
 
 
 
+class data_structure:
+  """A class to save the Odin data
+  """
+  def __init__(self):
+    self.data = [None]
+
+
+
 class plot_parameters:
   """A class defined to save all the values generated by the tkinter controls.
   """
   def __init__(self):
+    self.first_call = True
     self.sdf_num = 0
     self.use_analysis = False
     self.pathname = 'None'
@@ -332,7 +347,7 @@ class plot_parameters:
     self.iend = 0
     self.grid_boolean = False
     self.use_polar = False
-    self.var_name = 'None'
+    self.var_name = ['None'] * 2
     self.reset_axis = False
     self.view_anisotropies = False
     self.use_log = False
@@ -344,18 +359,17 @@ class plot_parameters:
     self.plot_rays_on = False
     self.entry_comparison = os.path.abspath(os.getcwd())
     self.apply_comparison = False
-    self.dat1 = None
     self.cross_section = 1
     self.show_legend = False
-    self.line1_label = 'None'
-    self.line2_label = 'None'
+    self.line_label = 'None'
     self.sdf_num2 = 0
     self.plot_all_rays = False
     self.select_ray = False
     self.y_dir_cross_section = False
+    self.dir_list = [' '] * 2
+    self.num_dir = 2
 
     # Time history params
-    self.dat = None
     self.var_name2 = 'None'
     self.grid_choice = 'None'
     self.cbar_colour_scale = 1.0
@@ -400,21 +414,26 @@ def open_var_2d(dat, var_name, parameters):
 
 
 
-def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
+def snapshot(fig, ax1, cax1, *args, **kwargs):
   """This function plots [var_name] from the data set [dat] on [ax1].
   """
   parameters = kwargs.get('parameters', plot_parameters())
+  data_struct = kwargs.get('data', data_structure())
+  if parameters.var_name[1] == "None":
+    var_name = parameters.var_name[0]
+  else:
+    var_name = parameters.var_name[1]
   if parameters.grid_boolean == False:
     grid_colour = 'None'
   else:
     grid_colour = 'k'
 
   x_data, y_data, c_data, x_label, y_label, c_label = \
-      open_var_2d(dat, var_name, parameters)
+      open_var_2d(data_struct.data[0], var_name, parameters)
 
-  if parameters.apply_comparison:
+  if parameters.apply_comparison[1]:
     x_data1, y_data1, c_data1, _, _, _ \
-        = open_var_2d(parameters.dat1, var_name, parameters)
+        = open_var_2d(data_struct.data[1], var_name, parameters)
 
     x_size = max(np.shape(x_data)[0], np.shape(x_data1)[0])
     y_size = np.shape(x_data)[1] + np.shape(x_data1)[1]
@@ -443,11 +462,11 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
     y_data = new_y_data
     c_data = new_c_data
 
-    t_label = time_label(dat, parameters.line1_label)
-    t_label1 = time_label(parameters.dat1, parameters.line2_label)
+    t_label = time_label(data_struct.data[0], parameters.line_labels[0])
+    t_label1 = time_label(data_struct.data[1], parameters.line_labels[1])
     t_label = t_label + " and " + t_label1
   else:
-    t_label = time_label(dat, " ")
+    t_label = time_label(data_struct.data[0], " ")
 
   if parameters.reset_axis:
     zoomed_axis1 = np.array([np.min(x_data[:-1,:]), np.max(x_data[:-1,:]),
@@ -477,8 +496,8 @@ def snapshot(dat, fig, ax1, cax1, var_name, *args, **kwargs):
   cbar = fig.colorbar(cmesh, cax=cax1)
 
   if parameters.plot_rays_on:
-    wrapper_plot_light_rays(dat, parameters, fig, ax1)
-    wrapper_plot_electron_rays(dat, parameters, fig, ax1)
+    wrapper_plot_light_rays(data_struct.data[0], parameters, fig, ax1)
+    wrapper_plot_electron_rays(data_struct.data[0], parameters, fig, ax1)
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
@@ -618,24 +637,27 @@ def empty_lineout(fig, ax):
   """Initilise empty 1D plot and lines to be populated with data later.
   """
   ax1 = ax.twinx()
-
-  ax_l1, = ax.plot(1, lw = 2.5, color='black')
-  setattr(ax, 'line1', ax_l1)
-  ax_l2, = ax.plot(1, lw = 2.5, color='black', linestyle = '--')
-  setattr(ax, 'line2', ax_l2)
-  ax_l3 = ax.axvline(-big_num, lw = 1, color = 'tab:blue', linestyle = '--')
-  setattr(ax, 'line3', ax_l3)
-
-  ax1_l1, = ax1.plot(1, lw = 2, color = 'tab:red')
-  setattr(ax1, 'line1', ax1_l1)
-  ax1_l2, = ax1.plot(1, lw = 2, color='tab:red', linestyle = '--')
-  setattr(ax1, 'line2', ax1_l2)
   ax1.tick_params(axis='y', labelcolor = 'tab:red')
+
+  line_style = ('-','--','-.',':') * 10
+
+  for il in range(0, 10):
+    ax_line, = ax.plot(1, lw = 2.5, color='black', linestyle = line_style[il])
+    ax_line.set_visible(False)
+    line_name = 'line' + str(il + 1)
+    ax1_line, = ax1.plot(1, lw = 2, color = 'tab:red',
+        linestyle = line_style[il])
+    ax1_line.set_visible(False)
+
+  ax_surf = ax.axvline(-big_num, lw = 1, color = 'tab:blue', linestyle = '--')
+  setattr(ax, 'surf_tracker', ax_surf)
+  ax_surf.set_visible(False)
+
   return ax1
 
 
 
-def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
+def lineout(fig, ax, ax1, *args, **kwargs):
   """1D plot of [var_name] from data set [dat] on axis [ax1]. Axis [ax] is
   currently resevred for default variable which in Odin is Fluid_Rho. The [cs]
   provides information about which slice through the data to take. The x and y
@@ -643,65 +665,76 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   axis updates with the data.
   """
   parameters = kwargs.get('parameters', plot_parameters())
+  data_struct = kwargs.get('data', data_structure())
+  var_default = parameters.var_name[0]
+  var_name = parameters.var_name[1]
+
   if parameters.grid_boolean == False:
     grid_style = 'None'
   else:
     grid_style = 'x'
 
-  ax_l1 = getattr(ax, 'line1')
-  ax_l2 = getattr(ax, 'line2')
-  ax_l3 = getattr(ax, 'line3')
-  ax1_l1 = getattr(ax1, 'line1')
-  ax1_l2 = getattr(ax1, 'line2')
+  for num in range(0, parameters.num_dir):
+    ax.lines[num].set_label(' ')
+    ax1.lines[num].set_label(' ')
 
-  ax_l1.set_label(parameters.line1_label)
-  ax_l2.set_label(parameters.line2_label)
-  ax1_l1.set_label(' ')
-  ax1_l2.set_label(' ')
+    ax.lines[num].set_marker(grid_style)
+    ax1.lines[num].set_marker(grid_style)
+    if var_default == 'None':
+      ax.lines[num].set_visible(False)
+    else:
+      ax.lines[num].set_visible(parameters.apply_comparison[num])
+      ax.lines[num].set_label(parameters.line_labels[num])
 
-  # default variable for Odin is density but for other codes it is the first
-  # in the list of variables
-  if (dat.Header['code_name'] == 'Odin2D'):
-    var_default = "Fluid_Rho"
-  else:
-    var_default = dat.variables[0]
+    if var_name == 'None':
+      ax1.lines[num].set_visible(False)
+      ax1.set_visible(False)
+    else:
+      ax1.lines[num].set_visible(parameters.apply_comparison[num])
+      ax1.set_visible(True)
 
-  x_data, y_data, x_label, y_label = open_var_1d(dat, var_default, cs,
-                                                 parameters.use_log,
-                                                 parameters.y_dir_cross_section,
-                                                 parameters.use_polar)
-  _, y_data1, _, y_label1 = open_var_1d(dat, var_name, cs, parameters.use_log,
-                                        parameters.y_dir_cross_section,
-                                        parameters.use_polar)
+    if parameters.apply_comparison[num]:
+      x_data_alt, y_data_alt, x_label_alt, y_label_alt \
+                                = open_var_1d(data_struct.data[num], var_default,
+                                              parameters.cross_section,
+                                              parameters.use_log,
+                                              parameters.y_dir_cross_section,
+                                              parameters.use_polar)
+      _, y_data1_alt, _, y_label1_alt = open_var_1d(data_struct.data[num], var_name,
+                                                    parameters.cross_section,
+                                                    parameters.use_log,
+                                                    parameters.y_dir_cross_section,
+                                                    parameters.use_polar)
 
-  ax_l1.set_xdata(x_data)
-  ax_l1.set_ydata(y_data)
-  ax1_l1.set_xdata(x_data)
-  ax1_l1.set_ydata(y_data1)
+      ax.lines[num].set_xdata(x_data_alt)
+      ax.lines[num].set_ydata(y_data_alt)
+      ax1.lines[num].set_xdata(x_data_alt)
+      ax1.lines[num].set_ydata(y_data1_alt)
 
-  if parameters.apply_comparison:
-    x_data_comp, y_data_comp, _, _ = open_var_1d(parameters.dat1, var_default,
-                                                 cs, parameters.use_log,
-                                                 parameters.y_dir_cross_section)
-    _, y_data1_comp, _, _ = open_var_1d(parameters.dat1, var_name, cs,
-                                        parameters.use_log,
-                                        parameters.y_dir_cross_section)
+    if num == 0:
+      x_data = x_data_alt
+      y_data = y_data_alt
+      x_label = x_label_alt
+      y_label = y_label_alt
+      y_data1 = y_data1_alt
+      y_label1 = y_label1_alt
 
-    ax_l2.set_xdata(x_data_comp)
-    ax_l2.set_ydata(y_data_comp)
-    ax1_l2.set_xdata(x_data_comp)
-    ax1_l2.set_ydata(y_data1_comp)
-
-    t_label = time_label(dat, parameters.line1_label)
-    t_label1 = time_label(parameters.dat1, parameters.line2_label)
+  if parameters.apply_comparison[1]:
+    t_label = time_label(data_struct.data[0], parameters.line_labels[num])
+    t_label1 = time_label(data_struct.data[1], parameters.line_labels[num])
     t_label = t_label + " and " + t_label1
   else:
-    ax_l2.set_xdata(1)
-    ax_l2.set_ydata(1)
-    ax1_l2.set_xdata(1)
-    ax1_l2.set_ydata(1)
+    ax.lines[1].set_xdata(1)
+    ax.lines[1].set_ydata(1)
+    ax1.lines[1].set_xdata(1)
+    ax1.lines[1].set_ydata(1)
 
-    t_label = time_label(dat, " ")
+    t_label = time_label(data_struct.data[0], " ")
+
+  ax.set_xlabel(x_label, fontsize = fs)
+  ax.set_ylabel(y_label, fontsize = fs)
+  ax1.set_ylabel(y_label1, color='tab:red', fontsize = fs)
+  ax.set_title(t_label, fontsize = fs)
 
   ax.xaxis.get_offset_text().set_size(fs)
   ax.yaxis.get_offset_text().set_size(fs)
@@ -730,29 +763,24 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
     zoomed_axis1 = np.array([ax1.get_xlim()[0], ax1.get_xlim()[1],
                              ymin1, ymax1])
 
+  ax_surf = getattr(ax, 'surf_tracker')
   # Track a particular point in the data as time is updated
   if parameters.surface_name == 'None':
-    ax_l3.set_xdata(-big_num)
+    ax_surf.set_visible(False)
     surface_location = 'None'
     surface_move = 0.0
   else:
+    ax_surf.set_visible(True)
     old_surface_location = getattr(ax, "loc_cell_track")
-    surface = getattr(dat, parameters.surface_name)
+    surface = getattr(data_struct.data[0], parameters.surface_name)
     surface_location = surface.data[cs] * surface.unit_conversion
     if old_surface_location == 'None':
       surface_move = 0.0
     else:
       surface_move = surface_location - old_surface_location
-    ax_l3.set_xdata(surface_location)
+    ax_surf.set_xdata(surface_location)
 
   setattr(ax, "loc_cell_track", surface_location)
-
-  ax_l1.set_marker(grid_style)
-
-  ax.set_xlabel(x_label, fontsize = fs)
-  ax.set_ylabel(y_label, fontsize = fs)
-  ax1.set_ylabel(y_label1, color='tab:red', fontsize = fs)
-  ax.set_title(t_label, fontsize = fs)
 
   ax.tick_params(axis='x', labelsize = fs)
   ax.tick_params(axis='y', labelsize = fs)
@@ -767,11 +795,8 @@ def lineout(dat, cs, fig, ax, ax1, var_name, *args, **kwargs):
   if parameters.show_legend:
     lines, labels = ax.get_legend_handles_labels()
     lines1, labels1 = ax1.get_legend_handles_labels()
-    all_lines = lines + lines1
-    all_labels = labels + labels1
-    order = [0,2,1,3]
-    all_lines = [all_lines[idx] for idx in order]
-    all_labels = [all_labels[idx] for idx in order]
+    all_lines = lines[0:parameters.num_dir]
+    all_labels = labels[0:parameters.num_dir]
     ax.legend(all_lines, all_labels, loc = 'upper right')
   else:
     try:
