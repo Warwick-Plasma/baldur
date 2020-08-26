@@ -674,6 +674,11 @@ def lineout(fig, ax, ax1, *args, **kwargs):
   else:
     grid_style = 'x'
 
+  try:
+    line_colours = plt.rcParams['axes.prop_cycle'].by_key()['color']
+  except:
+    line_colours = plt.rcParams['axes.color_cycle']
+
   for num in range(0, parameters.num_dir):
     ax.lines[num].set_label(' ')
     ax1.lines[num].set_label(' ')
@@ -689,9 +694,11 @@ def lineout(fig, ax, ax1, *args, **kwargs):
     if var_name == 'None':
       ax1.lines[num].set_visible(False)
       ax1.set_visible(False)
+      ax.lines[num].set_color(line_colours[num])
     else:
       ax1.lines[num].set_visible(parameters.apply_comparison[num])
       ax1.set_visible(True)
+      ax.lines[num].set_color('black')
 
     if parameters.apply_comparison[num]:
       x_data_alt, y_data_alt, x_label_alt, y_label_alt \
