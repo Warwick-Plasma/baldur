@@ -440,22 +440,22 @@ def snapshot(fig, ax1, cax1, *args, **kwargs):
 
     new_x_data = np.zeros((x_size, y_size))
     new_x_data[x_size-np.shape(x_data1)[0]:,:np.shape(x_data1)[1]] \
-    = np.flip(-x_data1,1)
+        = np.flip(-x_data1,1)
     new_x_data[x_size-np.shape(x_data)[0]:,np.shape(x_data1)[1]:] \
-    = x_data
+        = x_data
 
     new_y_data = np.zeros((x_size, y_size))
     new_y_data[x_size-np.shape(x_data1)[0]:,:np.shape(x_data1)[1]] \
-    = np.flip(y_data1,1)
+        = np.flip(y_data1,1)
     new_y_data[x_size-np.shape(x_data)[0]:,np.shape(x_data1)[1]:] \
-    = y_data
+        = y_data
 
     # c_data is 1 smaller than x and y as it is cell centred so we minus 1 from
     # x and 2 from y but we need an extra blank space to combine the data sets
     # so we +1 in the y direction
     new_c_data = np.zeros((x_size-1, y_size-1))
     new_c_data[x_size-1-np.shape(c_data1)[0]:,:np.shape(c_data1)[1]] \
-    = np.flip(c_data1,1)
+        = np.flip(c_data1,1)
     new_c_data[x_size-1-np.shape(c_data)[0]:,np.shape(c_data1)[1]+1:] = c_data
 
     x_data = new_x_data
@@ -498,6 +498,12 @@ def snapshot(fig, ax1, cax1, *args, **kwargs):
   if parameters.plot_rays_on:
     wrapper_plot_light_rays(data_struct.data[0], parameters, fig, ax1)
     wrapper_plot_electron_rays(data_struct.data[0], parameters, fig, ax1)
+
+  if not (parameters.surface_name == 'None'):
+    cs = parameters.cross_section
+    surface = getattr(data_struct.data[0], parameters.surface_name)
+    ax1.plot(x_data[surface.index[cs],:],y_data[surface.index[cs],:], 'w:',
+        linewidth = 2)
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
