@@ -668,6 +668,7 @@ def lineout(fig, ax, ax1, *args, **kwargs):
   data_struct = kwargs.get('data', data_structure())
   var_default = parameters.var_name[0]
   var_name = parameters.var_name[1]
+  cs = parameters.cross_section
 
   if parameters.grid_boolean == False:
     grid_style = 'None'
@@ -765,7 +766,7 @@ def lineout(fig, ax, ax1, *args, **kwargs):
 
   ax_surf = getattr(ax, 'surf_tracker')
   # Track a particular point in the data as time is updated
-  if parameters.surface_name == 'None':
+  if (parameters.surface_name == 'None' or not parameters.use_polar):
     ax_surf.set_visible(False)
     surface_location = 'None'
     surface_move = 0.0
