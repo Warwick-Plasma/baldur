@@ -766,7 +766,7 @@ def lineout(fig, ax, ax1, *args, **kwargs):
 
   ax_surf = getattr(ax, 'surf_tracker')
   # Track a particular point in the data as time is updated
-  if (parameters.surface_name == 'None' or not parameters.use_polar):
+  if (parameters.surface_name == 'None' or parameters.y_dir_cross_section):
     ax_surf.set_visible(False)
     surface_location = 'None'
     surface_move = 0.0
@@ -774,7 +774,7 @@ def lineout(fig, ax, ax1, *args, **kwargs):
     ax_surf.set_visible(True)
     old_surface_location = getattr(ax, "loc_cell_track")
     surface = getattr(data_struct.data[0], parameters.surface_name)
-    surface_location = surface.data[cs] * surface.unit_conversion
+    surface_location = x_data[surface.index[cs]]
     if old_surface_location == 'None':
       surface_move = 0.0
     else:
