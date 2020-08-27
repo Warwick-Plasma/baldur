@@ -20,7 +20,7 @@ class new_variable:
   """
   def __init__(self, *args, **kwargs):
     self.data = kwargs.get('data', 1)
-    self.index = kwargs.get('indices', 1)
+    self.index = kwargs.get('index', 1)
     self.all_time_data = kwargs.get('all_time_data', 1)
     self.grid =  kwargs.get('grid', 1)
     self.units = kwargs.get('units', 'Not set')
@@ -245,9 +245,9 @@ def laser(dat, *args, **kwargs):
   crit_crossing = ne_density - n_crit
   quart_crit_crossing = ne_density - n_crit / 4.0
   nx, ny = ne_density.shape
-  crit_surf_ind = [0] * ny
+  crit_surf_ind = np.zeros(ny, dtype=int)
   crit_rad = np.zeros(ny)
-  quart_crit_surf_ind = [0] * ny
+  quart_crit_surf_ind = np.zeros(ny, dtype=int)
   quart_crit_rad = np.zeros(ny)
   # critical surface is chosen based on direction of laser propagation
   # This needs upgrading to use the output laser direction.
