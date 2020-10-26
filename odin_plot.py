@@ -529,7 +529,7 @@ def snapshot(fig, ax1, cax1, *args, **kwargs):
 
 
 def wrapper_plot_light_rays(dat, parameters, fig, ax1):
-  var = getattr(dat, parameters.var_name)
+  var = getattr(dat, parameters.var_name[0])
   var_grid = getattr(var, 'grid')
   grid_conv = getattr(var_grid, 'unit_conversion')
   select_ray = parameters.select_ray
@@ -544,7 +544,7 @@ def wrapper_plot_light_rays(dat, parameters, fig, ax1):
 
 
 def wrapper_plot_electron_rays(dat, parameters, fig, ax1):
-  var = getattr(dat, parameters.var_name)
+  var = getattr(dat, parameters.var_name[0])
   var_grid = getattr(var, 'grid')
   grid_conv = getattr(var_grid, 'unit_conversion')
   select_ray = parameters.select_ray

@@ -613,7 +613,7 @@ class snapshot_GUI:
     self.parameters.select_ray = self.slider3.get()
     self.parameters.plot_rays_on = self.rays_variable.get()
     self.parameters.plot_all_rays = self.all_rays_variable.get()
-    op.wrapper_plot_electron_rays(self.parameters.dat, self.parameters, self.fig,
+    op.wrapper_plot_electron_rays(self.data_struct.data[0], self.parameters, self.fig,
         self.ax1)
 
   def hide_slider(self, event):
