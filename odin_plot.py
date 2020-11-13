@@ -573,7 +573,6 @@ def wrapper_plot_electron_rays(dat, parameters, fig, ax1):
         plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
                   parameters.use_polar, grid_conv)
     else:
-      num_burs = len(dat.bursts)
       iname = parameters.select_ray
       skip = 1
       plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
