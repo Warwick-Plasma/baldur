@@ -51,15 +51,24 @@ def add_label(dat):
     setattr(var, "name", name)
     unit_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
     setattr(var, "unit_conversion", unit_conversion)
-    units_new = "KeV"
+    units_new = "keV"
     setattr(var, "units_new", units_new)
+
+    if hasattr(dat, "Radiation_Rad_temp"):
+      var = getattr(dat, "Radiation_Rad_temp")
+      name = 'Radiation Temperature'
+      setattr(var, "name", name)
+      unit_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
+      setattr(var, "unit_conversion", unit_conversion)
+      units_new = "keV"
+      setattr(var, "units_new", units_new)
 
     var = getattr(dat, "Fluid_Temperature_ion")
     name = 'Ion Temperature'
     setattr(var, "name", name)
     unit_conversion = 1.0 / 11604.5 / 1000.0 # from Kelvin
     setattr(var, "unit_conversion", unit_conversion)
-    units_new = "KeV"
+    units_new = "keV"
     setattr(var, "units_new", units_new)
 
     var = getattr(dat, "Grid_Grid_mid")
