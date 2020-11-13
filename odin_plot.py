@@ -27,21 +27,38 @@ big_num = 1e100
 def plot_laser_profile(*args, **kwargs):
   """Simple, Self-suffient routine to plot a .csv file as a laser profile
   """
-  name = kwargs.get('name', 'laser_profile.csv')
-  with open(name) as csvfile:
+  name1 = kwargs.get('name1', 'laser_profile.csv')
+  name2 = kwargs.get('name2', 'laser_profile.csv')
+
+  with open(name1) as csvfile:
     readCSV = csv.reader(csvfile, delimiter=',')
     times = []
     powers = []
     for row in readCSV:
-      time = float(row[0]) / 1000.0
+      time = float(row[0]) * 1.0e9
       times.append(time)
-      power = float(row[1])
+      power = float(row[1]) * 1.0e-12
       powers.append(power)
-      print(time, power)
   plt.figure()
-  plt.xlabel('Time (ns)')
-  plt.ylabel('Power (TW)')
-  plt.plot(times, powers)
+  ax = plt.axes()
+  ax.plot(times, powers, linewidth = 2)
+
+  with open(name2) as csvfile:
+    readCSV = csv.reader(csvfile, delimiter=',')
+    times = []
+    powers = []
+    for row in readCSV:
+      time = float(row[0]) * 1.0e9
+      times.append(time)
+      power = float(row[1]) * 1.0e-12
+      powers.append(power)
+  ax.plot(times, powers, color = 'tab:red', linestyle = "--", linewidth = 2)
+
+  ax.set_xlabel('Time (ns)', fontsize = fs)
+  ax.set_ylabel('Power (TW)', fontsize = fs)
+  ax.tick_params(axis='x', labelsize = fs)
+  ax.tick_params(axis='y', labelsize = fs)
+
   plt.show()
 
 
