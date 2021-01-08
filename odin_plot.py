@@ -481,7 +481,7 @@ def snapshot(fig, ax1, cax1, *args, **kwargs):
 
     t_label = time_label(data_struct.data[0], parameters.line_labels[0])
     t_label1 = time_label(data_struct.data[1], parameters.line_labels[1])
-    t_label = t_label + " and " + t_label1
+    t_label = t_label1 + " and " + t_label
   else:
     t_label = time_label(data_struct.data[0], " ")
 
@@ -750,8 +750,8 @@ def lineout(fig, ax, ax1, *args, **kwargs):
       y_label1 = y_label1_alt
 
   if parameters.apply_comparison[1]:
-    t_label = time_label(data_struct.data[0], parameters.line_labels[num])
-    t_label1 = time_label(data_struct.data[1], parameters.line_labels[num])
+    t_label = time_label(data_struct.data[0], parameters.line_labels[0])
+    t_label1 = time_label(data_struct.data[1], parameters.line_labels[1])
     t_label = t_label + " and " + t_label1
   else:
     ax.lines[1].set_xdata(1)

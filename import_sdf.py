@@ -259,7 +259,8 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   # Analysis functions are applied to SDF data
   if use_analysis:
     dat = afunc.basic(dat)
-    if "Fluid_Energy_deposited_laser" in dat.variables:
+    if ("Fluid_Energy_deposited_laser" in dat.variables
+        and hasattr(dat, "Fluid_Number_density_electron")):
       dat = afunc.laser(dat, call_basic = False, laser_change = True,
           sdf_num = sdf_num, istart = istart, pathname = pathname)
     if "Fluid_Energy_deposited_hot_electron" in dat.variables:

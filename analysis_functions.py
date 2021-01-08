@@ -184,15 +184,16 @@ def basic(dat):
                                       unit_conversion = 1,
                                       name = "Number density of ions"))
 
-  var_name = "Fluid_Number_density_electron"
-  var_list.append(var_name)
-  Z = dat.Fluid_Charge_State.data
-  ne_density = Z * ni_density
-  setattr(dat, var_name, new_variable(data = ne_density,
-                                      grid = dat.Grid_Grid,
-                                      units_new = "#/m$^3$",
-                                      unit_conversion = 1,
-                                      name = "Number density of electrons"))
+  if hasattr(dat, "Fluid_Charge_State"):
+    var_name = "Fluid_Number_density_electron"
+    var_list.append(var_name)
+    Z = dat.Fluid_Charge_State.data
+    ne_density = Z * ni_density
+    setattr(dat, var_name, new_variable(data = ne_density,
+                                        grid = dat.Grid_Grid,
+                                        units_new = "#/m$^3$",
+                                        unit_conversion = 1,
+                                        name = "Number density of electrons"))
 
   setattr(dat, "variables", var_list)
 
@@ -382,6 +383,15 @@ def hot_electron(dat, *args, **kwargs):
                                       units_new = "J/kg",
                                       unit_conversion = 1,
                                       name = "Hot Electron Energy Deposited"))
+
+  var_name = "Electron_Energy_per_cell"
+  var_list.append(var_name)
+  electron_dep_cell = electron_dep_step * dat.Cell_Mass.data
+  setattr(dat, var_name, new_variable(data = electron_dep_cell,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "J",
+                                      unit_conversion = 1,
+                                      name = "Hot Electron Energy per Cell"))
 
   var_name = "Electron_Power_per_volume"
   var_list.append(var_name)
