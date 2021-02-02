@@ -405,6 +405,34 @@ def hot_electron(dat, *args, **kwargs):
                                       unit_conversion = 1,
                                       name = "Hot Electron Power Per Volume"))
 
+  if hasattr(dat, "Fluid_Flux_hot_electron"):
+    grid = dat.Grid_Grid.data
+    x = grid[0]
+    y = grid[1]
+    electron_flux = dat.Fluid_Flux_hot_electron.data
+
+    cell_height = np.abs(y[:-1,1:] - y[:-1,:-1])
+    electron_flux_per_area = electron_flux / dat.Fluid_Volume_rz.data * cell_height
+    var_name = "Electron_Flux_per_area"
+    var_list.append(var_name)
+    setattr(dat, var_name, new_variable(data = electron_flux_per_area,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "cm$^-2$",
+                                      unit_conversion = 1.0e-6,
+                                      name = "Hot Electron Flux Per Area"))
+
+    var_name = "Electron_Energy_per_volume_per_particle"
+    var_list.append(var_name)
+    nepart = max(np.max(np.sum(electron_flux, axis=0)), np.max(np.sum(electron_flux, axis=1)))
+    if (nepart > 1):
+      boltzmann_constant = 6.242e+18
+      electron_erg_per_vol = electron_dep * dat.Fluid_Rho.data / nepart * boltzmann_constant / 1.0e6 / 1.0e6
+      setattr(dat, var_name, new_variable(data = electron_erg_per_vol,
+                                          grid = dat.Grid_Grid,
+                                          units_new = "MeV/cm$^3$/source particle",
+                                          unit_conversion = 1,
+                                          name = "Hot Electron Energy Deposited"))
+
   setattr(dat, "variables", var_list)
 
   # variables that only change in time
