@@ -827,7 +827,7 @@ def lineout(fig, ax, ax1, *args, **kwargs):
     lines1, labels1 = ax1.get_legend_handles_labels()
     all_lines = lines[0:parameters.num_dir]
     all_labels = labels[0:parameters.num_dir]
-    ax.legend(all_lines, all_labels, loc = 'upper right')
+    ax.legend(all_lines, all_labels, loc = 'upper right', fontsize = fs-5)
   else:
     try:
       ax.get_legend().remove()
@@ -858,7 +858,7 @@ def open_var_1d(dat, var_name, cs, use_log, y_dir_cross_section, use_polar):
     y_data = getattr(var, "data")[:,cs] * unit_conv
     if use_polar:
       x_data = np.sqrt(pos1**2 + pos2**2)
-      x_label = "Distance from origin" + " (" + grid_units + ")"
+      x_label = "Radius " + " (" + grid_units + ")"
       y_label = name + " (" + units + ")"
     else:
       x_data = pos1
