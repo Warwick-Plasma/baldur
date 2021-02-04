@@ -153,6 +153,22 @@ def basic(dat):
                                       unit_conversion = 1,
                                       name = "Speed of Cell"))
 
+  var_name = "Cell_Speed"
+  var_list.append(var_name)
+  vel = dat.Fluid_Speed.data
+  corner_mass = dat.Test_Corner_Mass.data * fac
+  cell_speed = (corner_mass[::2,::2] * vel[:-1,:-1]\
+     + corner_mass[1::2,1::2] * vel[1:,1:]\
+     + corner_mass[1::2,::2] * vel[1:,:-1]\
+     + corner_mass[::2,1::2] * vel[:-1,1:])\
+     / (corner_mass[::2,::2] + corner_mass[1::2,1::2]
+     + corner_mass[1::2,::2] + corner_mass[::2,1::2] + small_number)
+  setattr(dat, var_name, new_variable(data = cell_speed,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "m/s",
+                                      unit_conversion = 1,
+                                      name = "Speed of Cell"))
+
   var_name = "Rho_r"
   var_list.append(var_name)
   dr = np.zeros(np.shape(radius))
@@ -561,6 +577,184 @@ def energy(dat, *args, **kwargs):
                                       name = "Total Energy"))
 
   setattr(dat, "variables_time", var_list)
+
+  return dat
+
+
+
+def shell(dat, *args, **kwargs):
+  """ Here we try to determine where is the shell and the hotspot as well as
+  perturbations to the hotspot
+  """
+
+  grid_mid = dat.Grid_Grid_mid.data
+  xc = grid_mid[0]
+  yc = grid_mid[1]
+  radius = np.sqrt(xc**2 + yc**2)
+
+  nmat = dat.Integer_flags.nmat
+  gas_region_boolean = False
+
+  for mat_name in dat.materials:
+    if 'gas' in mat_name:
+      gas_rho = getattr(getattr(dat, 'Fluid_Rho_' + mat_name), 'data')
+      gas_region_boolean = True
+    if 'DT' in mat_name:
+      gas_rho = np.array(getattr(getattr(dat, 'Fluid_Rho_' + mat_name), 'data'))
+
+      nx, ny = gas_rho.shape
+      gas_rho_mean = np.mean(gas_rho[0,:])
+      for ix in range(0, nx):
+        for iy in range(0, ny):
+          if (gas_rho[ix,iy] > 2.0 * gas_rho_mean):
+            gas_rho[ix:,iy] = 0
+        gas_rho_mean = np.mean(np.ma.masked_equal(gas_rho[:ix+1,:], 0).mean(axis=1))
+      gas_region_boolean = True
+
+  if gas_region_boolean:
+    gas_rho_mean = np.mean(np.ma.masked_equal(gas_rho, 0).mean(axis=1))
+    rho_max = np.max(dat.Fluid_Rho.data)
+
+    if (np.mean(dat.Fluid_Temperature_ion.data[0,:]) > 100000.0):
+      inshell_temp = 0.1 * np.mean(dat.Fluid_Temperature_ion.data[0,:])
+      # If cell is greater than a given density it is part of the shell.
+      boolean_shell_mask = (np.array(dat.Fluid_Temperature_ion.data) <= inshell_temp)
+    else:
+      inshell_den = 0.01 * (rho_max - gas_rho_mean) + gas_rho_mean
+      # If cell is greater than a given density it is part of the shell.
+      boolean_shell_mask = (np.array(dat.Fluid_Rho.data) >= inshell_den)
+
+    # Remove any 1 cell "islands" of high density with this cleaning routine.
+    shell_mask = boolean_shell_mask + 0.0
+    clean_shell_mask = (shell_mask[2:] + shell_mask[1:-1] + shell_mask[:-2]) \
+        + (shell_mask[:-2] - 1)
+    clean_shell_mask = (clean_shell_mask >= 1) + 0.0
+    shell_mask[1:-1] = clean_shell_mask
+
+    # Add any large "islands" and the material between island and shell to
+    # the main shell
+    nx = np.size(shell_mask,0)
+    ny = np.size(shell_mask,1)
+    hotspot_mask = shell_mask * 0
+    hotspot_outer_index = [None] * ny
+    hotspot_outer_radius = [None] * ny
+    hotspot_outer_rhor = [None] * ny
+    for iy in range(0, ny):
+      first = True
+      island = False
+      for ix in range(0, nx):
+        if (shell_mask[ix,iy]==1) and first:
+          first = False
+          hotspot_outer_index[iy] = ix - 1
+          hotspot_outer_radius[iy] = dat.Radius_mid.data[0][ix,iy]
+          hotspot_outer_rhor[iy] = dat.Rho_r.data[ix,iy]
+        if (shell_mask[ix,iy] == 0) and not first and not island:
+          island = True
+          sx = ix
+        if (shell_mask[ix,iy] == 1) and island:
+          island = False
+          shell_mask[sx:ix,iy] = 1
+        if (shell_mask[ix,iy] == 0) and first:
+          hotspot_mask[ix,iy] = 1
+        else:
+          hotspot_mask[ix,iy] = 0
+    hotspot_outer_radius = np.array(hotspot_outer_radius)
+
+    # Variables that change in time and space
+    var_list = dat.variables
+
+    var_name = "Capsule_Shell"
+    var_list.append(var_name)
+    setattr(dat, var_name, new_variable(data = shell_mask,
+                                        grid = dat.Grid_Grid,
+                                        units_new = "Boolean",
+                                        unit_conversion = 1,
+                                        name = "Mask of Capsule Shell"))
+
+    setattr(dat, "variables", var_list)
+
+    var_list = dat.track_surfaces
+
+    var_name = "Hotspot_outer_radius"
+    var_list.append(var_name)
+    setattr(dat, var_name,
+            new_variable(data = hotspot_outer_radius,
+                         index = hotspot_outer_index,
+                         units_new = dat.Grid_Grid.units_new,
+                         unit_conversion = dat.Grid_Grid.unit_conversion,
+                         name = "Location of the Hotspot Edge"))
+
+    setattr(dat, "track_surfaces", var_list)
+
+    # variables that only change in time
+    var_list = dat.variables_time
+
+    var_name = "Areal_Density_Mean_Hotspot"
+    var_list.append(var_name)
+    rhor_hotspot = np.mean(hotspot_outer_rhor)
+    setattr(dat, var_name, new_variable(data = rhor_hotspot,
+                         units_new = dat.Rho_r.units_new,
+                         unit_conversion = dat.Rho_r.unit_conversion,
+                         name = "Mean Hotspot Areal Density"))
+
+    var_name = "Ion_temperature_Mean_Hotspot"
+    var_list.append(var_name)
+    dr = np.zeros(np.shape(radius))
+    for i in range(len(radius)-1):
+      dr[i, :] = radius[i+1] - radius[i]
+    ion_temp = dat.Fluid_Temperature_ion.data * hotspot_mask
+    weighted_ion_temp = ion_temp * dr * radius**2
+    ion_temp_mean_hs = np.mean(np.sum(weighted_ion_temp, axis=0) / hotspot_outer_radius**3)
+    setattr(dat, var_name, new_variable(data = ion_temp_mean_hs,
+                                        units_new = dat.Fluid_Temperature_ion.units_new,
+                                        unit_conversion = dat.Fluid_Temperature_ion.unit_conversion,
+                                        name = "Mean Hotspot Ion Temperature"))
+
+    var_name = "Radius_Perturbation"
+    var_list.append(var_name)
+    average_radius = np.mean(hotspot_outer_radius)
+    delta_radius = np.sqrt(np.sum((hotspot_outer_radius - average_radius)**2)) \
+        / average_radius
+    setattr(dat, var_name, new_variable(data = delta_radius,
+                                        units_new = 'unitless',
+                                        unit_conversion = 1,
+                                        name = "RMS perturbation in Radius"))
+
+    var_name = "Ignition_threshold_factor"
+    var_list.append(var_name)
+    # I0 factor is found by running a series of similar shots but degrading
+    # the implosion in one of the key variables until gain = 1, at this point
+    # the ITF = 1. This normally also corresponds to a performance cliff.
+    I0 = 4.0
+    hotspot_mass = np.sum(hotspot_mask * dat.Cell_Mass.data)
+    nominal_mass = 30.0e-6 # nominal values are taken from 1D ignition
+    shell_velocity = shell_mask * dat.Cell_Speed.data
+    shell_mass = shell_mask * dat.Cell_Mass.data
+    shell_velocity_average = np.average(shell_velocity, weights=shell_mass)
+    nominal_velocity = 360.0e3 # nominal values are taken from 1D ignition
+    shell_adiabat = shell_mask * dat.Fluid_Adiabat.data
+    shell_adiabat_average = np.average(shell_adiabat, weights=shell_mass)
+    nominal_adiabat = 8.0 # nominal values are taken from 1D ignition
+    #print(hotspot_mass / nominal_mass)
+    #print(shell_velocity_average / nominal_velocity)
+    #print(shell_adiabat_average / nominal_adiabat)
+    #print(1.0 - 1.2 * delta_radius)
+
+    # Equation 1 of Haan et al 2011 (missing mix terms)
+    ITF = I0 * (hotspot_mass / nominal_mass) \
+             * (shell_velocity_average / nominal_velocity) ** 8 \
+             * (shell_adiabat_average / nominal_adiabat) ** (-4) \
+             * (1.0 - 1.2 * delta_radius) ** 4
+    setattr(dat, var_name, new_variable(data = ITF,
+                                        units_new = 'unitless',
+                                        unit_conversion = 1,
+                                        name = "RMS perturbation in Radius"))
+
+    setattr(dat, "variables_time", var_list)
+
+  else:
+    print("Warning! gas region doesn't exist or name unexpected")
+    print("skipping hotspot analysis")
 
   return dat
 

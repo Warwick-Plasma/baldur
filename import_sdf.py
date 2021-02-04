@@ -192,6 +192,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   dat_track_surfaces = []
   dat_beam_names = []
   dat_burst_names = []
+  dat_mat_names = []
   for n in range(0, len(dat_names)):
     var = getattr(dat, dat_names[n])
     if type(var) == variable_type:
@@ -200,6 +201,9 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
       dat_grid_names.append(dat_names[n])
     elif type(var) == beam_type:
       dat_beam_names.append(dat_names[n])
+    elif type(var) == sdf.BlockNameValue:
+      if 'material_string_flags_' in var.name:
+        dat_mat_names.append(var.data['name'])
 
   # Clean grid list of things that require special effort to plot
   bad_var_list = []
@@ -252,6 +256,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
   setattr(dat, "variables_time", dat_variable_time_names)
   setattr(dat, "beams", dat_beam_names)
   setattr(dat, "bursts", dat_burst_names)
+  setattr(dat, "materials", dat_mat_names)
 
   # Save time variable
   var_list = dat.variables_time
@@ -277,6 +282,7 @@ def use_sdf(sdf_num, pathname, *args, **kwargs):
           sdf_num = sdf_num, istart = istart, pathname = pathname)
     dat = afunc.adiabat(dat, call_basic = False)
     dat = afunc.energy(dat, call_basic = False)
+    dat = afunc.shell(dat, call_basic = False)
 
   return dat
 
