@@ -704,7 +704,7 @@ def shell(dat, *args, **kwargs):
       dr[i, :] = radius[i+1] - radius[i]
     ion_temp = dat.Fluid_Temperature_ion.data * hotspot_mask
     weighted_ion_temp = ion_temp * dr * radius**2
-    ion_temp_mean_hs = np.mean(np.sum(weighted_ion_temp, axis=0) / hotspot_outer_radius**3)
+    ion_temp_mean_hs = 3.0 * np.mean(np.sum(weighted_ion_temp, axis=0) / hotspot_outer_radius**3)
     setattr(dat, var_name, new_variable(data = ion_temp_mean_hs,
                                         units_new = dat.Fluid_Temperature_ion.units_new,
                                         unit_conversion = dat.Fluid_Temperature_ion.unit_conversion,

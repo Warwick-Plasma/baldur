@@ -22,6 +22,25 @@ rest_mass_energy = me_si * c_si**2
 
 
 
+def lawson_criteria(ax):
+  """
+  """
+  ax.lines[0].set_visible(True)
+
+  hs_temp_min = 3.47**(2/3)
+  hs_temp = np.linspace(hs_temp_min, 100, 1000)
+
+  rhor = hs_temp / (hs_temp**(3/2) - 3.47) *  0.284
+
+  ax.lines[0].set_ydata(hs_temp)
+  ax.lines[0].set_xdata(rhor)
+
+  ax.lines[0].set_linestyle('--')
+
+  return ax
+
+
+
 def plot_maxwellian(*args, **kwargs):
   """
   """

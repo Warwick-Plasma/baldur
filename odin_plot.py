@@ -24,6 +24,44 @@ big_num = 1e100
 
 
 
+def plot_thermodynamic_path(fig, ax, data, parameters):
+  """
+  """
+  ax.lines[1].set_visible(True)
+
+  ax.xaxis.get_offset_text().set_size(fs)
+  ax.yaxis.get_offset_text().set_size(fs)
+
+  var = data.Ion_Temperature_Mean_Hotspot
+  unit_conv = getattr(var, "unit_conversion")
+  units = getattr(var, "units_new")
+  name = getattr(var, "name")
+  y_data = getattr(var, "all_time_data") * unit_conv
+  y_label = name + " (" + units + ")"
+  ax.set_ylabel(y_label, fontsize = fs)
+
+  rhor = data.Areal_Density_Mean_Hotspot
+  x_data = rhor.all_time_data * rhor.unit_conversion
+  x_label = rhor.name + " (" + rhor.units_new + ")"
+  ax.set_xlabel(x_label, fontsize = fs)
+
+  ax.lines[1].set_ydata(y_data)
+  ax.lines[1].set_xdata(x_data)
+  ax.lines[1].set_linestyle('-')
+
+  ax.tick_params(axis='x', labelsize = fs)
+  ax.tick_params(axis='y', labelsize = fs)
+
+  ax.set_xlim(np.min(x_data[:-1]), np.max(x_data[:-1]))
+  ax.set_ylim(np.min(y_data[:-1]), 1.3 * np.max(y_data[:-1]))
+
+  ax.set_yscale('log')
+  ax.set_xscale('log')
+
+  plt.show()
+
+
+
 def plot_laser_profile(*args, **kwargs):
   """Simple, Self-suffient routine to plot a .csv file as a laser profile
   """
