@@ -615,7 +615,7 @@ def shell(dat, *args, **kwargs):
     gas_rho_mean = np.mean(np.ma.masked_equal(gas_rho, 0).mean(axis=1))
     rho_max = np.max(dat.Fluid_Rho.data)
 
-    if (np.mean(dat.Fluid_Temperature_ion.data[0,:]) > 100000.0):
+    if (np.mean(dat.Fluid_Temperature_ion.data[0,:]) > 2321000.0):
       inshell_temp = 0.1 * np.mean(dat.Fluid_Temperature_ion.data[0,:])
       # If cell is greater than a given density it is part of the shell.
       boolean_shell_mask = (np.array(dat.Fluid_Temperature_ion.data) <= inshell_temp)
@@ -697,7 +697,7 @@ def shell(dat, *args, **kwargs):
                          unit_conversion = dat.Rho_r.unit_conversion,
                          name = "Mean Hotspot Areal Density"))
 
-    var_name = "Ion_temperature_Mean_Hotspot"
+    var_name = "Ion_Temperature_Mean_Hotspot"
     var_list.append(var_name)
     dr = np.zeros(np.shape(radius))
     for i in range(len(radius)-1):
