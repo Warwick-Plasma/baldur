@@ -293,7 +293,7 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
 # Droettboom and the Matplotlib development team; 2012 - 2018 The Matplotlib
 # development team.
 # https://matplotlib.org/3.1.1/gallery/lines_bars_and_markers/multicolored_line.html
-def plot_colourline(fig1, ax1, x, y, c, cnorm):
+def plot_colourline(fig1, ax1, x, y, c, cnorm, colourmap):
   """Modified from matplotlib examples. This plotting routine uses
   LineCollection to plot a line with different segments in different
   colours.
@@ -306,7 +306,7 @@ def plot_colourline(fig1, ax1, x, y, c, cnorm):
   segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
   # Create a continuous norm to map from data points to colors
-  lc = LineCollection(segments, cmap='Reds', norm=cnorm)
+  lc = LineCollection(segments, cmap=colourmap, norm=cnorm)
   # Set the values used for colormapping
   lc.set_array(c)
   lc.set_linewidth(2)
@@ -314,7 +314,7 @@ def plot_colourline(fig1, ax1, x, y, c, cnorm):
 
 
 
-def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
+def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv, cax1, *args, **kwargs):
   """Adds rays to the 2d plot. Currently does not have a colourbar. Colour
   of the line segments is determined by the [name_var] that is passed in and
   which type of ray is determined by [name].
@@ -322,6 +322,8 @@ def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
   beam = getattr(dat, name)
   beam_energy = getattr(dat, name + '_' + name_var)
   nrays = len(beam.data)
+  npart = kwargs.get('npart', [1]*nrays)
+  colourmap = 'plasma'
   for iray in range(0, nrays, skip):
     print_string = 'Processing ray {:4d}'.format(iray+1) \
                  + ' of {:4d}'.format(nrays) + '   '
@@ -330,17 +332,22 @@ def plot_rays(name, name_var, skip, dat, fig1, ax1, use_polar, grid_conv):
 
     x_ray = beam.data[iray].data[0] * grid_conv
     y_ray = beam.data[iray].data[1] * grid_conv
-    c_ray = beam_energy.data[iray].data
-    cmax = np.max(beam_energy.data[iray].data)
-    cmin = np.min(beam_energy.data[iray].data)
+    c_ray = beam_energy.data[iray].data / npart[iray] * 6.242e15 # convert to keV
+    cmax = np.max(300.0)
+    cmin = np.min(0.0)
     cnorm = plt.Normalize(cmin, cmax)
 
     if use_polar: x_ray, y_ray, _, _ = polar_coordinates(x_ray, y_ray, " ")
 
-    plot_colourline(fig1, ax1, x_ray, y_ray, c_ray, cnorm)
-  smap = cm.ScalarMappable(norm=cnorm, cmap='Reds')
+    plot_colourline(fig1, ax1, x_ray, y_ray, c_ray, cnorm, colourmap)
+  smap = cm.ScalarMappable(norm=cnorm, cmap=colourmap)
   smap.set_array([])
-  #fig1.colorbar(smap)
+
+  cbar = fig1.colorbar(smap, cax=cax1)
+  cbar.set_label("Hot Electron Energy (keV)", fontsize = fs)
+  cbar.ax.tick_params(labelsize=fs)
+  cbar.ax.yaxis.get_offset_text().set(size = fs)
+  cbar.draw_all()
 
 
 
@@ -510,11 +517,16 @@ def snapshot(fig, ax1, cax1, *args, **kwargs):
   cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
   cmesh.set_edgecolor(grid_colour)
   cmesh.set_clim(cmin, cmax)
-  cbar = fig.colorbar(cmesh, cax=cax1)
+  if not parameters.plot_rays_on:
+    cbar = fig.colorbar(cmesh, cax=cax1)
+    cbar.set_label(c_label, fontsize = fs)
+    cbar.ax.tick_params(labelsize=fs)
+    cbar.ax.yaxis.get_offset_text().set(size = fs)
+    cbar.draw_all()
 
   if parameters.plot_rays_on:
-    wrapper_plot_light_rays(data_struct.data[0], parameters, fig, ax1)
-    wrapper_plot_electron_rays(data_struct.data[0], parameters, fig, ax1)
+    #wrapper_plot_light_rays(data_struct.data[0], parameters, fig, ax1)
+    wrapper_plot_electron_rays(data_struct.data[0], parameters, fig, ax1, cax1)
 
   if not (parameters.surface_name == 'None'):
     cs = parameters.cross_section
@@ -524,14 +536,11 @@ def snapshot(fig, ax1, cax1, *args, **kwargs):
 
   ax1.set_xlabel(x_label, fontsize = fs)
   ax1.set_ylabel(y_label, fontsize = fs)
-  cbar.set_label(c_label, fontsize = fs)
   ax1.set_title(t_label, fontsize = fs)
 
   ax1.tick_params(axis='x', labelsize = fs)
   ax1.tick_params(axis='y', labelsize = fs)
-  cbar.ax.tick_params(labelsize=fs)
 
-  cbar.ax.yaxis.get_offset_text().set(size = fs)
   ax1.xaxis.get_offset_text().set_size(fs)
   ax1.yaxis.get_offset_text().set_size(fs)
 
@@ -539,7 +548,6 @@ def snapshot(fig, ax1, cax1, *args, **kwargs):
   ax1.set_xlim(new_xlim)
   new_ylim = zoomed_axis1[2:]
   ax1.set_ylim(new_ylim)
-  cbar.draw_all()
 
   plt.show()
 
@@ -560,23 +568,25 @@ def wrapper_plot_light_rays(dat, parameters, fig, ax1):
 
 
 
-def wrapper_plot_electron_rays(dat, parameters, fig, ax1):
+def wrapper_plot_electron_rays(dat, parameters, fig, ax1, cax1):
   var = getattr(dat, parameters.var_name[0])
   var_grid = getattr(var, 'grid')
   grid_conv = getattr(var_grid, 'unit_conversion')
   select_ray = parameters.select_ray
+  nparticles = dat.Particles_per_Path.data
+  var_name = 'Energy_Remaining'
   if hasattr(dat, 'Burst1'):
     if parameters.plot_all_rays:
       num_burs = len(dat.bursts)
       for iname in range(0, num_burs):
         skip = 1
-        plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
-                  parameters.use_polar, grid_conv)
+        plot_rays(dat.bursts[iname], var_name, skip, dat, fig, ax1,
+                parameters.use_polar, grid_conv, cax1, npart = nparticles[iname,:])
     else:
       iname = parameters.select_ray
       skip = 1
-      plot_rays(dat.bursts[iname], 'Energy_Deposited', skip, dat, fig, ax1,
-                parameters.use_polar, grid_conv)
+      plot_rays(dat.bursts[iname], var_name, skip, dat, fig, ax1,
+                parameters.use_polar, grid_conv, cax1, npart = nparticles[iname,:])
   else:
     print(" ")
     print("No electron path data found")

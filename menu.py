@@ -600,10 +600,10 @@ class snapshot_GUI:
       if (self.parameters.first_call):
         self.callbackFunc(event)
       else:
-        op.wrapper_plot_light_rays(self.data_struct.data[0], self.parameters,
-            self.fig, self.ax1)
+        #op.wrapper_plot_light_rays(self.data_struct.data[0], self.parameters,
+        #    self.fig, self.ax1)
         op.wrapper_plot_electron_rays(self.data_struct.data[0], self.parameters,
-            self.fig, self.ax1)
+            self.fig, self.ax1, self.cax1)
     else:
       self.label_slider3.grid_remove()
       self.slider3.grid_remove()
@@ -614,7 +614,7 @@ class snapshot_GUI:
     self.parameters.plot_rays_on = self.rays_variable.get()
     self.parameters.plot_all_rays = self.all_rays_variable.get()
     op.wrapper_plot_electron_rays(self.data_struct.data[0], self.parameters, self.fig,
-        self.ax1)
+        self.ax1, self.cax1)
 
   def hide_slider(self, event):
     show_slider_boolean = self.apply_comparison[0].get()
