@@ -590,7 +590,9 @@ def shell(dat, *args, **kwargs):
   grid_mid = dat.Grid_Grid_mid.data
   xc = grid_mid[0]
   yc = grid_mid[1]
-  radius = np.sqrt(xc**2 + yc**2)
+  grid = dat.Grid_Grid.data
+  x = grid[0]
+  y = grid[1]
 
   nmat = dat.Integer_flags.nmat
   gas_region_boolean = False
@@ -691,19 +693,23 @@ def shell(dat, *args, **kwargs):
 
     var_name = "Areal_Density_Mean_Hotspot"
     var_list.append(var_name)
-    rhor_hotspot = np.mean(hotspot_outer_rhor)
-    setattr(dat, var_name, new_variable(data = rhor_hotspot,
+    radius = np.sqrt(x**2 + y**2)
+    radius_centre = np.sqrt(xc**2 + yc**2)
+    dr = np.zeros(np.shape(radius_centre))
+    for i in range(len(radius)-1):
+      dr[i, :] = ((radius[i+1,:-1] - radius[i,:-1]) + (radius[i+1,1:] - radius[i,1:])) * 0.5
+    rhor = dat.Fluid_Rho.data * hotspot_mask
+    weighted_rhor = rhor * dr
+    rhor_mean_hs = np.mean(np.sum(weighted_rhor, axis=0))
+    setattr(dat, var_name, new_variable(data = rhor_mean_hs,
                          units_new = dat.Rho_r.units_new,
                          unit_conversion = dat.Rho_r.unit_conversion,
                          name = "Mean Hotspot Areal Density"))
 
     var_name = "Ion_Temperature_Mean_Hotspot"
     var_list.append(var_name)
-    dr = np.zeros(np.shape(radius))
-    for i in range(len(radius)-1):
-      dr[i, :] = radius[i+1] - radius[i]
     ion_temp = dat.Fluid_Temperature_ion.data * hotspot_mask
-    weighted_ion_temp = ion_temp * dr * radius**2
+    weighted_ion_temp = ion_temp * dr * radius_centre**2
     ion_temp_mean_hs = 3.0 * np.mean(np.sum(weighted_ion_temp, axis=0) / hotspot_outer_radius**3)
     setattr(dat, var_name, new_variable(data = ion_temp_mean_hs,
                                         units_new = dat.Fluid_Temperature_ion.units_new,
