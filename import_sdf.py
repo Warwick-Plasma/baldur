@@ -299,14 +299,14 @@ def get_data_all(dat1, istart, iend, pathname, use_analysis, cs):
     	setattr(getattr(dat1, var_name), "all_time_data", array)
 
     # Assemble arrays with variable data stored for all time
-    for var_name in dat.variables:
+    for var_name in dat1.variables:
       array = getattr(getattr(dat1, var_name), "all_time_data")
       data = getattr(getattr(dat, var_name), "data")
       array[n,:] = data[:,cs]
       setattr(getattr(dat1, var_name), "all_time_data", array)
 
     # Assemble lists of numbers that quantify each sdf file ie. total KE
-    for var_name in dat.variables_time:
+    for var_name in dat1.variables_time:
       array = getattr(getattr(dat1, var_name), "all_time_data")
       data = getattr(getattr(dat, var_name), "data")
       array[n] = data
