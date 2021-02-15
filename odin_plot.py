@@ -55,8 +55,8 @@ def plot_thermodynamic_path(fig, ax, data, parameters):
   ax.set_xlim(np.min(x_data[:-1]), np.max(x_data[:-1]))
   ax.set_ylim(np.min(y_data[:-1]), 1.3 * np.max(y_data[:-1]))
 
-  ax.set_yscale('log')
-  ax.set_xscale('log')
+  #ax.set_yscale('log')
+  #ax.set_xscale('log')
 
   plt.show()
 
