@@ -266,10 +266,14 @@ def data_and_plot(sdf_num, fig, ax1, cax1, fig2, ax2, ax3, parameters):
   data_struct.data = [None] * parameters.num_dir
 
   for num in range(0, parameters.num_dir):
-    if num == 0:
-      sdf_num = parameters.sdf_num
+    if parameters.movie:
+      parameters.sdf_num = sdf_num
+      parameters.sdf_num2 = sdf_num
     else:
-      sdf_num = parameters.sdf_num2
+      if num == 0:
+        sdf_num = parameters.sdf_num
+      else:
+        sdf_num = parameters.sdf_num2
     if parameters.apply_comparison[num]:
       if os.path.isdir(parameters.entry_comparison[num]):
         #print("Data loaded from: " + parameters.entry_comparison[num] + " to " + num)
@@ -385,6 +389,7 @@ class plot_parameters:
     self.y_dir_cross_section = False
     self.dir_list = [' '] * 2
     self.num_dir = 2
+    self.movie = False
 
     # Time history params
     self.var_name2 = 'None'
@@ -540,8 +545,11 @@ def snapshot(fig, ax1, cax1, *args, **kwargs):
   new_ylim = zoomed_axis1[2:]
   ax1.set_ylim(new_ylim)
   cbar.draw_all()
+  # Remove plot axis, great for gifs
+  #ax1.axis('off')
 
   plt.show()
+  plt.pause(0.1)
 
 
 
@@ -835,6 +843,7 @@ def lineout(fig, ax, ax1, *args, **kwargs):
       pass
 
   plt.show()
+  plt.pause(0.1)
 
 
 

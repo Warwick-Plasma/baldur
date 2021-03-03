@@ -3,7 +3,7 @@ import sdf_helper as sh
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, RadioButtons
-from matplotlib.animation import FuncAnimation
+from matplotlib.animation import FuncAnimation, PillowWriter
 import matplotlib.animation as ani
 import numpy as np
 import glob
@@ -649,15 +649,17 @@ class snapshot_GUI:
     """Saves a video of 2d plot as default but can be changed by changing fig
     """
     self.parameters.reset_axis = self.reset_axis_variable.get()
+    self.parameters.movie = True
 
-    filename1 = self.parameters.var_name + '.mp4'
+    filename1 = self.parameters.var_name[0] + '.gif'
     animation = ani.FuncAnimation(self.fig, op.data_and_plot,
-        frames=range(self.parameters.istart, self.parameters.iend+1),
+        frames=range(self.parameters.sdf_num, self.parameters.iend+1),
         fargs=(self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3,
-        self.parameters), repeat=False)
+        self.parameters))
 
-    writer = ani.FFMpegWriter(fps=24, bitrate=2e6)
+    writer = PillowWriter(fps=24)
     animation.save(filename1, writer=writer)
+    self.parameters.movie = False
 
   def exit_gui(self):
     """Closes all created figure windows and stops code
