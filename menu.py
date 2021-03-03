@@ -653,9 +653,9 @@ class snapshot_GUI:
 
     filename1 = self.parameters.var_name[0] + '.gif'
     animation = ani.FuncAnimation(self.fig, op.data_and_plot,
-        frames=range(self.parameters.istart, self.parameters.iend+1),
+        frames=range(self.parameters.sdf_num, self.parameters.iend+1),
         fargs=(self.fig, self.ax1, self.cax1, self.fig2, self.ax2, self.ax3,
-        self.parameters), repeat=False)
+        self.parameters))
 
     writer = PillowWriter(fps=24)
     animation.save(filename1, writer=writer)
