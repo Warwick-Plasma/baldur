@@ -545,6 +545,8 @@ def snapshot(fig, ax1, cax1, *args, **kwargs):
   new_ylim = zoomed_axis1[2:]
   ax1.set_ylim(new_ylim)
   cbar.draw_all()
+  # Remove plot axis, great for gifs
+  #ax1.axis('off')
 
   plt.show()
   plt.pause(0.1)
