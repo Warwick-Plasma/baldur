@@ -223,6 +223,33 @@ class time_history_GUI:
 
 
 
+def find_sdf_files():
+  num_dir = 2
+  dir_list = [' '] * 2
+  # find sdf files and count
+  seperator = "/"
+  pathname = os.path.abspath(os.getcwd())
+  parent_dir = pathname.split(seperator)[:-1]
+  parent_dir = seperator.join(parent_dir)
+  dir_list[0] = pathname.split(seperator)[-1]
+  dir_list[1] = pathname.split(seperator)[-1]
+  runs = glob.glob1(pathname,"*.sdf")
+  if len(runs) < 1:
+    dir_list = glob.glob1(pathname,"*")
+    dir_list.sort()
+    num_dir = len(dir_list)
+    parent_dir = pathname
+    pathname = os.path.abspath(os.getcwd()) + '/' + dir_list[0]
+    runs = glob.glob1(pathname,"*.sdf")
+    if len(runs) < 1:
+      self.app.destroy()
+      sys.exit('Failed to find .sdf files')
+    if num_dir == 1:
+      num_dir = 2
+      dir_list = dir_list + dir_list
+  return pathname, runs, dir_list, num_dir, parent_dir
+
+
 class snapshot_GUI:
   """This class creates plots which require data from a single sdf file.
 
@@ -251,29 +278,8 @@ class snapshot_GUI:
     plt.ion()
     plt.close('all')
 
-    # find sdf files and count
-    seperator = "/"
-    self.parameters.pathname = os.path.abspath(os.getcwd())
-    self.parameters.parent_dir = self.parameters.pathname.split(seperator)[:-1]
-    self.parameters.parent_dir = seperator.join(self.parameters.parent_dir)
-    self.parameters.dir_list[0] = self.parameters.pathname.split(seperator)[-1]
-    self.parameters.dir_list[1] = self.parameters.pathname.split(seperator)[-1]
-    runs = glob.glob1(self.parameters.pathname,"*.sdf")
-    if len(runs) < 1:
-      self.parameters.dir_list = glob.glob1(self.parameters.pathname,"*")
-      self.parameters.dir_list.sort()
-      self.parameters.num_dir = len(self.parameters.dir_list)
-      self.parameters.parent_dir = self.parameters.pathname
-      self.parameters.pathname = os.path.abspath(os.getcwd()) + '/' \
-          + self.parameters.dir_list[0]
-      runs = glob.glob1(self.parameters.pathname,"*.sdf")
-      if len(runs) < 1:
-        self.app.destroy()
-        sys.exit('Failed to find .sdf files')
-      if self.parameters.num_dir == 1:
-        self.parameters.num_dir = 2
-        self.parameters.dir_list = self.parameters.dir_list \
-            + self.parameters.dir_list
+    self.parameters.pathname, runs, self.parameters.dir_list, \
+        self.parameters.num_dir, self.parameters.parent_dir = find_sdf_files()
 
     self.parameters.istart, self.parameters.iend, self.parameters.sdf_num = \
         sdf_counter(runs, user_istart, user_iend)
