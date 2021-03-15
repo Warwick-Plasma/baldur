@@ -76,10 +76,13 @@ def options():
           file_name = "thermodynamic_path"
           op.save_as_csv(file_name, x_data, y_data, xlabel=x_label, ylabel=y_label)
 
-        op.plot_thermodynamic_path(fig1, ax1, num+1, x_data, y_data, x_label, y_label)
+        line_label = parameters.dir_list[num]
+        op.plot_thermodynamic_path(fig1, ax1, num+1, x_data, y_data, \
+            x_label, y_label, line_label)
       else:
         print()
         print("Warning: " + pathname + " is not a directory")
+    ax1.legend(loc = 'upper right')
     plt.show()
 
 
