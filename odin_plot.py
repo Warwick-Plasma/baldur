@@ -51,8 +51,8 @@ def plot_thermodynamic_path(fig, ax, num, x_data, y_data, x_label, y_label, line
     line_colours = plt.rcParams['axes.color_cycle']
  
   ax.lines[num].set_color(line_colours[num])
-  #ax.set_yscale('log')
-  #ax.set_xscale('log')
+  ax.set_yscale('log')
+  ax.set_xscale('log')
 
   ax.lines[num].set_label(line_label)
 
