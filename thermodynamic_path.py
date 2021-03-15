@@ -63,11 +63,8 @@ def options():
               parameters.pathname, parameters.use_analysis, parameters.cross_section)
 
           var = data.Ion_Temperature_Mean_Hotspot
-          unit_conv = getattr(var, "unit_conversion")
-          units = getattr(var, "units_new")
-          name = getattr(var, "name")
-          y_data = getattr(var, "all_time_data") * unit_conv
-          y_label = name + " (" + units + ")"
+          y_data = var.all_time_data * var.unit_conversion
+          y_label = var.name + " (" + var.units_new + ")"
 
           rhor = data.Areal_Density_Mean_Hotspot
           x_data = rhor.all_time_data * rhor.unit_conversion
