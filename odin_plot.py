@@ -24,7 +24,7 @@ big_num = 1e100
 
 
 
-def plot_thermodynamic_path(fig, ax, num, x_data, y_data, x_label, y_label):
+def plot_thermodynamic_path(fig, ax, num, x_data, y_data, x_label, y_label, line_label):
   """
   """
   ax.lines[num].set_visible(True)
@@ -53,6 +53,8 @@ def plot_thermodynamic_path(fig, ax, num, x_data, y_data, x_label, y_label):
   ax.lines[num].set_color(line_colours[num])
   #ax.set_yscale('log')
   #ax.set_xscale('log')
+
+  ax.lines[num].set_label(line_label)
 
 
 
