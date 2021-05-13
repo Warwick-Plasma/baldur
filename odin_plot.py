@@ -35,6 +35,9 @@ def plot_thermodynamic_path(fig, ax, num, x_data, y_data, x_label, y_label, line
   ax.set_ylabel(y_label, fontsize = fs)
   ax.set_xlabel(x_label, fontsize = fs)
 
+  if num == 1:
+    ax.lines[num].set_linestyle('-')
+
   ax.lines[num].set_ydata(y_data)
   ax.lines[num].set_xdata(x_data)
 

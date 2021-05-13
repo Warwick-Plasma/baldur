@@ -29,6 +29,8 @@ def options():
 
     parameters.pathname, runs, parameters.dir_list, \
         parameters.num_dir, parameters.parent_dir = mu.find_sdf_files()
+    if parameters.dir_list[0] == parameters.dir_list[1]:
+      parameters.num_dir=1
 
     # find sdf files and count
     parameters.istart, parameters.iend, parameters.sdf_num = mu.sdf_counter(runs, user_istart, user_iend)
