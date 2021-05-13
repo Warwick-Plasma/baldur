@@ -37,7 +37,6 @@ def plot_thermodynamic_path(fig, ax, num, x_data, y_data, x_label, y_label, line
 
   ax.lines[num].set_ydata(y_data)
   ax.lines[num].set_xdata(x_data)
-  ax.lines[num].set_linestyle('-')
 
   ax.tick_params(axis='x', labelsize = fs)
   ax.tick_params(axis='y', labelsize = fs)
@@ -50,6 +49,7 @@ def plot_thermodynamic_path(fig, ax, num, x_data, y_data, x_label, y_label, line
   except:
     line_colours = plt.rcParams['axes.color_cycle']
  
+  ax.lines[num].set_color(line_colours[num])
   ax.lines[num].set_color(line_colours[num])
   ax.set_yscale('log')
   ax.set_xscale('log')

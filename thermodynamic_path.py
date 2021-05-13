@@ -22,8 +22,8 @@ plt.switch_backend('TkAgg')
 
 def options():
     data_struct = op.data_structure()
-    user_istart = 111
-    user_iend = 130
+    user_istart = False
+    user_iend = False
     parameters = op.plot_parameters()
     parameters.use_analysis = True
 
