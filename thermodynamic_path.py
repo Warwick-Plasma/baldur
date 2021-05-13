@@ -54,8 +54,8 @@ def options():
           x_label = x_data[0]
           y_label = y_data[0]
 
-          x_data = np.array(x_data[1:]).astype(np.float)
-          y_data = np.array(y_data[1:]).astype(np.float)
+          x_data = np.array(x_data[1:]).astype(float)
+          y_data = np.array(y_data[1:]).astype(float)
         else:
           parameters.cross_section = 1
           # initial data import, needed for variable selection combo box
