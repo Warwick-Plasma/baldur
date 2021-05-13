@@ -78,36 +78,33 @@ def options():
     plt.xlabel('Electron Kinetic Energy, (keV)')
     plt.ylabel('Particle Number')
 
+    cut_off_kev = max(saved_energies)
+
     temperature_kev = 30.0
-    cut_off_kev = 300.0
     kT = 1.0e3 * qe_si * temperature_kev
     KE2 = np.linspace(0.0, cut_off_kev * qe_si * 1000.0, num=num_bins)
     prob = at.pdf_maxwellian(kT, KE2)
     plt.plot(KE2 / qe_si / 1000.0, prob / np.sum(prob) * np.sum(saved_nepart), "--", label="30keV")
 
     temperature_kev = 40.0
-    cut_off_kev = 300.0
     kT = 1.0e3 * qe_si * temperature_kev
     KE2 = np.linspace(0.0, cut_off_kev * qe_si * 1000.0, num=num_bins)
     prob = at.pdf_maxwellian(kT, KE2)
     plt.plot(KE2 / qe_si / 1000.0, prob / np.sum(prob) * np.sum(saved_nepart), "--", label="40keV")
 
     temperature_kev = 50.0
-    cut_off_kev = 300.0
     kT = 1.0e3 * qe_si * temperature_kev
     KE2 = np.linspace(0.0, cut_off_kev * qe_si * 1000.0, num=num_bins)
     prob = at.pdf_maxwellian(kT, KE2)
     plt.plot(KE2 / qe_si / 1000.0, prob / np.sum(prob) * np.sum(saved_nepart), "--", label="50keV")
 
     temperature_kev = 60.0
-    cut_off_kev = 300.0
     kT = 1.0e3 * qe_si * temperature_kev
     KE2 = np.linspace(0.0, cut_off_kev * qe_si * 1000.0, num=num_bins)
     prob = at.pdf_maxwellian(kT, KE2)
     plt.plot(KE2 / qe_si / 1000.0, prob / np.sum(prob) * np.sum(saved_nepart), "--", label="60keV")
 
     temperature_kev = 80.0
-    cut_off_kev = 300.0
     kT = 1.0e3 * qe_si * temperature_kev
     KE2 = np.linspace(0.0, cut_off_kev * qe_si * 1000.0, num=num_bins)
     prob = at.pdf_maxwellian(kT, KE2)
