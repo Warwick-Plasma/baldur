@@ -119,14 +119,6 @@ def add_label(dat):
     units_new = "Mbar"
     setattr(var, "units_new", units_new)
 
-    var = getattr(dat, "Fluid_Pressure_gbar")
-    name = 'Total Pressure'
-    setattr(var, "name", name)
-    unit_conversion = 1.0e-14 # from Pascal
-    setattr(var, "unit_conversion", unit_conversion)
-    units_new = "Gbar"
-    setattr(var, "units_new", units_new)
-
     if hasattr(dat, "Fluid_Energy_deposited_hot_electron"):
       var = getattr(dat, "Fluid_Energy_deposited_hot_electron")
       name = 'Hot Electron Energy Deposition'

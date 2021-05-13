@@ -83,7 +83,13 @@ def basic(dat):
                                       unit_conversion = 1,
                                       name = "No Variable"))
 
-
+  var_name = "Fluid_Pressure_Gbar"
+  var_list.append(var_name)
+  setattr(dat, var_name, new_variable(data = dat.Fluid_Pressure.data,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "Gbar",
+                                      unit_conversion = 1.0e-14,
+                                      name = "Pressure"))
 
   var_name = "Fluid_Volume_rz"
   var_list.append(var_name)
