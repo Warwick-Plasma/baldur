@@ -250,6 +250,8 @@ class snapshot_GUI:
 
     plt.ion()
     plt.close('all')
+    user_istart = False
+    user_iend = False
 
     # find sdf files and count
     seperator = "/"
