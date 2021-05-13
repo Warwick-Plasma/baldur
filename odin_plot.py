@@ -171,30 +171,18 @@ def time_history_lineout(fig, ax, ax1, *args, **kwargs):
   data_struct = kwargs.get('data', data_structure())
 
   if parameters.use_analysis:
-    ax.lines[0].set_visible(True)
+
     ax1.lines[0].set_visible(True)
-
-    var = data_struct.data.Laser_Power_Total_Deposited
-    y_data = var.all_time_data * var.unit_conversion
-    name = var.name
-    units = var.units_new
-
-    ax.lines[0].set_ydata(y_data)
-    y_label = name + " (" + units + ")"
-    ax.set_ylabel(y_label, fontsize = fs)
-
-    ax.xaxis.get_offset_text().set_size(fs)
-    ax.yaxis.get_offset_text().set_size(fs)
 
     var = getattr(data_struct.data, parameters.var_name2)
     unit_conv = getattr(var, "unit_conversion")
     units = getattr(var, "units_new")
     name = getattr(var, "name")
     y_data1 = getattr(var, "all_time_data") * unit_conv
+    y_data = y_data1
 
     times = data_struct.data.Times
     x_data = times.all_time_data * times.unit_conversion
-    ax.lines[0].set_xdata(x_data)
     ax.lines[1].set_xdata(x_data)
     ax1.lines[0].set_xdata(x_data)
     ax1.lines[0].set_ydata(y_data1)
@@ -205,6 +193,21 @@ def time_history_lineout(fig, ax, ax1, *args, **kwargs):
     ax.set_xlabel(x_label, fontsize = fs)
     ax1.set_ylabel(y_label, color='tab:red', fontsize = fs)
 
+    if hasattr(data_struct.data, "Laser_Power_Total_Deposited"):
+      ax.lines[0].set_visible(True)
+
+      var = data_struct.data.Laser_Power_Total_Deposited
+      y_data = var.all_time_data * var.unit_conversion
+      name = var.name
+      units = var.units_new
+
+      ax.lines[0].set_ydata(y_data)
+      ax.lines[0].set_xdata(x_data)
+      y_label = name + " (" + units + ")"
+      ax.set_ylabel(y_label, fontsize = fs)
+
+    ax.xaxis.get_offset_text().set_size(fs)
+    ax.yaxis.get_offset_text().set_size(fs)
     ax.tick_params(axis='x', labelsize = fs)
     ax.tick_params(axis='y', labelsize = fs)
     ax1.tick_params(axis='y', labelsize = fs)
