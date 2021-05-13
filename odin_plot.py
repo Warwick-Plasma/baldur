@@ -113,7 +113,7 @@ def time_history(fig, ax1, cax1, *args, **kwargs):
   ax1.clear() # This is nessasary for speed
   cax1.clear()
 
-  cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1)
+  cmesh = ax1.pcolormesh(x_data, y_data, c_data, linewidth=0.1, shading='auto')
   cmesh.set_clim(np.min(c_data), cbar_max)
 
   cbar = fig.colorbar(cmesh, cax=cax1)
