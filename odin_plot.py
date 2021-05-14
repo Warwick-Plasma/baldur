@@ -22,7 +22,14 @@ global big_num
 small_num = 1e-100
 big_num = 1e100
 
+global line_style
+line_style = ('-','--','-.',':') * 10
 
+global line_colours
+try:
+  line_colours = plt.rcParams['axes.prop_cycle'].by_key()['color'] * 10
+except:
+  line_colours = plt.rcParams['axes.color_cycle'] * 10
 
 def plot_thermodynamic_path(fig, ax, num, x_data, y_data, x_label, y_label, line_label):
   """
@@ -47,15 +54,10 @@ def plot_thermodynamic_path(fig, ax, num, x_data, y_data, x_label, y_label, line
   ax.set_xlim(np.min(x_data[:-1]), np.max(x_data[:-1]))
   ax.set_ylim(np.min(y_data[:-1]), 1.3 * np.max(y_data[:-1]))
 
-  try:
-    line_colours = plt.rcParams['axes.prop_cycle'].by_key()['color']
-  except:
-    line_colours = plt.rcParams['axes.color_cycle']
- 
   ax.lines[num].set_color(line_colours[num])
   ax.lines[num].set_color(line_colours[num])
-  ax.set_yscale('log')
-  ax.set_xscale('log')
+  #ax.set_yscale('log')
+  #ax.set_xscale('log')
 
   ax.lines[num].set_label(line_label)
 
@@ -724,9 +726,7 @@ def empty_lineout(fig, ax):
   ax1 = ax.twinx()
   ax1.tick_params(axis='y', labelcolor = 'tab:red')
 
-  line_style = ('-','--','-.',':') * 10
-
-  for il in range(0, 10):
+  for il in range(0, 12):
     ax_line, = ax.plot(1, lw = 2.5, color='black', linestyle = line_style[il])
     ax_line.set_visible(False)
     line_name = 'line' + str(il + 1)
@@ -759,11 +759,6 @@ def lineout(fig, ax, ax1, *args, **kwargs):
     grid_style = 'None'
   else:
     grid_style = 'x'
-
-  try:
-    line_colours = plt.rcParams['axes.prop_cycle'].by_key()['color']
-  except:
-    line_colours = plt.rcParams['axes.color_cycle']
 
   for num in range(0, parameters.num_dir):
     ax.lines[num].set_label(' ')
