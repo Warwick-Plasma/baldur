@@ -167,6 +167,15 @@ def basic(dat):
                                       unit_conversion = 0.1,
                                       name = "Areal Density"))
 
+  var_name = "Rho_r_reversed"
+  var_list.append(var_name)
+  rhor_cumulative2 = np.flip(np.cumsum(np.flip(rhor), axis=0))
+  setattr(dat, var_name, new_variable(data = rhor_cumulative2,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "g/cm$^2$",
+                                      unit_conversion = 0.1,
+                                      name = "Areal Density"))
+
   var_name = "Fluid_Number_density_ion"
   var_list.append(var_name)
   ni_density = 0.0
