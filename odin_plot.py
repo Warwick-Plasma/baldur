@@ -791,6 +791,11 @@ def lineout(fig, ax, ax1, *args, **kwargs):
     ymin1 = np.min(y_data1[:-1])
     ymax1 = 1.3 * np.max(y_data1[:-1])
 
+  if parameters.apply_scale_max:
+    ymax1 = parameters.scale_max
+  if parameters.apply_scale_min:
+    ymin1 = parameters.scale_min
+
   # This section updates the axis with information from the data if
   # [reset_axis] is true or from the prevouis plot if false.
   if parameters.reset_axis:
