@@ -536,6 +536,7 @@ class snapshot_GUI:
     self.reset_button.bind("<Button-1>", self.callbackFunc1)
     self.combo_surf.bind("<<ComboboxSelected>>", self.callbackFunc)
     self.scale_max_check.bind("<ButtonRelease-1>", self.callbackFunc)
+    self.scale_min_check.bind("<ButtonRelease-1>", self.callbackFunc)
     self.rays_button.bind("<ButtonRelease-1>", self.show_ray_slider)
     self.all_rays_button.bind("<ButtonRelease-1>", self.show_ray_slider)
     for num in range(0, self.parameters.num_dir - 1):
