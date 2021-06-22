@@ -23,14 +23,33 @@ rest_mass_energy = me_si * c_si**2
 
 
 def lawson_criteria(ax):
-  """
+  """Equation 4.41 from Meyer and Atzeni 2004 "The Physics of Inertial
+  Confinement Fusion" p91.
+
+  New one from equation 4.20 but factor of 1/5 is to match plots?
   """
   ax.lines[0].set_visible(True)
 
-  hs_temp_min = 3.47**(2/3)
+  hs_temp_min = (306/44)**(2/3)
+
   hs_temp = np.linspace(hs_temp_min, 100, 1000)
 
-  rhor = hs_temp / (hs_temp**(3/2) - 3.47) *  0.284
+  c_e = 1.0
+  A_e = 9.5e19 # erg s^-1 cm^-1 keV^-7/2
+  coulomb_log = 5.0
+  A = 3.0 * c_e * A_e / coulomb_log
+
+  A_alpha = 8.0e40 # erg / g^2
+  cross_section_const = 1.1e-18 # cm^3 / s / keV^2
+  f_alpha = 0.5
+  B = A_alpha * cross_section_const * f_alpha
+
+  A_b = 3.05e23 # erg cm^3 g^-2 s^-1 keV^-1/2
+
+  rhor = np.sqrt((A*hs_temp**(3))
+             /(B*hs_temp**(3/2)-A_b))
+  #np.sqrt((1.425*hs_temp**3)/(44*hs_temp**(3/2)-305))/5
+  #1.1*hs_temp / (hs_temp**(3/2) - 3.47) #*  0.284
 
   ax.lines[0].set_ydata(hs_temp)
   ax.lines[0].set_xdata(rhor)
