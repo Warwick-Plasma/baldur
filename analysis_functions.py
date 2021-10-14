@@ -354,6 +354,10 @@ def laser(dat, *args, **kwargs):
 def hot_electron(dat, *args, **kwargs):
   """
   """
+  grid_mid = dat.Grid_Grid_mid.data
+  xc = grid_mid[0]
+  yc = grid_mid[1]
+
   laser_change = kwargs.get('laser_change', False)
   sdf_num = kwargs.get('sdf_num', 0)
   istart = kwargs.get('istart', 0)
@@ -421,9 +425,10 @@ def hot_electron(dat, *args, **kwargs):
                                       unit_conversion = 1.0e-6,
                                       name = "Hot Electron Flux Per Area"))
 
+  if hasattr(dat, "Particles_per_Path"):
     var_name = "Electron_Energy_per_volume_per_particle"
     var_list.append(var_name)
-    nepart = max(np.max(np.sum(electron_flux, axis=0)), np.max(np.sum(electron_flux, axis=1)))
+    nepart = np.sum(dat.Particles_per_Path.data)
     if (nepart > 1):
       boltzmann_constant = 6.242e+18
       electron_erg_per_vol = electron_dep * dat.Fluid_Rho.data / nepart * boltzmann_constant / 1.0e6 / 1.0e6
@@ -432,6 +437,8 @@ def hot_electron(dat, *args, **kwargs):
                                           units_new = "MeV/cm$^3$/source particle",
                                           unit_conversion = 1,
                                           name = "Hot Electron Energy Deposited"))
+
+      (2.0*np.pi*electron_erg_per_vol*xc)/np.mean(dat.Fluid_Rho.data)
 
   setattr(dat, "variables", var_list)
 
