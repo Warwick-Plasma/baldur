@@ -7,6 +7,7 @@ import sys, os
 from matplotlib.widgets import Slider, RadioButtons, TextBox
 from scipy.optimize import fsolve
 import import_sdf as isdf
+import csv
 
 global qe_si
 qe_si = 1.6021766208e-19
@@ -19,6 +20,78 @@ me_si = 9.10938291e-31
 
 global rest_mass_energy
 rest_mass_energy = me_si * c_si**2
+
+
+
+def compare_penetration_function():
+  """
+  """
+  fig = plt.figure()
+  ax = plt.axes()
+
+  csv_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_unionized_50_keV/Berger_seltzer_maeda_penetration_50kev.csv"
+
+  with open(csv_name) as csvfile:
+    readCSV = csv.reader(csvfile, delimiter=',')
+    depths = []
+    pen_funcs = []
+    for row in readCSV:
+      depth = float(row[0])
+      depths.append(depth)
+      pen_func = float(row[1])
+      pen_funcs.append(pen_func)
+
+  ax.plot(depths, pen_funcs, "k-", label="Grun et al. 1957 experimental")
+
+  path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_ionized_50_keV_Z_14/0000.sdf"
+  plot_penetration_function(path_name, ax, legend_label="Odin ionized model")
+
+  path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_unionized_50_keV_Z_14_density_minus_1/0000.sdf"
+  plot_penetration_function(path_name, ax, legend_label="Odin unionized model")
+
+  ax.set_xlabel("Penetration Depth Normalised to Mean Range (Areal Density)")
+  ax.set_ylabel("Dose Function Normalised by Electron Energy and Mean Range")
+  ax.set_title("50keV Mono-energetic Hot Electron Stopping into Cold Low Pressure Nitrogen, Experimental Verification")
+  ax.legend()
+
+  plt.show()
+
+
+
+def plot_penetration_function(path_name, ax, legend_label):
+  """
+  """
+  dat = sh.getdata(path_name)
+  hot_electron_energy_MeV = 50.0e-3
+  mean_range = 4.92e-3
+
+  grid_mid = dat.Grid_Grid_mid.data
+  xc = grid_mid[0]
+  yc = grid_mid[1]
+
+  electron_dep = dat.Fluid_Energy_deposited_hot_electron.data
+  nepart = np.sum(dat.Particles_per_Path.data)
+  inverse_electron_charge = 6.242e+18
+  electron_erg_per_vol = electron_dep * dat.Fluid_Rho.data / nepart * inverse_electron_charge / 1.0e6 / 1.0e6
+  units_new = "MeV/cm$^3$/source particle"
+
+  dr = np.zeros(np.shape(xc))
+  for i in range(len(dr)-1):
+    dr[i,:] = xc[i+1,:] - xc[i,:]
+
+  penetration_function = np.sum((2.0*np.pi*electron_erg_per_vol*xc*dr*1.0e4)/np.mean(dat.Fluid_Rho.data), axis=0)*1000.0
+  pen_func_normalised = penetration_function * mean_range / hot_electron_energy_MeV
+
+  dr = np.zeros(np.shape(yc[0,:]))
+  for i in range(len(dr)-1):
+    dr[i] = yc[0,i+1] - yc[0,i]
+  rho = dat.Fluid_Rho.data[0,:]
+  rhor = rho * dr
+  rhor_cumulative = np.cumsum(rhor, axis=0)
+  rhor_gcm = rhor_cumulative * 0.1
+  rhor_gcm_normalised = rhor_gcm / mean_range
+
+  ax.plot(rhor_gcm_normalised, pen_func_normalised[::-1], ".", label=legend_label)
 
 
 
