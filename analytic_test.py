@@ -43,11 +43,26 @@ def compare_penetration_function():
 
   ax.plot(depths, pen_funcs, "k-", label="Grun et al. 1957 experimental")
 
-  path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_ionized_50_keV_Z_14/0000.sdf"
-  plot_penetration_function(path_name, ax, legend_label="Odin ionized model")
+  path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_berger_model/0000.sdf"
+  plot_penetration_function(path_name, ax, legend_label="Berger, Seltzer and Maeda model")
 
-  path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_unionized_50_keV_Z_14_density_minus_1/0000.sdf"
-  plot_penetration_function(path_name, ax, legend_label="Odin unionized model")
+  path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_fox_non_rel_model/0000.sdf"
+  plot_penetration_function(path_name, ax, legend_label="Fox ionized, non-rel model")
+
+  path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_davies_non_rel_model/0000.sdf"
+  plot_penetration_function(path_name, ax, legend_label="Davies unionized, non-rel model")
+
+  #path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_hybrid_atom_scatter_ion_stopping/0000.sdf"
+  #plot_penetration_function(path_name, ax, legend_label="Ion stopping, atom scattering hyrid model")
+
+  #path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_hybrid_ion_scatter_atom_stopping/0000.sdf"
+  #plot_penetration_function(path_name, ax, legend_label="Atom stopping, ion scattering hyrid model")
+
+  path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_robinson_ionized_model/0000.sdf"
+  plot_penetration_function(path_name, ax, legend_label="Robinson ionized model")
+
+  path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_robinson_unionized_model/0000.sdf"
+  plot_penetration_function(path_name, ax, legend_label="Robinson unionized model")
 
   ax.set_xlabel("Penetration Depth Normalised to Mean Range (Areal Density)")
   ax.set_ylabel("Dose Function Normalised by Electron Energy and Mean Range")
@@ -72,14 +87,14 @@ def plot_penetration_function(path_name, ax, legend_label):
   electron_dep = dat.Fluid_Energy_deposited_hot_electron.data
   nepart = np.sum(dat.Particles_per_Path.data)
   inverse_electron_charge = 6.242e+18
-  electron_erg_per_vol = electron_dep * dat.Fluid_Rho.data / nepart * inverse_electron_charge / 1.0e6 / 1.0e6
+  electron_erg_per_vol = electron_dep / nepart * inverse_electron_charge / 1.0e6 / 1.0e6 # MeV -> J and m^-3 -> cm^-3 (mass cancels)
   units_new = "MeV/cm$^3$/source particle"
 
   dr = np.zeros(np.shape(xc))
   for i in range(len(dr)-1):
     dr[i,:] = xc[i+1,:] - xc[i,:]
 
-  penetration_function = np.sum((2.0*np.pi*electron_erg_per_vol*xc*dr*1.0e4)/np.mean(dat.Fluid_Rho.data), axis=0)*1000.0
+  penetration_function = np.sum((2.0*np.pi*electron_erg_per_vol*xc*dr*1.0e4), axis=0)*1000.0
   pen_func_normalised = penetration_function * mean_range / hot_electron_energy_MeV
 
   dr = np.zeros(np.shape(yc[0,:]))
