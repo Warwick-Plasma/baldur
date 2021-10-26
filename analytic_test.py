@@ -64,6 +64,9 @@ def compare_penetration_function():
   path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_robinson_unionized_model/0000.sdf"
   plot_penetration_function(path_name, ax, legend_label="Robinson unionized model")
 
+  path_name = "/home/phrjmt/Odin/Data_electron_dep_berger_seltzer_maeda_1969_charge_state_half/0000.sdf"
+  plot_penetration_function(path_name, ax, legend_label="Davies/Fox q=0.5, non-rel model")
+
   ax.set_xlabel("Penetration Depth Normalised to Mean Range (Areal Density)")
   ax.set_ylabel("Dose Function Normalised by Electron Energy and Mean Range")
   ax.set_title("50keV Mono-energetic Hot Electron Stopping into Cold Low Pressure Nitrogen, Experimental Verification")
