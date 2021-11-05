@@ -195,8 +195,8 @@ def basic(dat):
 
   setattr(dat, var_name, new_variable(data = ni_density,
                                       grid = dat.Grid_Grid,
-                                      units_new = "#/m$^3$",
-                                      unit_conversion = 1,
+                                      units_new = "#/cm$^3$",
+                                      unit_conversion = 1.0e-6,
                                       name = "Number density of ions"))
 
   if hasattr(dat, "Fluid_Charge_State"):
@@ -206,8 +206,8 @@ def basic(dat):
     ne_density = Z * ni_density
     setattr(dat, var_name, new_variable(data = ne_density,
                                         grid = dat.Grid_Grid,
-                                        units_new = "#/m$^3$",
-                                        unit_conversion = 1,
+                                        units_new = "#/cm$^3$",
+                                        unit_conversion = 1.0e-6,
                                         name = "Number density of electrons"))
 
   setattr(dat, "variables", var_list)
