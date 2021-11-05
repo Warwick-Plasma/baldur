@@ -408,6 +408,15 @@ def hot_electron(dat, *args, **kwargs):
                                       unit_conversion = 1,
                                       name = "Hot Electron Energy per Cell"))
 
+  var_name = "Electron_Energy_Cumalitive"
+  var_list.append(var_name)
+  electron_dep_cell_cum = np.cumsum(electron_dep * dat.Cell_Mass.data, axis=0) 
+  setattr(dat, var_name, new_variable(data = electron_dep_cell_cum,
+                                      grid = dat.Grid_Grid,
+                                      units_new = "kJ",
+                                      unit_conversion = 1.0e-3,
+                                      name = "Hot Electron Energy Cumalitive"))
+
   var_name = "Electron_Power_per_volume"
   var_list.append(var_name)
   if dt < small_number:
