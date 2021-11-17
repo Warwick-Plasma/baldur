@@ -63,6 +63,23 @@ def plot_laser_profile(*args, **kwargs):
 
 
 
+def save_as_csv(file_name, x_data, y_data, *args, **kwargs):
+  x_label = kwargs.get('xlabel', 'x label (units)')
+  y_label = kwargs.get('ylabel', 'y label (units)')
+
+  data = [None] * (len(x_data)+1)
+  with open(file_name+".csv", "w", newline='') as file:
+
+    writer = csv.writer(file)
+    data[0] = x_label
+    data[1:] = x_data
+    writer.writerow(data)
+    data[0] = y_label
+    data[1:] = y_data
+    writer.writerow(data)
+
+
+
 def time_history(fig, ax1, cax1, *args, **kwargs):
   """A pcolormesh plot of space against time with a variable shown in colour
   """
