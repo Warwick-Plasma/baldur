@@ -408,10 +408,20 @@ def hot_electron(dat, *args, **kwargs):
                                       unit_conversion = 1,
                                       name = "Hot Electron Energy per Cell"))
 
-  var_name = "Electron_Energy_Cumalitive"
+  var_name = "Electron_Energy_Cumalitive_Fraction"
   var_list.append(var_name)
   electron_dep_cell_cum = np.cumsum(electron_dep * dat.Cell_Mass.data, axis=0) 
-  setattr(dat, var_name, new_variable(data = electron_dep_cell_cum,
+  electron_dep_row_tot = np.sum(electron_dep * dat.Cell_Mass.data, axis=0)
+  setattr(dat, var_name, new_variable(data = electron_dep_cell_cum/ (electron_dep_row_tot+small_number),
+                                      grid = dat.Grid_Grid,
+                                      units_new = "",
+                                      unit_conversion = 1.0,
+                                      name = "Hot Electron Energy Cumalitive Fraction of Total"))
+
+  var_name = "Electron_Energy_Cumalitive"
+  var_list.append(var_name)
+  electron_dep_cell_tot = np.sum(electron_dep * dat.Cell_Mass.data)
+  setattr(dat, var_name, new_variable(data = electron_dep_cell_cum/(electron_dep_row_tot+small_number)*electron_dep_cell_tot,
                                       grid = dat.Grid_Grid,
                                       units_new = "kJ",
                                       unit_conversion = 1.0e-3,
